@@ -29,7 +29,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.NUMERIC_STD.ALL;
 
 entity mdsynth is
    port ( clk      : in    std_logic; 
@@ -55,6 +54,10 @@ component sinewave is
 			);
 end component;
 
+component player is
+    port (    clk:           in std_logic;
+              output:        out std_logic);
+end component;
 
 signal counter : unsigned(15 downto 0) := (others => '0');
 
@@ -62,12 +65,13 @@ signal dac_in : std_logic_vector(7 downto 0);
 signal dac_reset : std_logic;
 signal dac_out : std_logic;
 signal sine_clk : std_logic;
-signal sine : integer range -128 to 127;
-
+signal sine : integer range -128 to 127 := 0;
+signal player_out : std_logic;
 begin
 
 	dac1 : dac port map (clk => clk, dac_in => dac_in, reset => dac_reset, dac_out => dac_out);
 	sinewave1 : sinewave port map (clk => sine_clk, data_out => sine);
+	player1 : player port map (clk => clk, output => player_out);
 
 	process (clk)
 	begin
@@ -76,16 +80,16 @@ begin
 		end if;
 	end process;
 	
-	process (switch)
+	process (switch(1 downto 0), counter, sine)
 	begin
 		case switch(1 downto 0) is
-			when B"01" =>
+			when "01" =>
 				-- Square wave
 				dac_in(7 downto 0) <= (others => std_logic(counter(15)));
-			when B"10" =>
+			when "10" =>
 				-- Sawtooth wave
 				dac_in <= std_logic_vector(counter(15 downto 8));
-			when B"11" =>
+			when "11" =>
 				-- Sine wave
 				dac_in <= conv_std_logic_vector(128 + sine, 8);
 			when others =>

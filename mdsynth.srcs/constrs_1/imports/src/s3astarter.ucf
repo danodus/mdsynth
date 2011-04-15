@@ -38,5 +38,5 @@ NET "switch<3>"         LOC = "T9"   | IOSTANDARD = LVCMOS33 ;
 NET "btn_south"     LOC = "T15"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
 
 # Note: Connect a RC filter to one the following pin
-NET "aud_l"         LOC = "AA21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
-NET "aud_r"         LOC = "AB21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "aud_l"         LOC = "Y10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "aud_r"         LOC = "V10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
