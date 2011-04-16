@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<DARoots Version="1" Minor="12">
+	<FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
+		<Filter Type="Srcs"/>
+		<File Path="$PSRCDIR/sources_1/imports/src/dac.vhd">
+			<FileInfo>
+				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/dac.vhd"/>
+				<Attr Name="ImportTime" Val="1297455010"/>
+			</FileInfo>
+		</File>
+		<File Path="$PSRCDIR/sources_1/imports/src/div_by_12.vhd">
+			<FileInfo>
+				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/div_by_12.vhd"/>
+				<Attr Name="ImportTime" Val="1299777942"/>
+			</FileInfo>
+		</File>
+		<File Path="$PSRCDIR/sources_1/imports/src/mdsynth.vhd">
+			<FileInfo>
+				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/mdsynth.vhd"/>
+				<Attr Name="ImportTime" Val="1299885873"/>
+			</FileInfo>
+		</File>
+		<File Path="$PSRCDIR/sources_1/imports/src/player.vhd">
+			<FileInfo>
+				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/player.vhd"/>
+				<Attr Name="ImportTime" Val="1299777942"/>
+			</FileInfo>
+		</File>
+		<File Path="$PSRCDIR/sources_1/imports/src/sinewave.vhd">
+			<FileInfo>
+				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/sinewave.vhd"/>
+				<Attr Name="ImportTime" Val="1299797437"/>
+			</FileInfo>
+		</File>
+		<Config>
+			<Option Name="DesignMode" Val="RTL"/>
+			<Option Name="TopModule" Val="mdsynth"/>
+		</Config>
+	</FileSet>
+</DARoots>
+
