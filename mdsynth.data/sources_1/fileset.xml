@@ -20,17 +20,15 @@
 				<Attr Name="ImportTime" Val="1299885873"/>
 			</FileInfo>
 		</File>
-		<File Path="$PSRCDIR/sources_1/imports/src/player.vhd">
-			<FileInfo>
-				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/player.vhd"/>
-				<Attr Name="ImportTime" Val="1299777942"/>
-			</FileInfo>
-		</File>
 		<File Path="$PSRCDIR/sources_1/imports/src/sinewave.vhd">
 			<FileInfo>
 				<Attr Name="ImportPath" Val="$PPRDIR/../Xilinx/mdsynth/src/sinewave.vhd"/>
 				<Attr Name="ImportTime" Val="1299797437"/>
 			</FileInfo>
+		</File>
+		<File Path="$PSRCDIR/sources_1/new/pitch_clk_div.vhd">
+		</File>
+		<File Path="$PSRCDIR/sources_1/imports/src/channel.vhd">
 		</File>
 		<Config>
 			<Option Name="DesignMode" Val="RTL"/>

@@ -25,54 +25,80 @@
 -- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 -- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+--
+-- Based on the Music Box example at www.fpga4fun.com
+--
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 
-entity mdsynth is
-   port ( clk:         in std_logic; 
- 		  btn_south:   in std_logic;
-          switch:      in std_logic_vector(3 downto 0);
-          aud_l:       out std_logic;
-          aud_r:       out std_logic);
- 
-end entity mdsynth;
-
-architecture mdsynth_arch of mdsynth is
-
-component channel is
-    port ( clk:      in std_logic;
+entity channel is
+    port ( clk:      in  std_logic;
            reset:    in std_logic;
            waveform: in unsigned(1 downto 0);    -- 0: None, 1: Square, 2: Sawtooth, 3: Sine
            pitch:    in unsigned(6 downto 0);      -- 60 = C4
            output:   out  std_logic);
+end channel;
+
+architecture channel_arch of channel is
+
+component dac is
+	port (	clk:		in std_logic;
+			dac_in:	    in std_logic_vector(7 downto 0);
+			reset:	    in std_logic;
+			dac_out:	out std_logic);
 end component;
 
-signal channel_out: std_logic;
-signal pitch: unsigned (6 downto 0) := conv_unsigned(69, 7);
-signal counter: unsigned (31 downto 0) := conv_unsigned(0, 32);
-signal waveform: unsigned(1 downto 0);
+component sinewave is
+	port (    clk:			in  std_logic;
+			  data_out: 	out integer range -128 to 127);
+end component;
+
+component pitch_clk_div is
+    port ( clk: std_logic;
+           pitch : in unsigned(6 downto 0);      -- 60 = C4
+           output : out  std_logic);
+end component;
+
+signal counter : unsigned(15 downto 0) := (others => '0');
+
+signal dac_in : std_logic_vector(7 downto 0);
+signal dac_reset : std_logic;
+signal sine : integer range -128 to 127 := 0;
+signal clk_div_out : std_logic;
+
 
 begin
 
-    channel0: channel port map (clk => clk, reset => btn_south, waveform => waveform, pitch => pitch, output => channel_out);
+    pitch_clk_div0 : pitch_clk_div port map (clk => clk, pitch => pitch, output => clk_div_out);
+	sinewave0 : sinewave port map (clk => clk_div_out, data_out => sine);
+	dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
 
-    waveform <= unsigned(switch(1 downto 0));
-
-    aud_l <= channel_out;
-	aud_r <= channel_out;
-	
-	process (clk)
+	process (clk_div_out)
 	begin
-	    if (clk'event and clk='1') then
-	        if (counter = 0) then
-	            counter <= conv_unsigned(5000000, 32);
-	            pitch <= pitch + 1;
-	        else
-	            counter <= counter - 1;
-	        end if;
-	    end if;
+	    if (clk_div_out'event and clk_div_out = '1') then
+			counter <= counter + 1;
+            case waveform is
+                when "01" =>
+                    -- Square wave
+                    if (std_logic(counter(0))= '1') then
+                        dac_in(7 downto 0) <= (others => '1');
+                    else
+                        dac_in(7 downto 0) <= (others => '0');
+                    end if;
+                when "10" =>
+                    -- Sawtooth wave
+                    dac_in <= std_logic_vector(counter(7 downto 0));
+                when "11" =>
+                    -- Sine wave
+                    dac_in <= conv_std_logic_vector(128 + sine, 8);
+                when others =>
+                    dac_in(7 downto 0) <= (others => '0');
+            end case;
+		end if;
+		
 	end process;
 	
-end architecture mdsynth_arch;
+end channel_arch;
+
