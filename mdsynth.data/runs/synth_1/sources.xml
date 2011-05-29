@@ -26,9 +26,9 @@
 				<Attr Name="ImportTime" Val="1299797437"/>
 			</FileInfo>
 		</File>
-		<File Path="$PSRCDIR/sources_1/new/pitch_clk_div.vhd">
-		</File>
 		<File Path="$PSRCDIR/sources_1/imports/src/channel.vhd">
+		</File>
+		<File Path="$PSRCDIR/sources_1/new/nco.vhd">
 		</File>
 		<Config>
 			<Option Name="DesignMode" Val="RTL"/>

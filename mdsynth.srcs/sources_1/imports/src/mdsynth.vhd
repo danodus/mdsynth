@@ -28,14 +28,16 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity mdsynth is
    port ( clk:         in std_logic; 
  		  btn_south:   in std_logic;
           switch:      in std_logic_vector(3 downto 0);
           aud_l:       out std_logic;
-          aud_r:       out std_logic);
+          aud_r:       out std_logic;
+          aux_aud_l:   out std_logic;
+          aux_aud_r:   out std_logic);
  
 end entity mdsynth;
 
@@ -44,30 +46,32 @@ architecture mdsynth_arch of mdsynth is
 component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in unsigned(1 downto 0);    -- 0: None, 1: Square, 2: Sawtooth, 3: Sine
+           waveform: in std_logic_vector(1 downto 0);    -- 0: None, 1: Square, 2: Sawtooth, 3: Sine
            pitch:    in unsigned(6 downto 0);      -- 60 = C4
            output:   out  std_logic);
 end component;
 
 signal channel_out: std_logic;
-signal pitch: unsigned (6 downto 0) := conv_unsigned(69, 7);
-signal counter: unsigned (31 downto 0) := conv_unsigned(0, 32);
-signal waveform: unsigned(1 downto 0);
+signal pitch: unsigned (6 downto 0) := to_unsigned(69, 7);
+signal counter: unsigned (31 downto 0) := to_unsigned(0, 32);
+signal waveform: std_logic_vector(1 downto 0) := "11";
 
 begin
 
     channel0: channel port map (clk => clk, reset => btn_south, waveform => waveform, pitch => pitch, output => channel_out);
 
-    waveform <= unsigned(switch(1 downto 0));
+    waveform <= switch(1 downto 0);
 
     aud_l <= channel_out;
 	aud_r <= channel_out;
+	aux_aud_l <= channel_out;
+	aux_aud_r <= channel_out;
 	
 	process (clk)
 	begin
-	    if (clk'event and clk='1') then
+	    if (rising_edge(clk)) then
 	        if (counter = 0) then
-	            counter <= conv_unsigned(5000000, 32);
+	            counter <= to_unsigned(5000000, 32);
 	            pitch <= pitch + 1;
 	        else
 	            counter <= counter - 1;

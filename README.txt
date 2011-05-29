@@ -10,11 +10,15 @@ Language: VHDL
 Description
 -----------
 
-In its current state, the project is a simple wave generator using a sigma-delta DAC. The ouput pin of the DAC is either AA21 or AB21. You will need a RC filter at the output. Refer to the Xilinx application note 154 for more details about the DAC.
+In its current state, the project is a simple wave generator using a sigma-delta DAC. There are two audio outputs:
+	- Standard audio output of the board;
+	- Auxiliary audio ouput on J18, pins AA21 and AB21 being left and right channels respectively.
+	
+You will need a RC filter at the output in order to see the waveform with an oscilloscope. Refer to the Xilinx application note 154 for more details about the DAC.
 
 In this version, we have a single voice with a single channel per voice. Each voice has a pitch control and a waveform selection. The same channel is connected to both the left and right audio outputs.
 
-In this example, the pitch requested from the channel is increasing over time from 0 to 127.
+The pitch requested from the channel is increasing over time from 0 to 127.
 
 The projet has been converted to Xilinx PlanAhead 13.1.
 
@@ -33,8 +37,11 @@ Pitch
 
 The pitch is MIDI compatible. The value is between 0 and 127, 69 being A4 at 440Hz.
 
-Limitations
------------
+Implementation Notes
+--------------------
 
-Only the square wave will be at correct pitch in this version. The other waveforms will require a higher frequency from the pitch to clock converter.
+I am now using an numerically-controlled oscillator (NCO) in order to produce a phase value used as an index of the sine table. This is much simpler, less restrictive and is a better design because we keep the clock intact.
 
+Right now, the sine table is a complete 2*PI cycle. I will eventually use only a quarter of it in order to reduce the footprint.
+
+The NCO decode the MIDI pitch value, but we may want to split this and provide to the NCO a frequency value instead for more flexibility.

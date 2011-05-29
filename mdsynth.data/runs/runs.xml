@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Runs Version="1" Minor="6">
-	<Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current" Dir="$PRUNDIR/synth_1" LaunchTime="1305485373">
+	<Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current" Dir="$PRUNDIR/synth_1" LaunchTime="1306704110">
 		<File Type="PA-XST" Name="mdsynth.xst"/>
 		<File Type="RUN-SRCS" Name="$PDATADIR/runs/synth_1/sources.xml"/>
 		<File Type="XST-NGC" Name="mdsynth.ngc"/>
@@ -8,7 +8,7 @@
 		<File Type="RUN-CONSTRS" Name="$PDATADIR/runs/synth_1/constrs_in.xml"/>
 		<File Type="XST-SRP" Name="mdsynth.srp"/>
 	</Run>
-	<Run Id="impl_1" Type="Ft2:EntireDesign" SynthRun="synth_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current" Dir="$PRUNDIR/impl_1" LaunchTime="1305485391">
+	<Run Id="impl_1" Type="Ft2:EntireDesign" SynthRun="synth_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current" Dir="$PRUNDIR/impl_1" LaunchTime="1306704140">
 		<File Type="PA-EDIF" Name="mdsynth.edf"/>
 		<File Type="PAR-PAD" Name="mdsynth_routed_pad.txt"/>
 		<File Type="PA-UCF" Name="mdsynth.ucf"/>

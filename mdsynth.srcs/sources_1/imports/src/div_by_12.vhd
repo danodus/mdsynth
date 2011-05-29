@@ -31,12 +31,12 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity div_by_12 is
-    Port ( numerator : in  unsigned(6 downto 0);
-           quotient : out  unsigned(3 downto 0);
-           remain : out  unsigned(3 downto 0));
+    Port ( numerator:    in unsigned(6 downto 0);
+           quotient:     out unsigned(3 downto 0);
+           remain:       out unsigned(3 downto 0));
 end div_by_12;
 
 architecture div_by_12_arch of div_by_12 is
