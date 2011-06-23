@@ -51,21 +51,31 @@ component sinewave is
 			  data_out: 	out integer range -128 to 127);
 end component;
 
+component pitch_to_freq is
+    port ( pitch:         in unsigned(6 downto 0);      -- 60 = C4
+           phase_delta:   out unsigned(11 downto 0);
+           octave:        out unsigned(3 downto 0));
+end component;
+
 component nco is
-    port ( clk:    in std_logic;
-           pitch:  in unsigned(6 downto 0);      -- 60 = C4
-           phase:  out unsigned(7 downto 0));
+    port ( clk:     in std_logic;
+           phase_delta:  in unsigned(11 downto 0);
+           octave:  in unsigned(3 downto 0);
+           phase:   out unsigned(7 downto 0));
 end component;
 
 signal counter : unsigned(15 downto 0) := (others => '0');
 
 signal dac_in : std_logic_vector(7 downto 0);
+signal phase_delta : unsigned(11 downto 0);
+signal octave : unsigned(3 downto 0);
 signal phase : unsigned(7 downto 0);
 signal sine : integer range -128 to 127 := 0;
 
 begin
 
-    nco0 : nco port map (clk => clk, pitch => pitch, phase => phase);
+    pitch_to_freq0 : pitch_to_freq port map (pitch => pitch, phase_delta => phase_delta, octave => octave);
+    nco0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave, phase => phase);
 	sinewave0 : sinewave port map (phase => phase, data_out => sine);
 	dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
 
