@@ -1,0 +1,137 @@
+#-----------------------------------------------------------
+# PlanAhead v13.1
+# Build 117799 by hdbuild on Thu Feb 17 11:38:00 PST 2011
+# Start of session at: Sat Jun 11 14:54:11 2011
+# Process ID: 2656
+# Log file: C:/Users/dev/Xilinx/mdsynth/planAhead.log
+# Journal file: C:/Users/dev/Xilinx/mdsynth/planAhead.jou
+#-----------------------------------------------------------
+start_gui -project {C:\Users\dev\Xilinx\mdsynth\mdsynth.ppr}
+open_project {C:\Users\dev\Xilinx\mdsynth\mdsynth.ppr}
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+launch_impact 
+launch_impact 
+launch_impact 
+close [ open {C:\Users\dev\Xilinx\mdsynth\mdsynth.srcs\sources_1\new\pitch_to_freq.vhd} w ]
+add_files {C:\Users\dev\Xilinx\mdsynth\mdsynth.srcs\sources_1\new\pitch_to_freq.vhd}
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+launch_impact 
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+open_rtl_design -name rtl_1
+open_rtl_design -name rtl_1
+open_rtl_design -name rtl_1
+open_rtl_design -name rtl_1
+reset_run -run synth_1
+launch_runs synth_1
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+launch_isim -simset sim_1 -mode behavioral
+launch_isim -simset sim_1 -mode behavioral
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+close_design
+open_impl_design
+open_rtl_design -name rtl_1
+open_rtl_design -name rtl_1
+refresh_design
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+reset_run -run synth_1
+launch_runs synth_1
+refresh_design
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+reset_run -run synth_1
+launch_runs synth_1
+set_property add_step {} [get_runs impl_1]
+launch_runs impl_1
+set_property add_step Bitgen [get_runs impl_1]
+launch_runs impl_1
+current_design impl_1
+close_design
+open_impl_design
+exit

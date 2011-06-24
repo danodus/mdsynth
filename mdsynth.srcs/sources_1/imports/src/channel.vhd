@@ -32,8 +32,9 @@ use IEEE.NUMERIC_STD.ALL;
 entity channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in std_logic_vector(1 downto 0);    -- 0: None, 1: Square, 2: Sawtooth, 3: Sine
-           pitch:    in unsigned(6 downto 0);            -- 60 = C4
+           waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
+           pitch_message:    in unsigned(6 downto 0);            -- 60 = C4
+           pitch_carrier:    in unsigned(6 downto 0);            -- 60 = C4
            output:   out std_logic);
 end channel;
 
@@ -67,36 +68,56 @@ end component;
 signal counter : unsigned(15 downto 0) := (others => '0');
 
 signal dac_in : std_logic_vector(7 downto 0);
-signal phase_delta : unsigned(11 downto 0);
-signal octave : unsigned(3 downto 0);
-signal phase : unsigned(7 downto 0);
-signal sine : integer range -128 to 127 := 0;
+
+signal phase_delta_carrier : unsigned(11 downto 0);
+signal phase_delta_message : unsigned(11 downto 0);
+
+signal octave_carrier : unsigned(3 downto 0);
+signal octave_message : unsigned(3 downto 0);
+
+signal phase_carrier : unsigned(7 downto 0);
+signal phase_message : unsigned(7 downto 0);
+signal phase_modulated  : unsigned(7 downto 0);
+
+signal sine_message : integer range -128 to 127 := 0;
+signal sine_modulated : integer range -128 to 127 := 0;
 
 begin
 
-    pitch_to_freq0 : pitch_to_freq port map (pitch => pitch, phase_delta => phase_delta, octave => octave);
-    nco0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave, phase => phase);
-	sinewave0 : sinewave port map (phase => phase, data_out => sine);
-	dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
+    pitch_to_freq_message0 : pitch_to_freq port map (pitch => pitch_message, phase_delta => phase_delta_message, octave => octave_message);
+    pitch_to_freq_carrier0 : pitch_to_freq port map (pitch => pitch_carrier, phase_delta => phase_delta_carrier, octave => octave_carrier);
 
+    nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta_carrier, octave => octave_carrier, phase => phase_carrier);
+    nco_message0 : nco port map (clk => clk, phase_delta => phase_delta_message, octave => octave_message, phase => phase_message);
+
+    sinewave_message0 : sinewave port map (phase => phase_message, data_out => sine_message);
+    sinewave_modulated0 : sinewave port map (phase => phase_modulated, data_out => sine_modulated);
+
+    dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
+
+	phase_modulated <= phase_carrier + sine_message;
+	
 	process (clk)
 	begin
 	    if (rising_edge(clk)) then
 			counter <= counter + 1;
             case waveform is
-                when "01" =>
+                when "001" =>
                     -- Square wave
-                    if (phase(7) = '1') then
+                    if (phase_message(7) = '1') then
                         dac_in(7 downto 0) <= (others => '1');
                     else
                         dac_in(7 downto 0) <= (others => '0');
                     end if;
-                when "10" =>
+                when "010" =>
                     -- Sawtooth wave
-                    dac_in <= std_logic_vector(phase);
-                when "11" =>
+                    dac_in <= std_logic_vector(phase_message);
+                when "011" =>
                     -- Sine wave
-                    dac_in <= std_logic_vector(to_unsigned(128 + sine, 8));
+                    dac_in <= std_logic_vector(to_unsigned(128 + sine_message, 8));
+                when "100" =>
+                    -- FM (implemented as phase modulation)
+                    dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
                 when others =>
                     dac_in(7 downto 0) <= (others => '0');
             end case;

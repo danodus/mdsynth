@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<DARoots Version="1" Minor="12">
+	<FileSet Name="constrs_out" Type="Constrs" RelSrcDir="$PRUNDIR/impl_1/.constrs">
+		<File Path="$PRUNDIR/impl_1/.constrs/s3astarter.ucf">
+		</File>
+		<Config>
+			<Option Name="TargetConstrsFile" Val="$PRUNDIR/impl_1/.constrs/s3astarter.ucf"/>
+			<Option Name="TargetPart" Val="xc3s700afg484-4"/>
+		</Config>
+	</FileSet>
+</DARoots>
+

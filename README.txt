@@ -25,23 +25,26 @@ The projet has been converted to Xilinx PlanAhead 13.1.
 Waveform selection
 ------------------
 
-SW0	SW1	Waveform
---	--	--------
-0	0	None
-0	1	Square
-1	0	Sawtooth
-1	1	Sine
+SW0	SW1	SW2	Waveform
+---	---	---	--------
+0	0	0	None
+0	1	0	Square (message only)
+1	0	0	Sawtooth (message only)
+1	1	0	Sine (message only)
+0	0	1	Frequency Modulation (implemented as phase modulation for simplicity)
 
 Pitch
 -----
 
 The pitch is MIDI compatible. The value is between 0 and 127, 69 being A4 at 440Hz.
 
+Phase Modulation
+----------------
+
+The formula is the following: y(t) = sin(m(t) + 2*pi*freq_carrier*t)
+where m(t) = sin(2*pi*freq_message*t)
+
 Implementation Notes
 --------------------
 
-I am now using an numerically-controlled oscillator (NCO) in order to produce a phase value used as an index of the sine table. This is much simpler, less restrictive and is a better design because we keep the clock intact.
-
-Right now, the sine table is a complete 2*PI cycle. I will eventually use only a quarter of it in order to reduce the footprint.
-
-The NCO decode the MIDI pitch value, but we may want to split this and provide to the NCO a frequency value instead for more flexibility.
+I am using an numerically-controlled oscillator (NCO) in order to produce a phase value used as an index of the sine table.

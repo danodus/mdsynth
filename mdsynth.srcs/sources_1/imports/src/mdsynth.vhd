@@ -46,21 +46,23 @@ architecture mdsynth_arch of mdsynth is
 component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in std_logic_vector(1 downto 0);    -- 0: None, 1: Square, 2: Sawtooth, 3: Sine
-           pitch:    in unsigned(6 downto 0);      -- 60 = C4
+           waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square, 2: Sawtooth, 3: Sine, 4: FM
+           pitch_message:    in unsigned(6 downto 0);      -- 60 = C4
+           pitch_carrier:    in unsigned(6 downto 0);      -- 60 = C4
            output:   out  std_logic);
 end component;
 
 signal channel_out: std_logic;
-signal pitch: unsigned (6 downto 0) := to_unsigned(69, 7);
+signal pitch_message: unsigned (6 downto 0) := to_unsigned(69, 7);
+signal pitch_carrier: unsigned (6 downto 0) := to_unsigned(10, 7);
 signal counter: unsigned (31 downto 0) := to_unsigned(0, 32);
-signal waveform: std_logic_vector(1 downto 0) := "11";
+signal waveform: std_logic_vector(2 downto 0) := "100";
 
 begin
 
-    channel0: channel port map (clk => clk, reset => btn_south, waveform => waveform, pitch => pitch, output => channel_out);
+    channel0: channel port map (clk => clk, reset => btn_south, waveform => waveform, pitch_message => pitch_message, pitch_carrier => pitch_carrier, output => channel_out);
 
-    waveform <= switch(1 downto 0);
+    waveform <= switch(2 downto 0);
 
     aud_l <= channel_out;
 	aud_r <= channel_out;
@@ -72,7 +74,7 @@ begin
 	    if (rising_edge(clk)) then
 	        if (counter = 0) then
 	            counter <= to_unsigned(5000000, 32);
-	            pitch <= pitch + 1;
+	            pitch_message <= pitch_message + 1;
 	        else
 	            counter <= counter - 1;
 	        end if;

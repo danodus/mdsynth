@@ -1,8 +1,8 @@
 INTSTYLE=impact
-INFILE=C:\Users\Public\Documents\Xilinx\mdsynth\mdsynth.data\impact.xsl
-OUTFILE=C:\Users\Public\Documents\Xilinx\mdsynth\mdsynth.data\impact.xsl
+INFILE=C:\Users\dev\Xilinx\mdsynth\mdsynth.data\impact.xsl
+OUTFILE=C:\Users\dev\Xilinx\mdsynth\mdsynth.data\impact.xsl
 FAMILY=Multiple
 PART=Multiple
-WORKINGDIR=C:\Users\Public\Documents\Xilinx\mdsynth\mdsynth.data
+WORKINGDIR=C:\Users\dev\Xilinx\mdsynth\mdsynth.data
 LICENSE=iMPACT
 USER_INFO=iMPACT
