@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<DARoots Version="1" Minor="12">
+	<FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
+		<Filter Type="Srcs"/>
+		<File Path="$PPRDIR/../../src/sound/channel.vhd">
+		</File>
+		<File Path="$PPRDIR/../../src/sound/dac.vhd">
+		</File>
+		<File Path="$PPRDIR/../../src/sound/div_by_12.vhd">
+		</File>
+		<File Path="$PPRDIR/../../src/sound/nco.vhd">
+		</File>
+		<File Path="$PPRDIR/../../src/sound/pitch_to_freq.vhd">
+		</File>
+		<File Path="$PPRDIR/../../src/sound/sinewave.vhd">
+		</File>
+		<File Path="$PPRDIR/src/channel_tb.vhd">
+		</File>
+		<Config>
+			<Option Name="DesignMode" Val="RTL"/>
+			<Option Name="TopModule" Val="channel_tb"/>
+		</Config>
+	</FileSet>
+</DARoots>
+

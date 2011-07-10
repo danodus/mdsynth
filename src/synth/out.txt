@@ -1,0 +1,265 @@
+Assembler release DWC_2.0 version 2.11
+May 6, 2004 (c) Motorola (free ware)
+0001                         * 6809
+0002                         * Synth
+0003                         *
+0004                         		NAM SYNTH
+0005                         		OPT l
+
+
+synth.asm                                                                       page   2
+0007                         		
+0008 E020                    KEYB	EQU	$E020
+0009 E030                    VDU		EQU	$E030
+0010 E050                    TIMER	EQU	$E050		
+0011 E080                    SNDL	EQU	$E080
+0012 E090                    SNDR	EQU	$E090
+0013                         
+0014                         ******************************************************************************
+0015                         * Variables
+0016                         ******************************************************************************
+0017                         
+0018 0F00                    		ORG	$0F00
+0019 0F00                    STACK	EQU	*
+0020 0F00                    CURX	RMB	1
+0021 0F01                    CURY	RMB	1
+0022 0F02                    MPITCH	RMB	1
+0023 0F03                    CPITCH	RMB	1
+0024 0F04                    MODE	RMB	1
+0025                         		
+0026                         ******************************************************************************
+0027                         * Main
+0028                         ******************************************************************************
+0029                         		
+0030 1000                    		ORG	$1000
+0031                         		
+0032 1000 10 CE 0F 00        		LDS	#STACK
+0033                         
+0034 1004 86 00              		LDA	#0
+0035 1006 B7 0F 04           		STA	MODE		; We set the initial mode to message pitch
+0036 1009 B7 0F 02           		STA	MPITCH		; We set the initial message pitch
+0037 100C 86 14              		LDA	#20
+0038 100E B7 0F 03           		STA	CPITCH		; We set the initial carrier pitch
+0039                         		
+0040                         * We clear the screen
+0041 1011 BD 10 C7           		JSR	CLEARS		; We clear the screen
+0042                         		
+0043                         * We print the title		
+0044 1014 86 00              		LDA	#0
+0045 1016 B7 0F 00           		STA	CURX		; We set the cursor position to the top left
+0046 1019 B7 0F 01           		STA	CURY
+0047                         		
+0048 101C 8E 11 3D           		LDX	#MSG_TITLE
+0049 101F BD 10 A4           		JSR	PRINTS		; We print the title
+0050                         		
+0051                         		
+0052                         * We play a sequence of sounds
+0053                         
+0054 1022 BD 10 EA           MAIN0	JSR	GETKEY		; We get the current key
+0055 1025 BD 11 2B           		JSR	STOP_SND
+0056 1028 81 00              		CMPA	#0		; If no key is pressed...
+0057 102A 27 F6              		BEQ	MAIN0		; ...we loop
+0058 102C 81 31              		CMPA	#'1'	; Check for key '1'
+0059 102E 26 17              		BNE	MAIN1
+0060                         * Message pitch mode		
+0061 1030 8E 11 4C           		LDX	#MSG_MESSAGE
+0062 1033 86 01              		LDA	#1
+0063 1035 B7 0F 01           		STA	CURY
+0064 1038 86 00              		LDA	#0
+0065 103A B7 0F 00           		STA	CURX
+0066 103D BD 10 A4           		JSR	PRINTS
+0067 1040 86 00              		LDA	#0
+0068 1042 B7 0F 04           		STA	MODE
+0069 1045 20 DB              		BRA	MAIN0
+0070 1047 81 32              MAIN1	CMPA	#'2'	
+0071 1049 26 17              		BNE	MAIN2
+0072                         * Carrier pitch mode
+0073 104B 8E 11 5A           		LDX	#MSG_CARRIER
+0074 104E 86 01              		LDA	#1
+0075 1050 B7 0F 01           		STA	CURY
+0076 1053 86 00              		LDA	#0
+0077 1055 B7 0F 00           		STA	CURX
+0078 1058 BD 10 A4           		JSR	PRINTS
+0079 105B 86 01              		LDA	#1
+0080 105D B7 0F 04           		STA	MODE
+0081 1060 20 C0              		BRA	MAIN0
+0082 1062 F6 0F 04           MAIN2	LDB	MODE
+0083 1065 C1 01              		CMPB	#1
+0084 1067 27 05              		BEQ	MAIN3
+0085 1069 B7 0F 02           		STA	MPITCH
+0086 106C 20 03              		BRA	MAIN4
+0087 106E B7 0F 03           MAIN3	STA	CPITCH
+0088 1071 BD 10 FF           MAIN4	JSR	PLAY_SND
+0089                         		
+0090 1074 7E 10 22           		JMP MAIN0
+0091                         			
+0092                         		
+0093                         ******************************************************************************
+0094                         * Wait subroutines for 20us, 1ms and 100ms
+0095                         ******************************************************************************
+0096                         		
+0097 1077 34 22              WAIT10US	PSHS	Y,A	
+0098 1079 10 8E E0 50        		LDY	#TIMER
+0099 107D 86 FA              		LDA	#250
+0100 107F A7 A4              		STA 0,Y
+0101 1081 86 01              		LDA	#1
+0102 1083 A7 21              		STA 1,Y
+0103 1085 A6 A4              WLOOP 	LDA	0,Y
+0104 1087 26 FC              		BNE	WLOOP
+0105 1089 35 22              		PULS	Y,A
+0106 108B 39                 		RTS
+0107                         
+0108 108C 34 04              WAIT1MS	PSHS	B
+0109 108E C6 64              		LDB	#100
+0110 1090 8D E5              W2LOOP	BSR WAIT10US
+0111 1092 5A                 		DECB
+0112 1093 26 FB              		BNE	W2LOOP
+0113 1095 35 04              		PULS	B
+0114 1097 39                 		RTS
+0115                         
+0116 1098 34 04              WAIT100MS	PSHS	B
+0117 109A C6 64              		LDB	#100
+0118 109C 8D EE              W3LOOP	BSR WAIT1MS
+0119 109E 5A                 		DECB
+0120 109F 26 FB              		BNE	W3LOOP
+0121 10A1 35 04              		PULS	B
+0122 10A3 39                 		RTS
+0123                         
+0124                         ******************************************************************************
+0125                         * Print a string to the VDU
+0126                         * Parameters:
+0127                         *	X: Address of the null-terminated string		
+0128                         ******************************************************************************
+0129                         		
+0130 10A4 34 26              PRINTS	PSHS	Y,A,B
+0131 10A6 10 8E E0 30        		LDY	#VDU
+0132 10AA B6 0F 01           		LDA	CURY		; Get current line
+0133 10AD A7 23              		STA	3,Y			; Set the line to VDU
+0134 10AF B6 0F 00           		LDA	CURX		; A = column		
+0135 10B2 E6 80              PRINTS0	LDB	,X+			; B = the next character
+0136 10B4 C1 00              		CMPB	#0		; Is it null?
+0137 10B6 27 07              		BEQ	PRINTS1		; If yes, stop
+0138 10B8 A7 22              		STA	2,Y			; Set the column to VDU
+0139 10BA E7 A4              		STB	,Y			; We write the character
+0140 10BC 4C                 		INCA			; We go to the next column
+0141 10BD 20 F3              		BRA PRINTS0		; We continue
+0142 10BF B7 0F 00           PRINTS1	STA	CURX		; We write the current column
+0143 10C2 A7 22              		STA	2,Y			; Set the column to VDU
+0144 10C4 35 26              		PULS	Y,A,B
+0145 10C6 39                 		RTS
+0146                         
+0147                         ******************************************************************************
+0148                         * Clear the screen
+0149                         ******************************************************************************
+0150                         		
+0151 10C7 34 26              CLEARS	PSHS	Y,A,B
+0152 10C9 10 8E E0 30        		LDY		#VDU
+0153 10CD C6 20              		LDB		#32		; Character to write
+0154 10CF 86 00              		LDA		#0		; Start at the first line
+0155 10D1 A7 23              CLEARS0	STA		3,Y		; Set the line to VDU
+0156 10D3 34 02              		PSHS	A		; Preserve the line value
+0157 10D5 86 00              		LDA		#0		; Start at the first column
+0158 10D7 A7 22              CLEARS1	STA		2,Y		; Set the column to VDU
+0159 10D9 E7 A4              		STB		,Y		; Write character to VDU
+0160 10DB 4C                 		INCA			; Increment the column
+0161 10DC 81 50              		CMPA	#80		; Is the last column?
+0162 10DE 26 F7              		BNE		CLEARS1	; Continue if not the last column
+0163 10E0 35 02              		PULS	A		; Restore the line value
+0164 10E2 4C                 		INCA			; Increment the line
+0165 10E3 81 19              		CMPA	#25		; Is the last line?
+0166 10E5 26 EA              		BNE		CLEARS0	; Continue if not the last line
+0167 10E7 35 26              		PULS	Y,A,B
+0168 10E9 39                 		RTS
+0169                         		
+0170                         		
+0171                         ******************************************************************************
+0172                         * Get currently pressed key
+0173                         * Returns:
+0174                         *	A: Key (0 if none)
+0175                         ******************************************************************************
+0176                         
+0177 10EA 34 20              GETKEY	PSHS	Y
+0178 10EC 10 8E E0 20        	LDY	#KEYB
+0179 10F0 A6 A4              GETKEY0	LDA	,Y
+0180 10F2 85 01              	BITA	#1			; Test for key pressed
+0181 10F4 26 04              	BNE	GETKEY1			; Branch if a key is pressed
+0182 10F6 86 00              	LDA	#0				; No key is pressed
+0183 10F8 20 02              	BRA	GETKEY2
+0184 10FA A6 21              GETKEY1	LDA	1,Y			; Get the key value
+0185 10FC 35 20              GETKEY2	PULS	Y
+0186 10FE 39                 	RTS
+0187                         
+0188                         
+0189                         ******************************************************************************
+0190                         * Play a sound
+0191                         ******************************************************************************
+0192                         		
+0193 10FF 34 36              PLAY_SND	PSHS	A,B,X,Y
+0194                         
+0195 1101 8E E0 80           		LDX	#SNDL
+0196 1104 10 8E E0 90        		LDY #SNDR
+0197                         
+0198                         * We set the message pitch
+0199 1108 B6 0F 02           		LDA	MPITCH
+0200 110B A7 01              		STA	1,X
+0201 110D A7 21              		STA 1,Y
+0202                         		
+0203                         * We set the carrier pitch
+0204 110F B6 0F 03           		LDA	CPITCH
+0205 1112 A7 02              		STA	2,X
+0206 1114 A7 22              		STA	2,Y
+0207                         		
+0208                         * We enable the phase-modulated wave
+0209 1116 86 04              		LDA	#4
+0210 1118 A7 84              		STA ,X
+0211 111A A7 A4              		STA ,Y
+0212                         		
+0213                         * We wait
+0214 111C 17 FF 79           PLAY0	LBSR WAIT100MS
+0215 111F 5A                 		DECB
+0216 1120 26 FA              		BNE	PLAY0
+0217                         		
+0218                         * We disable the sine wave
+0219 1122 86 00              		LDA	#0
+0220 1124 A7 84              		STA ,X
+0221 1126 A7 A4              		STA ,Y
+0222 1128 35 36              		PULS	A,B,X,Y
+0223 112A 39                 		RTS
+0224                         		
+0225                         
+0226                         ******************************************************************************
+0227                         * Stop sound
+0228                         ******************************************************************************
+0229                         		
+0230 112B 34 32              STOP_SND	PSHS	A,X,Y
+0231                         
+0232 112D 8E E0 80           		LDX	#SNDL
+0233 1130 10 8E E0 90        		LDY #SNDR
+0234                         		
+0235                         * We disable the sine wave
+0236 1134 86 00              		LDA	#0
+0237 1136 A7 84              		STA ,X
+0238 1138 A7 A4              		STA ,Y
+0239 113A 35 32              		PULS	A,X,Y
+0240 113C 39                 		RTS
+0241                         		
+0242                         		
+0243                         ******************************************************************************
+0244                         * Constants
+0245                         ******************************************************************************
+0246                         
+0247 113D 4D 44 2D 53 79 6E  MSG_TITLE	FCC	'MD-Synthesizer'
+          74 68 65 73 69 7A
+          65 72
+0248 114B 00                 			FCB	0
+0249 114C 4D 65 73 73 61 67  MSG_MESSAGE	FCC 'Message Pitch'
+          65 20 50 69 74 63
+          68
+0250 1159 00                 			FCB	0
+0251 115A 43 61 72 72 69 65  MSG_CARRIER	FCC	'Carrier Pitch'
+          72 20 50 69 74 63
+          68
+0252 1167 00                 			FCB	0
+0253                         		END
+Program + Init Data = 360 bytes
+Error count = 0

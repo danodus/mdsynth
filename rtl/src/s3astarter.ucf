@@ -1,0 +1,477 @@
+###############################################################################
+### Copyright (c) 2006, 2007 Xilinx, Inc.
+### This design is confidential and proprietary of Xilinx, All Rights Reserved.
+###############################################################################
+###   ____  ____
+###  /   /\/   /
+### /___/  \  /   Vendor:        Xilinx
+### \   \   \/    Version:       1.0.1
+###  \   \        Filename:      starter_kit_constraints.ucf
+###  /   /        Date Created:  December 25, 2006
+### /___/   /\    Last Modified: April 1, 2007
+### \   \  /  \
+###  \___\/\___\
+###
+### Devices:   Spartan-3 Generation FPGA
+### Purpose:   Complete constraint file for Spartan-3A(N) Starter Kit
+### Contact:   crabill@xilinx.com
+### Reference: None
+###
+### Revision History:
+###   Rev 1.0.0 - (crabill) Created December 25, 2006 for PCB revision C.
+###   Rev 1.0.1 - (crabill) Modified April 1, 2007 to mention revision D
+###                         of the PCB and applicability to Spartan-3AN.
+###
+###############################################################################
+###
+### LIMITED WARRANTY AND DISCLAIMER. These designs are provided to you "as is".
+### Xilinx and its licensors make and you receive no warranties or conditions,
+### express, implied, statutory or otherwise, and Xilinx specifically disclaims
+### any implied warranties of merchantability, non-infringement, or fitness for
+### a particular purpose. Xilinx does not warrant that the functions contained
+### in these designs will meet your requirements, or that the operation of
+### these designs will be uninterrupted or error free, or that defects in the
+### designs will be corrected. Furthermore, Xilinx does not warrant or make any
+### representations regarding use or the results of the use of the designs in
+### terms of correctness, accuracy, reliability, or otherwise.
+###
+### LIMITATION OF LIABILITY. In no event will Xilinx or its licensors be liable
+### for any loss of data, lost profits, cost or procurement of substitute goods
+### or services, or for any special, incidental, consequential, or indirect
+### damages arising from the use or operation of the designs or accompanying
+### documentation, however caused and on any theory of liability. This
+### limitation will apply even if Xilinx has been advised of the possibility
+### of such damage. This limitation shall apply not-withstanding the failure
+### of the essential purpose of any limited remedies herein.
+###
+###############################################################################
+### Copyright (c) 2006, 2007 Xilinx, Inc.
+### This design is confidential and proprietary of Xilinx, All Rights Reserved.
+###############################################################################
+#
+## On this board, VCCAUX is 3.3 volts.
+#
+#CONFIG VCCAUX = "3.3" ;
+#
+## Configure SUSPEND mode options.
+# 
+#CONFIG ENABLE_SUSPEND = "FILTERED" ;
+#
+## FILTERED is appropriate for use with the switch on this board. Other allowed
+## settings are NO or UNFILTERED.  If set NO, the AWAKE pin becomes general I/O.
+## Please read the FPGA User Guide for more information.
+#
+## Configure POST_CRC options.
+#
+#CONFIG POST_CRC = "DISABLE" ;
+#
+## DISABLE the post-configuration CRC checking so INIT_B is available for
+## general I/O after configuration is done.  On this board, INIT_B is used
+## after configuration to control the Platform Flash device.  Other allowed
+## settings are ENABLE.  Please read the FPGA User Guide for more information.
+#
+###############################################################################
+## These are sample constraints for the three clock inputs.  You will need
+## to change these constraints to suit your application.  Please read the
+## FPGA Development System Reference Guide for more information on expressing
+## timing constraints for your design.
+###############################################################################
+#
+NET "CLK_50MHZ"       LOC = "E12"  | IOSTANDARD = LVCMOS33 | PERIOD = 20.000 ;
+OFFSET = IN  10.000 VALID 20.000 BEFORE "CLK_50MHZ" ;
+OFFSET = OUT 20.000 AFTER "CLK_50MHZ" ;
+#
+#NET "CLK_AUX"       LOC = "V12"  | IOSTANDARD = LVCMOS33 | PERIOD = 20.000 ;
+#OFFSET = IN  10.000 VALID 20.000 BEFORE "CLK_AUX" ;
+#OFFSET = OUT 20.000 AFTER "CLK_AUX" ;
+#
+#NET "CLK_SMA"       LOC = "U12"  | IOSTANDARD = LVCMOS33 | PERIOD = 20.000 ;
+#OFFSET = IN  10.000 VALID 20.000 BEFORE "CLK_SMA" ;
+#OFFSET = OUT 20.000 AFTER "CLK_SMA" ;
+#
+###############################################################################
+## Discrete Indicators (LED)
+###############################################################################
+#
+NET "LED<0>"        LOC = "R20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<1>"        LOC = "T19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<2>"        LOC = "U20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<3>"        LOC = "U19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<4>"        LOC = "V19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<5>"        LOC = "V20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<6>"        LOC = "Y22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "LED<7>"        LOC = "W21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Character Display (LCD)
+###############################################################################
+#
+#NET "LCD_DB<0>"     LOC = "Y13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<1>"     LOC = "AB18" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<2>"     LOC = "AB17" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<3>"     LOC = "AB12" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<4>"     LOC = "AA12" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<5>"     LOC = "Y16"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<6>"     LOC = "AB16" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_DB<7>"     LOC = "Y15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_E"         LOC = "AB4"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_RS"        LOC = "Y14"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "LCD_RW"        LOC = "W13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Stereo Audio Output (AUD)
+###############################################################################
+#
+NET "AUD_L"         LOC = "Y10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "AUD_R"         LOC = "V10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Video Output Port (VGA)
+###############################################################################
+#
+#NET "VGA_B<0>"      LOC = "C7"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_B<1>"      LOC = "D7"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_B<2>"      LOC = "B9"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+NET "VGA_BLUE"      LOC = "C9"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_G<0>"      LOC = "C5"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_G<1>"      LOC = "D5"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_G<2>"      LOC = "C6"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+NET "VGA_GREEN"      LOC = "D6"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_R<0>"      LOC = "A3"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_R<1>"      LOC = "B3"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "VGA_R<2>"      LOC = "B8"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+NET "VGA_RED"      LOC = "C8"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+NET "VGA_HSYNC"     LOC = "C11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+NET "VGA_VSYNC"     LOC = "B11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#
+###############################################################################
+## Hirose Expansion Connector (FX2)
+###############################################################################
+#
+#NET "FX2_IO<1>"     LOC = "A13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<2>"     LOC = "B13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<3>"     LOC = "A14"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<4>"     LOC = "B15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<5>"     LOC = "A15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<6>"     LOC = "A16"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<7>"     LOC = "A17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<8>"     LOC = "B17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<9>"     LOC = "A18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<10>"    LOC = "C18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<11>"    LOC = "A19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<12>"    LOC = "B19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<13>"    LOC = "A20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<14>"    LOC = "B20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<15>"    LOC = "C19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<16>"    LOC = "D19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<17>"    LOC = "D18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<18>"    LOC = "E17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<19>"    LOC = "D20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<20>"    LOC = "D21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<21>"    LOC = "D22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<22>"    LOC = "E22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<23>"    LOC = "F18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<24>"    LOC = "F19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<25>"    LOC = "F20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<26>"    LOC = "E20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<27>"    LOC = "G20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<28>"    LOC = "G19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<29>"    LOC = "H19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<30>"    LOC = "J18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<31>"    LOC = "K18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<32>"    LOC = "K17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<33>"    LOC = "K19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<34>"    LOC = "K20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<35>"    LOC = "L19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<36>"    LOC = "L18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<37>"    LOC = "M20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<38>"    LOC = "M18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<39>"    LOC = "L20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_IO<40>"    LOC = "P20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_CLKIN"     LOC = "M22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_CLKIO"     LOC = "L21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FX2_CLKOUT"    LOC = "L22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Accessory Headers (J18, J19, J20)
+###############################################################################
+#
+#NET "J18_IO<1>"     LOC = "AA21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<2>"     LOC = "AB21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<3>"     LOC = "AA19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<4>"     LOC = "AB19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+#NET "J19_IO<1>"     LOC = "Y18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J19_IO<2>"     LOC = "W18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J19_IO<3>"     LOC = "V17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J19_IO<4>"     LOC = "W17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+#NET "J20_IO<1>"     LOC = "V14"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J20_IO<2>"     LOC = "V15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J20_IO<3>"     LOC = "W16"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J20_IO<4>"     LOC = "V16"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Mouse and/or Keyboard Connector (PS2)
+###############################################################################
+#
+## Primary connection, simply plug device into connector.
+NET "PS2_CLK"      LOC = "W12"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+NET "PS2_DATA"     LOC = "V11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+## Secondary connection, use requires a splitter cable.
+#NET "PS2_CLK2"      LOC = "U11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "PS2_DATA2"     LOC = "Y12"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## High-Speed LVDS Receiver Connector (RX)
+###############################################################################
+#
+#NET "RX_CLK_N"      LOC = "A11"  | IOSTANDARD = LVDS_33 ;
+#NET "RX_CLK_P"      LOC = "A12"  | IOSTANDARD = LVDS_33 ;
+#NET "RX_N<0>"       LOC = "B4"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_P<0>"       LOC = "A4"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_N<1>"       LOC = "A5"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_P<1>"       LOC = "B6"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_N<2>"       LOC = "A6"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_P<2>"       LOC = "A7"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_N<3>"       LOC = "A8"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_P<3>"       LOC = "A9"   | IOSTANDARD = LVDS_33 ;
+#NET "RX_N<4>"       LOC = "C10"  | IOSTANDARD = LVDS_33 ;
+#NET "RX_P<4>"       LOC = "A10"  | IOSTANDARD = LVDS_33 ;
+#
+###############################################################################
+## High-Speed LVDS Transmitter Connector (TX)
+###############################################################################
+#
+#NET "TX_CLK_N"      LOC = "AB10" | IOSTANDARD = LVDS_33 ;
+#NET "TX_CLK_P"      LOC = "AA10" | IOSTANDARD = LVDS_33 ;
+#NET "TX_N<0>"       LOC = "AA3"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_P<0>"       LOC = "AB2"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_N<1>"       LOC = "AA4"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_P<1>"       LOC = "AB3"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_N<2>"       LOC = "AB6"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_P<2>"       LOC = "AA6"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_N<3>"       LOC = "AB7"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_P<3>"       LOC = "Y7"   | IOSTANDARD = LVDS_33 ;
+#NET "TX_N<4>"       LOC = "AB8"  | IOSTANDARD = LVDS_33 ;
+#NET "TX_P<4>"       LOC = "AA8"  | IOSTANDARD = LVDS_33 ;
+#
+###############################################################################
+## Directional Push-Buttons (BTN)
+###############################################################################
+#
+#NET "BTN_EAST"      LOC = "T16"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+#NET "BTN_NORTH"     LOC = "T14"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+NET "BTN_SOUTH"     LOC = "T15"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+#NET "BTN_WEST"      LOC = "U15"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+#
+###############################################################################
+## Rotary Knob (ROT)
+###############################################################################
+#
+#NET "ROT_CENTER"    LOC = "R13"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+#NET "ROT_A"         LOC = "T13"  | IOSTANDARD = LVCMOS33 | PULLUP ;
+#NET "ROT_B"         LOC = "R14"  | IOSTANDARD = LVCMOS33 | PULLUP ;
+#
+###############################################################################
+## Mechanical Switches (SW)
+###############################################################################
+#
+#NET "SW<0>"         LOC = "V8"   | IOSTANDARD = LVCMOS33 ;
+#NET "SW<1>"         LOC = "U10"  | IOSTANDARD = LVCMOS33 ;
+#NET "SW<2>"         LOC = "U8"   | IOSTANDARD = LVCMOS33 ;
+#NET "SW<3>"         LOC = "T9"   | IOSTANDARD = LVCMOS33 ;
+#
+###############################################################################
+## Serial Ports (RS232)
+###############################################################################
+#
+NET "RS232_DCE_RXD" LOC = "E16"  | IOSTANDARD = LVCMOS33 ;
+NET "RS232_DCE_TXD" LOC = "F15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+#NET "RS232_DTE_RXD" LOC = "F16"  | IOSTANDARD = LVCMOS33 ;
+#NET "RS232_DTE_TXD" LOC = "E15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Regulator I2C Control (REG)
+###############################################################################
+#
+## Controls VCCINT, VCCAUX, and VCCO_012 supply rails.
+#NET "REG1_SCL"      LOC = "E13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "REG1_SDA"      LOC = "D13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+## Controls SDRAM, TERM, and VREF supply rails.
+#NET "REG2_SCL"      LOC = "D11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "REG2_SDA"      LOC = "F13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+# 
+###############################################################################
+## 10/100 Ethernet (E)
+###############################################################################
+#
+#NET "E_TX_CLK"      LOC = "E11"  | IOSTANDARD = LVCMOS33 | PERIOD = 40.000 ;
+#OFFSET = IN   5.000 VALID 10.000 BEFORE "E_TX_CLK" ;
+#OFFSET = OUT 10.000 AFTER "E_TX_CLK" ;
+#
+#NET "E_RX_CLK"      LOC = "C12"  | IOSTANDARD = LVCMOS33 | PERIOD = 40.000 ;
+#OFFSET = IN   5.000 VALID 10.000 BEFORE "E_RX_CLK" ;
+#OFFSET = OUT 10.000 AFTER "E_RX_CLK" ;
+#
+#NET "E_NRST"        LOC = "D15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "E_MDC"         LOC = "D10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "E_MDIO"        LOC = "E10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+#NET "E_TXD<0>"      LOC = "F8"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "E_TXD<1>"      LOC = "E7"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "E_TXD<2>"      LOC = "E6"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "E_TXD<3>"      LOC = "F7"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#NET "E_TX_EN"       LOC = "D8"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;
+#
+#NET "E_RXD<0>"      LOC = "G7"   | IOSTANDARD = LVCMOS33 | PULLUP ;
+#NET "E_RXD<1>"      LOC = "G8"   | IOSTANDARD = LVCMOS33 | PULLUP ;
+#NET "E_RXD<2>"      LOC = "G9"   | IOSTANDARD = LVCMOS33 | PULLUP ;
+#NET "E_RXD<3>"      LOC = "H9"   | IOSTANDARD = LVCMOS33 | PULLUP ;
+#NET "E_RX_DV"       LOC = "H10"  | IOSTANDARD = LVCMOS33 ;
+#
+#NET "E_RX_ERR"      LOC = "G10"  | IOSTANDARD = LVCMOS33 ;
+#NET "E_NINT"        LOC = "B2"   | IOSTANDARD = LVCMOS33 | PULLUP ;
+#NET "E_CRS"         LOC = "H12"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+#NET "E_COL"         LOC = "G12"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+#
+###############################################################################
+## Serial Peripheral System
+###############################################################################
+#
+#NET "SPI_SCK"       LOC = "AA20" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+#NET "SPI_MOSI"      LOC = "AB14" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "SPI_MISO"      LOC = "AB20" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "AMP_OUT"       LOC = "T7"   | IOSTANDARD = LVCMOS33 ; # Private MISO for AMP
+#NET "DAC_OUT"       LOC = "V7"   | IOSTANDARD = LVCMOS33 ; # Private MISO for DAC
+#NET "ADC_OUT"       LOC = "D16"  | IOSTANDARD = LVCMOS33 ; # Private MISO for ADC
+#
+#NET "SPI_SS_B"      LOC = "Y4"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "ALT_SS_B"      LOC = "Y5"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "FPGA_INIT_B"   LOC = "V13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "AMP_CS"        LOC = "W6"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "DAC_CS"        LOC = "W7"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "AD_CONV"       LOC = "Y6"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+#NET "AMP_SHDN"      LOC = "W15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "DAC_CLR"       LOC = "AB13" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "ST_SPI_WP"     LOC = "C13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "DATAFLASH_WP"  LOC = "C14"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "DATAFLASH_RST" LOC = "C15"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#
+###############################################################################
+## Parallel Flash (NF)
+###############################################################################
+#
+#NET "NF_CE"         LOC = "W20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_BYTE"       LOC = "Y21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_OE"         LOC = "W19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_RP"         LOC = "R22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_WE"         LOC = "AA22" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_WP"         LOC = "E14"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_STS"        LOC = "P22"  | IOSTANDARD = LVCMOS33 ;
+#
+#NET "NF_A<1>"       LOC = "T18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<2>"       LOC = "R19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<3>"       LOC = "P18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<4>"       LOC = "N22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<5>"       LOC = "N21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<6>"       LOC = "N20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<7>"       LOC = "N19"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<8>"       LOC = "N18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<9>"       LOC = "N17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<10>"      LOC = "K22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<11>"      LOC = "J22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<12>"      LOC = "J21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<13>"      LOC = "J20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<14>"      LOC = "H22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<15>"      LOC = "G22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<16>"      LOC = "H21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<17>"      LOC = "H20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<18>"      LOC = "F22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<19>"      LOC = "F21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<20>"      LOC = "C22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_A<21>"      LOC = "C21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+# 
+## Note: NF_D<0> pin is shared with SPI_MISO pin which was previously declared.
+#NET "NF_D<1>"       LOC = "Y17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<2>"       LOC = "AA17" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<3>"       LOC = "U13"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<4>"       LOC = "AB11" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<5>"       LOC = "Y11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<6>"       LOC = "AB9"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<7>"       LOC = "Y9"   | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<8>"       LOC = "T20"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<9>"       LOC = "W22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<10>"      LOC = "V22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<11>"      LOC = "U21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<12>"      LOC = "U22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<13>"      LOC = "T22"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<14>"      LOC = "R21"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "NF_D<15>"      LOC = "T17"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+## Note: NF_D<15> becomes NF_A<0> when NF_BYTE is asserted (for 8-bit mode).
+# 
+###############################################################################
+## DDR2 SDRAM Device (SD)
+###############################################################################
+#
+#NET "SD_A<0>"       LOC = "R2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<1>"       LOC = "T4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<2>"       LOC = "R1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<3>"       LOC = "U3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<4>"       LOC = "U2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<5>"       LOC = "U4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<6>"       LOC = "U1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<7>"       LOC = "Y1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<8>"       LOC = "W1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<9>"       LOC = "W2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<10>"      LOC = "T3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<11>"      LOC = "V1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<12>"      LOC = "Y2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<13>"      LOC = "V3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<14>"      LOC = "V4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_A<15>"      LOC = "W3"   | IOSTANDARD = SSTL18_I ;
+#
+#NET "SD_BA<0>"      LOC = "P3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_BA<1>"      LOC = "R3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_BA<2>"      LOC = "P5"   | IOSTANDARD = SSTL18_I ;
+#
+#NET "SD_RAS"        LOC = "M3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_CAS"        LOC = "M4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_CK_N"       LOC = "M2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_CK_P"       LOC = "M1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_CKE"        LOC = "N3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_ODT"        LOC = "P1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_CS"         LOC = "M5"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_WE"         LOC = "N4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_LDM"        LOC = "J3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_LDQS_N"     LOC = "K2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_LDQS_P"     LOC = "K3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_LOOP_IN"    LOC = "H4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_LOOP_OUT"   LOC = "H3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_UDM"        LOC = "E3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_UDQS_N"     LOC = "J5"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_UDQS_P"     LOC = "K6"   | IOSTANDARD = SSTL18_I ;
+#
+#NET "SD_DQ<0>"      LOC = "H1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<1>"      LOC = "K5"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<2>"      LOC = "K1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<3>"      LOC = "L3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<4>"      LOC = "L5"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<5>"      LOC = "L1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<6>"      LOC = "K4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<7>"      LOC = "H2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<8>"      LOC = "F2"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<9>"      LOC = "G4"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<10>"     LOC = "G1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<11>"     LOC = "H6"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<12>"     LOC = "H5"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<13>"     LOC = "F1"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<14>"     LOC = "G3"   | IOSTANDARD = SSTL18_I ;
+#NET "SD_DQ<15>"     LOC = "F3"   | IOSTANDARD = SSTL18_I ;
+#
+###############################################################################

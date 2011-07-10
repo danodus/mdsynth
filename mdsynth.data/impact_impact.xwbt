@@ -1,8 +1,0 @@
-INTSTYLE=impact
-INFILE=C:\Users\dev\Xilinx\mdsynth\mdsynth.data\impact.xsl
-OUTFILE=C:\Users\dev\Xilinx\mdsynth\mdsynth.data\impact.xsl
-FAMILY=Multiple
-PART=Multiple
-WORKINGDIR=C:\Users\dev\Xilinx\mdsynth\mdsynth.data
-LICENSE=iMPACT
-USER_INFO=iMPACT

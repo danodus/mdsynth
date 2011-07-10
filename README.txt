@@ -4,8 +4,26 @@ FPGA-based synthesizer for the Xilinx Spartan-3A Starter Kit
 Author: Daniel Cliche (dcliche@meldora.com)
 Copyright (c) 2011, Meldora Inc. All rights reserved.
 
-License: New BSD
-Language: VHDL
+License: GPL for the complete system, New BSD for the sound synthesizer module only.
+Languages: VHDL, 6809 assembly, C
+
+============================================================
+Overview
+============================================================
+
+The project is divided in two components:
+	- Synth: The sound synthesizer module with a test bench;
+	- Sys09: The complete 6809-based system with sound synthesizer module integration.
+
+Each component has its own PlanAhead project.
+
+============================================================
+Sound synthesizer module
+============================================================
+
+License: New BSD (if used as a stand-alone component)
+Languages: VHDL
+Path: synth
 
 Description
 -----------
@@ -48,3 +66,14 @@ Implementation Notes
 --------------------
 
 I am using an numerically-controlled oscillator (NCO) in order to produce a phase value used as an index of the sine table.
+
+============================================================
+6809-based synthesizer system
+============================================================
+
+Adaptation of the excellent System09 project by John E. Kent (dilbert57@opencores.org)
+http://members.optushome.com.au/jekent/system09/
+
+License: GPL
+Languages: VHDL, 6809 assembly, C
+Path:	sys09

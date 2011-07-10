@@ -1,0 +1,11 @@
+Micro-C is a subset of C compiler. It compiles everything
+in 1 pass.
+
+Major limitations compared to standard C compilers are:
+	1) no float or double
+	2) no bit field
+	3) limited pre-processor capability (use 'cpp' of UNIX if necessary)
+	4) no real long (long is only 2 bytes long)
+
+Non standard features:
+	1) #asm and #endasm construction (dangerous, use only after ';' or '}')

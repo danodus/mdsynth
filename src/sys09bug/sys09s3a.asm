@@ -1,0 +1,5 @@
+ NAM SYS09BUG FOR SPARTAN 3E STARTER
+ INCLUDE "opt_s3e.asm"
+ INCLUDE "sys09equ.asm"
+ INCLUDE "sys09bug.asm"
+ END 
