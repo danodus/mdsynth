@@ -1,0 +1,8 @@
+INTSTYLE=impact
+INFILE=E:\Xilinx\mdsynth\rtl\mdsynth.data\impact.xsl
+OUTFILE=E:\Xilinx\mdsynth\rtl\mdsynth.data\impact.xsl
+FAMILY=Multiple
+PART=Multiple
+WORKINGDIR=E:\Xilinx\mdsynth\rtl\mdsynth.data
+LICENSE=iMPACT
+USER_INFO=iMPACT

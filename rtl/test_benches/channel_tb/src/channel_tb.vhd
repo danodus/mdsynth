@@ -31,13 +31,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity channel_tb is
-   port ( clk:         in std_logic; 
+   port ( clk_50mhz:   in std_logic; 
  		  btn_south:   in std_logic;
-          switch:      in std_logic_vector(3 downto 0);
+          sw:          in std_logic_vector(3 downto 0);
           aud_l:       out std_logic;
           aud_r:       out std_logic;
-          aux_aud_l:   out std_logic;
-          aux_aud_r:   out std_logic);
+          j18_io:         out std_logic_vector(1 downto 0));
  
 end entity channel_tb;
 
@@ -60,18 +59,18 @@ signal waveform: std_logic_vector(2 downto 0) := "100";
 
 begin
 
-    channel0: channel port map (clk => clk, reset => btn_south, waveform => waveform, pitch_message => pitch_message, pitch_carrier => pitch_carrier, output => channel_out);
+    channel0: channel port map (clk => clk_50mhz, reset => btn_south, waveform => waveform, pitch_message => pitch_message, pitch_carrier => pitch_carrier, output => channel_out);
 
-    waveform <= switch(2 downto 0);
+    waveform <= sw(2 downto 0);
 
     aud_l <= channel_out;
 	aud_r <= channel_out;
-	aux_aud_l <= channel_out;
-	aux_aud_r <= channel_out;
+	j18_io(0) <= channel_out;
+	j18_io(1) <= channel_out;
 	
-	process (clk)
+	process (clk_50mhz)
 	begin
-	    if (rising_edge(clk)) then
+	    if (rising_edge(clk_50mhz)) then
 	        if (counter = 0) then
 	            counter <= to_unsigned(5000000, 32);
 	            pitch_message <= pitch_message + 1;

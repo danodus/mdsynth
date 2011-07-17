@@ -6,8 +6,6 @@
 *	12-Dec-81	M.Ohta,H.Tezuka
 *
 
-	OPT	l
-
 	ORG	$100
 
 _00001	PSHS	D,X,Y		multiply
@@ -380,17 +378,13 @@ _12
 main
 	PSHS	U
 	LEAU	,S
-	LEAS	-1,S
-	CLRA
-	CLRB
-	STB	-1,U
+	LBSR	clearscr
 	CLRA
 	CLRB
 	STB	0,Y
 	CLRA
 	CLRB
 	STB	1,Y
-	LBSR	clearscr
 	LEAX	2,PC
 	BRA	_14
 	FCB	72,101,108,108,111,32,87,111
@@ -399,44 +393,8 @@ _14
 	PSHS	X
 	LBSR	prints
 	LEAS	2,S
-	LEAX	2,PC
-	BRA	_15
-	FCB	32,45,45,32,80,114,101,115
-	FCB	115,32,97,32,107,101,121,0
-_15
-	PSHS	X
-	LBSR	prints
-	LEAS	2,S
-	LDD	#1
-	STB	1,Y
-	LDD	#65
-	PSHS	D
-	LBSR	printc
-	LEAS	2,S
-	LDD	#10
-	PSHS	D
-	LBSR	printh4
-	LEAS	2,S
-	LDD	#248
-	PSHS	D
-	LBSR	printh8
-	LEAS	2,S
-_17
-	LBSR	getch
-	STB	-1,U
 	CLRA
 	CLRB
-	STB	0,Y
-	LDB	-1,U
-	SEX
-	PSHS	D
-	LBSR	printh8
-	LEAS	2,S
-	LBRA	_17
-_16
-	CLRA
-	CLRB
-	LEAS	,U
 	PULS	U,PC
 _1	RTS
 _INITIALIZE	EQU	_1

@@ -14,5 +14,7 @@
 	</Step>
 	<Step Id="xdl">
 	</Step>
+	<Step Id="bitgen">
+	</Step>
 </Strategy>
 

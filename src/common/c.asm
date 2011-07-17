@@ -5,8 +5,6 @@
 *	12-Dec-81	M.Ohta,H.Tezuka
 *
 
-	OPT	l
-
 	ORG	$100
 
 _00001	PSHS	D,X,Y		multiply

@@ -1,18 +1,9 @@
-
-#asm
-
-#include "c.txt"	
-
-#endasm
-
 /**********************************/
 
 char curx, cury;
 
 #define KBD		0xE020
 #define VDU		0xE030
-#define SNDL	0xE080
-#define SNDR	0xE090
 
 /* Print a single character */
 printc(c)
@@ -79,30 +70,4 @@ char getch()
 	
 	/* Return the key value */
 	return *(KBD + 1);
-}
-
-
-int main(argc, argv)
-int argc;
-char **argv;
-{
-	char c;
-
-	c = 0;
-	curx = 0;
-	cury = 0;
-	
-	clearscr();
-	prints("Hello World!");
-	prints(" -- Press a key");
-	
-	cury = 1;
-		
-	while(1) {
-		c = getch();
-		curx = 0;
-		printh8(c);
-	}
-	
-	return 0;
 }

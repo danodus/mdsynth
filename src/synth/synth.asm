@@ -1,7 +1,7 @@
 * 6809
-* Synth
+* Test
 *
-		NAM SYNTH
+		NAM TEST
 		OPT l
 		PAGE
 		
