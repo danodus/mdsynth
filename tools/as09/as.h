@@ -1,6 +1,33 @@
 /*
+    Copyright (c) 2011, Meldora Inc.
+	Copyright (c) 2004, Motorola Inc.
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
+    conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer
+      in the documentation and/or other materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+    IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+    OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+*/
+
+
+#ifndef __as_h__
+#define __as_h__
+
+/*
  *      machine independent definitions and global variables
  */
+
+#include <stdio.h>
 
 #define YES     1
 #define NO      0
@@ -69,65 +96,65 @@
 #define PSEUDO  35      /* Pseudo ops                   */
 
 /* global variables */
-int     Line_num =0;            /* current line number          */
-int     Err_count =0;           /* total number of errors       */
-char    Line[MAXBUF] = {0};     /* input line buffer            */
-char    Label[MAXLAB] = {0};    /* label on current line        */
-char    Op[MAXOP] = {0};        /* opcode mnemonic on current line      */
-char    Operand[MAXBUF] = {0};  /* remainder of line after op           */
+extern int     Line_num;            /* current line number          */
+extern int     Err_count;           /* total number of errors       */
+extern char    Line[MAXBUF];     /* input line buffer            */
+extern char    Label[MAXLAB];    /* label on current line        */
+extern char    Op[MAXOP];        /* opcode mnemonic on current line      */
+extern char    Operand[MAXBUF];  /* remainder of line after op           */
                                 /* (up to ';' rel TER_2.0) */
-char    *Optr =0;               /* pointer into current Operand field   */
-int     Result =0;              /* result of expression evaluation      */
-int     Force_word =0;          /* Result should be a word when set     */
-int     Force_byte =0;          /* Result should be a byte when set     */
-int     Pc =0;                  /* Program Counter              */
-int     Old_pc =0;              /* Program Counter at beginning */
+extern char    *Optr;               /* pointer into current Operand field   */
+extern int     Result;              /* result of expression evaluation      */
+extern int     Force_word;          /* Result should be a word when set     */
+extern int     Force_byte;          /* Result should be a byte when set     */
+extern int     Pc;                  /* Program Counter              */
+extern int     Old_pc;              /* Program Counter at beginning */
 
-int     Last_sym =0;            /* result of last lookup        */
+extern int     Last_sym;            /* result of last lookup        */
 
-int     Pass =0;                /* Current pass #               */
-int     N_files =0;             /* Number of files to assemble  */
-FILE    *Fd =0;                 /* Current input file structure */
-int     Cfn =0;                 /* Current file number 1...n    */
-int     Ffn =0;                 /* forward ref file #           */
-int     F_ref =0;               /* next line with forward ref   */
-char    **Argv =0;              /* pointer to file names        */
+extern int     Pass;                /* Current pass #               */
+extern int     N_files;             /* Number of files to assemble  */
+extern FILE    *Fd;                 /* Current input file structure */
+extern int     Cfn;                 /* Current file number 1...n    */
+extern int     Ffn;                 /* forward ref file #           */
+extern int     F_ref;               /* next line with forward ref   */
+extern char    **Argv;              /* pointer to file names        */
 
-int     E_total =0;             /* total # bytes for one line   */
-int     E_bytes[E_LIMIT] = {0}; /* Emitted held bytes           */
-int     E_pc =0;                /* Pc at beginning of collection*/
+extern int     E_total;             /* total # bytes for one line   */
+extern int     E_bytes[E_LIMIT]; /* Emitted held bytes           */
+extern int     E_pc;                /* Pc at beginning of collection*/
 
-int     Lflag = 0;              /* listing flag 0=nolist, 1=list*/
+extern int     Lflag;              /* listing flag 0=nolist, 1=list*/
 
-int     P_force = 0;            /* force listing line to include Old_pc */
-int     P_total =0;             /* current number of bytes collected    */
-int     P_bytes[P_LIMIT] = {0}; /* Bytes collected for listing  */
+extern int     P_force;            /* force listing line to include Old_pc */
+extern int     P_total;             /* current number of bytes collected    */
+extern int     P_bytes[P_LIMIT]; /* Bytes collected for listing  */
 
-int     Cflag = 0;              /* cycle count flag */
-int     Cycles = 0;             /* # of cycles per instruction  */
-long    Ctotal = 0;             /* # of cycles seen so far */
-int     Sflag = 0;              /* symbol table flag, 0=no symbol */
-int     N_page = 0;             /* new page flag */
-int     Page_num = 2;           /* page number */
-int     CREflag = 0;            /* cross reference table flag */
-int     CRflag = 0;             /* flag to add <CR><LF> to S record */
+extern int     Cflag;              /* cycle count flag */
+extern int     Cycles;             /* # of cycles per instruction  */
+extern long    Ctotal;             /* # of cycles seen so far */
+extern int     Sflag;              /* symbol table flag, 0=no symbol */
+extern int     N_page;             /* new page flag */
+extern int     Page_num;           /* page number */
+extern int     CREflag;            /* cross reference table flag */
+extern int     CRflag;             /* flag to add <CR><LF> to S record */
                                 /* added ver TER_1.1 June 3, 1989 */
-int     nfFlag = 1;             /* if=1 number INCLUDE files separate */
+extern int     nfFlag;             /* if=1 number INCLUDE files separate */
                                 /* ver TER_2.0 June 17, 1989 */
-int     FdCount = 0;            /* INCLUDE files "stack" pointer */
+extern int     FdCount;            /* INCLUDE files "stack" pointer */
                                 /* ver TER_2.0 June 17, 1989 */
-char    InclFName[MAXBUF]={0};  /* current INCLUDE file name */
-int     F_total = 0;            /* total bytes emitted in S file */
+extern char    InclFName[MAXBUF];  /* current INCLUDE file name */
+extern int     F_total;            /* total bytes emitted in S file */
                                 /* ver (TER) 2.02 19 Jun 89 */
-int     Page_lines = 0;         /* total lines this page */
+extern int     Page_lines;         /* total lines this page */
                                 /* ver (TER) 2.02 19 Jun 89 */
-int     Pflag50 = 0;            /* if 1 then form feed every 50 lines */
+extern int     Pflag50;            /* if 1 then form feed every 50 lines */
                                 /* ver (TER) 2.02 19 Jun 89 */
-int     Pflag75 = 0;            /* if 1 then form feed every 75 lines */
+extern int     Pflag75;            /* if 1 then form feed every 75 lines */
                                 /* ver (DWC) 2.10 8 Oct 2001 */
-int     PC_Save[4] = {0,0,0,0}; /* saved contents of CODE,DATA,BSS,AUTO PCs */
+extern int     PC_Save[4]; /* saved contents of CODE,DATA,BSS,AUTO PCs */
                                 /* ver TER_2.09 25 July 89 */
-int     PC_ptr = 0;             /* index or pointer to current PC */
+extern int     PC_ptr;             /* index or pointer to current PC */
                         /* initialized to CODE ver TER_2.09 25 July 89 */
 
 struct link { /* linked list to hold line numbers */
@@ -152,10 +179,10 @@ struct oper {   /* an entry in the mnemonic table */
         char    cycles;         /* its base # of cycles */
 };
 
-struct  nlist *root;            /* root node of the tree */
+extern struct  nlist *root;            /* root node of the tree */
 
-FILE    *Objfil =0;             /* object file's file descriptor*/
-char    Obj_name[] = {"             "};
+extern FILE    *Objfil;             /* object file's file descriptor*/
+extern char    Obj_name[];
 
 struct  InclFile {      /* The INCLUDE files nesting "stack" */
                         /* added ver TER_2.0 6/17/89 */
@@ -176,3 +203,5 @@ struct nlist * lookup(char *name);
 void pouterror();
 void f_record();
 void NewPage();
+
+#endif // __as_h__

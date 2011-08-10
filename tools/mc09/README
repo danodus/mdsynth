@@ -1,5 +1,5 @@
-Micro-C is a subset of C compiler. It compiles everything
-in 1 pass.
+
+MC09 is a subset of C compiler. It compiles everything in 1 pass.
 
 Major limitations compared to standard C compilers are:
 	1) no float or double

@@ -1,149 +1,83 @@
+/*
+    Copyright (c) 2011, Meldora Inc.
+	Copyright (c) 1981, 1987, Masataka Ohta, Hiroshi Tezuka.
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
+    conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer
+      in the documentation and/or other materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+    INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+    IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+    OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+    OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/*
+    This is an adaptation of the public domain Micro-C compiler.
+*/
 
 #define DEBUG	error(-1)
 
-/*#include "CCLIB.TXT"
-*/
 #include <stdlib.h>
 #include <stdio.h>
 
-#define INT	(-1)
-#define CHAR	(-2)
+#define INT         (-1)
+#define CHAR	    (-2)
 #define UNSIGNED	(-3)
-#define POINTER (-4)
-#define ARRAY	(-5)
-#define STRUCT	(-6)
-#define UNION	(-7)
+#define POINTER     (-4)
+#define ARRAY	    (-5)
+#define STRUCT	    (-6)
+#define UNION	    (-7)
 #define FUNCTION	(-8)
-#define EMPTY	(-9)
+#define EMPTY	    (-9)
 
-#define STATIC	(-10)
-#define GOTO	(-11)
-#define RETURN	(-12)
-#define BREAK	(-13)
+#define STATIC	    (-10)
+#define GOTO	    (-11)
+#define RETURN	    (-12)
+#define BREAK	    (-13)
 #define CONTINUE	(-14)
-#define IF	(-15)
-#define ELSE	(-16)
-#define FOR	(-17)
-#define DO	(-18)
-#define WHILE	(-19)
-#define SWITCH	(-20)
-#define CASE	(-21)
-#define DEFAULT (-22)
-#define RESERVE (-23)
-#define TAG	(-24)
-#define FIELD	(-25)
-#define IDENT	(-26)
-#define STRING	(-27)
-#define MACRO	(-28)
-#define BLABEL	(-29)
-#define FLABEL	(-30)
-#define TYPEDEF (-31)
-#define SIZEOF	(-32)
-#define TYPE	(-33)
-#define LONG	(-34)
-#define SHORT	(-35)
+#define IF	        (-15)
+#define ELSE	    (-16)
+#define FOR	        (-17)
+#define DO	        (-18)
+#define WHILE	    (-19)
+#define SWITCH	    (-20)
+#define CASE	    (-21)
+#define DEFAULT     (-22)
+#define RESERVE     (-23)
+#define TAG	        (-24)
+#define FIELD	    (-25)
+#define IDENT	    (-26)
+#define STRING	    (-27)
+#define MACRO	    (-28)
+#define BLABEL	    (-29)
+#define FLABEL	    (-30)
+#define TYPEDEF     (-31)
+#define SIZEOF	    (-32)
+#define TYPE	    (-33)
+#define LONG	    (-34)
+#define SHORT	    (-35)
 
-#define TOP	0
-#define GDECL	1
-#define GSDECL	2
-#define GUDECL	3
-#define ADECL	4
-#define LDECL	5
-#define LSDECL	6
-#define LUDECL	7
-#define STADECL 8
-#define STAT	9
-#define GTDECL	10
-#define LTDECL	11
+enum {TOP = 0, GDECL, GSDECL, GUDECL, ADECL, LDECL, LSDECL, LUDECL, STADECL, STAT, GTDECL, LTDECL};
 
-#define GVAR	1
-#define RGVAR	2
-#define CRGVAR	3
-#define LVAR	4
-#define RLVAR	5
-#define CRLVAR	6
-#define CONST	7
-#define FNAME	8
-#define INDIRECT	9
-#define RINDIRECT	10
-#define CRINDIRECT	11
-#define ADDRESS 12
-#define MINUS	13
-#define LNOT	14
-#define BNOT	15
-#define INC	16
-#define POSTINC 17
-#define PREINC	18
-#define CPOSTINC	19
-#define CPREINC 20
-#define DEC	21
-#define CPOSTDEC	22
-#define CPREDEC 23
-#define MUL	24
-#define UMUL	25
-#define DIV	26
-#define UDIV	27
-#define MOD	28
-#define UMOD	29
-#define ADD	30
-#define SUB	31
-#define RSHIFT	32
-#define URSHIFT 33
-#define LSHIFT	34
-#define ULSHIFT 35
-#define GT	36
-#define UGT	37
-#define GE	38
-#define UGE	39
-#define LT	40
-#define ULT	41
-#define LE	42
-#define ULE	43
-#define EQ	44
-#define NEQ	45
-#define BAND	46
-#define EOR	47
-#define BOR	48
-#define LAND	49
-#define LOR	50
-#define COND	51
-#define ASS	52
-#define CASS	53
-#define ASSOP	54
-#define CASSOP	55
-#define COMMA	56
-#define LPAR	57
-#define RPAR	58
-#define LBRA	59
-#define RBRA	60
-#define LC	61
-#define RC	62
-#define COLON	63
-#define SM	64
-#define PERIOD	65
-#define ARROW	66
+enum { GVAR = 1, RGVAR, CRGVAR, LVAR, RLVAR, CRLVAR, CONST, FNAME, INDIRECT, RINDIRECT, CRINDIRECT,
+    ADDRESS, MINUS, LNOT, BNOT, INC, POSTINC, PREINC, CPOSTINC, CPREINC, DEC, CPOSTDEC, CPREDEC,
+    MUL, UMUL, DIV, UDIV, MOD, UMOD, ADD, SUB, RSHIFT, URSHIFT, LSHIFT, ULSHIFT, GT, UGT, GE, UGE,
+    LT, ULT, LE, ULE, EQ, NEQ, BAND, EOR, BOR, LAND, LOR, COND, ASS, CASS, ASSOP, CASSOP, COMMA,
+    LPAR, RPAR, LBRA, RBRA, LC, RC, COLON, SM, PERIOD, ARROW };
 
-#define US	1
-#define AS	100
+#define US          1
+#define AS          100
 
-#define FILERR	1
-#define DCERR	2
-#define STERR	3
-#define EXERR	4
-#define CNERR	5
-#define CHERR	6
-#define GSERR	7
-#define LSERR	8
-#define STRERR	9
-#define LNERR	10
-#define EOFERR	11
-#define MCERR	12
-#define INCERR	13
-#define HPERR	14
-#define TYERR	15
-#define LVERR	16
-#define UDERR	17
-#define OPTION	18
+enum {FILERR = 1, DCERR, STERR, EXERR, CNERR, CHERR, GSERR, LSERR, STRERR, LNERR, EOFERR, MCERR,
+    INCERR, HPERR, TYERR, LVERR, UDERR, OPTION};
 
 #define GSYMS	450
 #define LSYMS	50
@@ -154,42 +88,219 @@
 
 #define FILES 3
 
-int sym,ch,chsave,type,mode,gfree,lfree,mflag,lineno,glineno;
-int labelno,gpc,lvar,disp;
-int symval,args,heap[HEAPSIZE];
-int blabel,clabel,dlabel,cslabel,ilabel,control,ac,ac2,lsrc,chk,asmf;
+int sym, ch, chsave, type, mode, gfree, lfree, mflag, lineno, glineno;
+int labelno, gpc, lvar, disp;
+int symval, args, heap[HEAPSIZE];
+int blabel, clabel, dlabel, cslabel, ilabel, control, ac, ac2, lsrc, chk, asmf;
 
 unsigned hash;
 
-char linebuf[LBUFSIZE],cheap[CHEAPSIZE],*chptr,*chptrsave;
-char name[9],*cheapp,**av,/*obuf[320],*/*sptr,escape();
+char linebuf[LBUFSIZE], cheap[CHEAPSIZE], *chptr, *chptrsave;
+char name[9], *cheapp, **av, *sptr, escape();
 
 FILE *obuf;
 
 typedef struct nametable {
 	char nm[9];
-	int sc,ty,dsp; } NMTBL;
+	int sc,ty,dsp;
+} NMTBL;
 
-NMTBL ntable[GSYMS+LSYMS],*nptr,*gnptr,*decl0(),*decl1(),*lsearch(),*gsearch();
+NMTBL ntable[GSYMS+LSYMS], *nptr, *gnptr, *decl0(), *decl1(), *lsearch(), *gsearch();
 
-struct {int fd,ln;/*char fcb[320]*/FILE *fcb;} *filep,filestack[FILES];
+struct {
+    int fd,ln;
+    FILE *fcb;
+} *filep, filestack[FILES];
 
-main(argc,argv)
-int argc;
-char **argv;
-{NMTBL *nptr;
-int i;
-char *ccout;
-	if(argc==1) exit(1);
+//
+// Forward declarations
+//
+
+int error(int n);
+void errmsg();
+void checksym(int s);
+void init();
+struct nametable *decl0();
+void newfile();
+void reserve(char *s, int d);
+void decl();
+int typespec();
+struct nametable *decl0();
+NMTBL *decl1();
+void adecl();
+void reverse(int t1);
+int size(int t);
+void def(NMTBL *n);
+int sdecl(int s);
+void fdecl(NMTBL *n);
+void fcheck(NMTBL *n);
+void compatible(int t1, int t2);
+int scalar(int t);
+int integral(int t);
+void statement();
+void doif();
+void dowhile();
+void dodo();
+void dofor();
+void doswitch();
+void docomp();
+void docase();
+void dodefault();
+void doreturn();
+void return2();
+void ret(char *reg);
+void unlink2();
+void dogoto();
+void dolabel();
+int expr();
+int expr0();
+int expr1();
+int expr2();
+int expr3();
+int expr4();
+int expr5();
+int expr6();
+int expr7();
+int expr8();
+int expr9();
+int expr10();
+int expr11();
+int expr12();
+int expr13();
+int expr14();
+int expr15(int e1);
+int expr16(int e1);
+int rvalue(int e);
+void lcheck(int e);
+int indop(int e);
+int strop(e);
+int binop(int op, int e1, int e2, int t1, int t2);
+int typeid(int s);
+int typename();
+int ndecl0();
+int ndecl1();
+void bexpr(int e1, char cond, int l1);
+void rexpr(int e1, int l1, char *s);
+void jcond(int l, char cond);
+void jmp(int l);
+int fwdlabel();
+fwddef(int l);
+int backdef();
+void gexpr(int e1);
+void string(int e1);
+void function(int e1);
+void indirect(int e1);
+void machinop(int e1);
+void rindirect(int e1);
+void assign(int e1);
+void assop(int e1);
+int simpop(int op);
+void oprt(int op, int e1);
+void oprt1(int op, char *index, int n);
+void dualop(int op, char *index, int n);
+void oprtc(int op, int n);
+void dualc(int op, int n);
+void tosop(int op);
+void dualtosop(int op);
+void pushd();
+void pushx();
+void pulld();
+void pulx();
+void tfrdx();
+void tfrxd();
+void asld();
+void adddim(n);
+void subdim(n);
+void cmpdimm(int n);
+void addds();
+void subds();
+void clrd();
+void lddim(int n);
+void ldd(int e);
+void lddx();
+void lddy(int n);
+void lddu(int n);
+void predecx(char *op, int l);
+void std(int e);
+void stdx();
+void stdy(int n);
+void stdu(int n);
+void ldbx();
+void ldby(int n);
+void ldbu(int n);
+void postincx(char *op, int l);
+void leaxy(int n);
+void leaxu(int n);
+void leaxpcr(NMTBL *n);
+void ldx(int e);
+void ldxy(int n);
+void ldxu(int n);
+void stx(int e);
+void stxy(int n);
+void stxu(int n);
+void sex();
+void incx();
+void decx();
+void opdx(char *op);
+void indexx(char *op, int n);
+void index_(char *op, int e);
+void indexy(char *op, int n);
+void indexu(char *op, int n);
+void indir(char *op, int e);
+void indiry(char *op, int n);
+void indiru(char *op, int n);
+void sextend(int byte);
+void binexpr(int e1);
+void library(int op);
+int cexpr(e);
+int getsym();
+int postequ(int s1, int s2);
+int alpha(char c);
+int digit(char c);
+NMTBL *gsearch();
+NMTBL *lsearch();
+int neqname(char *p);
+void copy(char *p);
+void getstring();
+int skipspc();
+int getch();
+char escape();
+FILE *getfname();
+void getline();
+int macroeq(char *s);
+int car(int e);
+int cadr(int e);
+int caddr(int e);
+int cadddr(int e);
+int list2(int e1, int e2);
+int list3(int e1, int e2, int e3);
+int list4(int e1, int e2, int e3, int e4);
+int getfree(int n);
+int rplacad(int e, int n);
+
+// ----------------------------------------------------------------------------
+main(int argc, char **argv)
+{
+    NMTBL *nptr;
+    int i;
+    char *ccout;
+	
+    // If no argument is provided, we bail out
+    if(argc == 1)
+        exit(1);
+
+
 	lsrc = chk = asmf = 0;
 	ccout = "c.out";
-	ac=argc;
-	av=argv;
-	for (ac2=1; (ac2 < ac) && (*av[ac2] == '-'); ++ac2)
-		switch (*(av[ac2]+1))
-		{case 'S': case 's':
+	ac = argc;
+	av = argv;
+
+    // For each argument
+    for (ac2 = 1; (ac2 < ac) && (*av[ac2] == '-'); ++ac2) {
+        switch (*(av[ac2] + 1)) {
+        case 'S': case 's':
 			lsrc = 1;
-			break;
+			 break;
 		case 'O': case 'o':
 			ccout = av[ac2]+2;
 			break;
@@ -200,34 +311,45 @@ char *ccout;
 			error(OPTION);
 			exit(1);
 		}
+    }
+
 	fclose(stdout);
-	if (!chk)
-		if ( (obuf = fopen(ccout,"w")) == NULL ) error(FILERR);
+
+    if (!chk)
+		if ((obuf = fopen(ccout,"w")) == NULL)
+            error(FILERR);
+
+    // We perform the initialization
 	init();
+
 	while(1)
-	{	for (nptr = &ntable[GSYMS],i=LSYMS; i--;)
+	{
+        for (nptr = &ntable[GSYMS], i = LSYMS; i--;)
 			(nptr++)->sc = EMPTY;
-		mode=TOP;
-		while(getsym()==SM);
+		mode = TOP;
+
+		while(getsym() == SM);
 		mode=GDECL;
 		args=0;
 		decl();
 	}
 }
-error(n)
-int n;
-{	if(n == EOFERR)
+
+// ----------------------------------------------------------------------------
+int error(int n)
+{
+    if (n == EOFERR)
 		if(filep!=filestack)
 		{	lineno=filep->ln;
 			fclose(filep->fcb);
 			fprintf(stderr,"End of inclusion.\n");
 			--filep;
-			return;
+			return 0;
 		}
 		else if(ac2!=ac)
 		{	fclose(filep->fcb);
 			newfile();
-			return;
+			return 0;
 		}
 		else if(mode == TOP)
 		{	fprintf(stderr,"\nCompiled %u lines.\n",glineno-1);
@@ -261,21 +383,33 @@ int n;
 		"Bug of compiler");
 	errmsg();
 	exit(1);
+    return 0;
 }
-errmsg()
-{char *p,*lim;
-	if(lineno==0) return;
-	fprintf(stderr,"%s",linebuf);
-	lim=(mflag?chptrsave:chptr);
-	for (p=linebuf; p < lim;)
+
+// ----------------------------------------------------------------------------    
+void errmsg()
+{
+    char *p,*lim;
+	if (lineno == 0)
+        return;
+
+    fprintf(stderr,"%s",linebuf);
+
+    lim = (mflag ? chptrsave : chptr);
+
+	for (p = linebuf; p < lim;)
 		fprintf(stderr,(*p++ == '\t') ? "\t" : " ");
+
 	fprintf (stderr,"^\n");
 }
-checksym(s)
-int s;
-{char *p;
+
+// ----------------------------------------------------------------------------    
+void checksym(int s)
+{
+    char *p;
 	if (sym != s)
-	{	p=(s==RPAR) ? "')'": (s==RBRA) ? "']'": (s==SM) ? "';'":
+	{
+        p = (s == RPAR) ? "')'" : (s==RBRA) ? "']'": (s==SM) ? "';'":
 		  (s==LPAR) ? "'('": (s==WHILE) ? "'while'":
 		  (s==COLON) ? "':'": "Identifier";
 		fprintf(stderr,"%d:%s expected.\n",lineno,p);
@@ -283,9 +417,12 @@ int s;
 	}
 	else getsym();
 }
-init()
-{NMTBL *nptr;
-int i;
+
+// ----------------------------------------------------------------------------    
+void init()
+{
+    NMTBL *nptr;
+    int i;
 	for(nptr = ntable,i = GSYMS; i--;) (nptr++)->sc = EMPTY;
 	reserve("int",INT);
 	reserve("void",INT);
@@ -320,27 +457,33 @@ int i;
 	getline();
 	getch();
 }
-newfile()
+
+// ----------------------------------------------------------------------------    
+void newfile()
 {	lineno=0;
 	fprintf(stderr,"%s:\n",av[ac2]);
 	if ( (filep->fcb = fopen(av[ac2++],"r")) == NULL ) error(FILERR);
 }
-reserve(s,d)
-char *s;
-int d;
-{NMTBL *nptr;
-char *t;
+
+// ----------------------------------------------------------------------------    
+void reserve(char *s, int d)
+{
+    NMTBL *nptr;
+    char *t;
 	hash=0;
 	t=name;
-	while(*t++ = *s) hash=7*(hash+*s++);
+	while(*t++ = *s)
+        hash = 7 * (hash + *s++);
 	(nptr = gsearch())->sc = RESERVE;
 	nptr->dsp = d;
 }
 
-decl()
-{NMTBL *n;
-int t;
-	if(sym==STATIC)
+// ----------------------------------------------------------------------------    
+void decl()
+{
+    NMTBL *n;
+    int t;
+	if(sym == STATIC)
 		if(mode==LDECL)
 		{	getsym();
 			mode=STADECL;
@@ -375,8 +518,11 @@ int t;
 	if(mode==GTDECL) mode=GDECL;
 	if(mode==STADECL||mode==LTDECL) mode=LDECL;
 }
-typespec()
-{int t;
+
+// ----------------------------------------------------------------------------    
+int typespec()
+{
+    int t;
 	switch(sym)
 	{case INT:
 	case CHAR:
@@ -416,8 +562,11 @@ typespec()
 	}
 	return t;
 }
+
+// ----------------------------------------------------------------------------    
 struct nametable *decl0()
-{NMTBL *n;
+{
+    NMTBL *n;
 	if(sym==MUL)
 	{	getsym();
 		n=decl0();
@@ -426,9 +575,12 @@ struct nametable *decl0()
 	}
 	return decl1();
 }
+
+// ----------------------------------------------------------------------------    
 NMTBL *decl1()
-{NMTBL *n;
-int i,t;
+{
+    NMTBL *n;
+    int i,t;
 	if(sym==LPAR)
 	{	getsym();
 		n=decl0();
@@ -466,8 +618,11 @@ int i,t;
 		}
 		else return n;
 }
-adecl()
-{	if(mode!=GDECL) error(DCERR);
+
+// ----------------------------------------------------------------------------    
+void adecl()
+{	
+    if(mode!=GDECL) error(DCERR);
 	mode=ADECL;
 	args= 2;
 	while(1)
@@ -482,9 +637,11 @@ adecl()
 	mode=GDECL;
 	return;
 }
-reverse(t1)
-int t1;
-{int t2,t3;
+
+// ----------------------------------------------------------------------------    
+void reverse(int t1)
+{
+    int t2,t3;
 	t2=t1;
 	while(type!=t1)
 	{	t3=cadr(type);
@@ -494,8 +651,9 @@ int t1;
 	}
 	type=t2;
 }
-size(t)
-int t;
+
+// ----------------------------------------------------------------------------    
+int size(int t)
 {	if(t==CHAR) return 1;
 	if(scalar(t)) return 2;
 	if(car(t)==STRUCT||car(t)==UNION)
@@ -506,9 +664,11 @@ int t;
 	else error(DCERR);
 	/*NOTREACHED*/
 }
-def(n)
-NMTBL *n;
-{int sz,nsc,ndsp,slfree,l,t,e;
+
+// ----------------------------------------------------------------------------    
+void def(NMTBL *n)
+{
+    int sz,nsc,ndsp,slfree,l,t,e;
 	if(car(type)==FUNCTION)
 	{	fcheck(n);
 		return;
@@ -594,10 +754,12 @@ NMTBL *n;
 	n->sc = nsc;
 	n->dsp = ndsp;
 }
-sdecl(s)
-int s;
-{int smode,sdisp,type;
-NMTBL *nptr0;
+
+// ----------------------------------------------------------------------------    
+int sdecl(int s)
+{
+    int smode,sdisp,type;
+    NMTBL *nptr0;
 	smode=mode;
 	if (mode==GDECL || mode==GSDECL || mode==GUDECL || mode==GTDECL)
 		mode=(s==STRUCT?GSDECL:GUDECL);
@@ -631,9 +793,11 @@ NMTBL *nptr0;
 	mode=smode;
 	return type;
 }
-fdecl(n)
-NMTBL *n;
-{	args=0;
+
+// ----------------------------------------------------------------------------    
+void fdecl(NMTBL *n)
+{
+    args=0;
 	fcheck(n);
 	mode=ADECL;
 	lfree= HEAPSIZE;
@@ -652,17 +816,21 @@ NMTBL *n;
 	while(sym!=RC) statement();
 	if (control) return2();
 }
-fcheck(n)
-NMTBL *n;
-{	if(mode!=GDECL||car(type)!=FUNCTION) error(DCERR);
+
+// ----------------------------------------------------------------------------    
+void fcheck(NMTBL *n)
+{
+    if(mode!=GDECL||car(type)!=FUNCTION) error(DCERR);
 	if(n->sc==FUNCTION) compatible(n->ty,cadr(type));
 	else if(n->sc!=EMPTY) error(DCERR);
 	n->sc=FUNCTION;
 	n->ty=cadr(type);
 }
-compatible(t1,t2)
-int t1,t2;
-{	if(integral(t1))
+
+// ----------------------------------------------------------------------------    
+void compatible(int t1, int t2)
+{
+    if(integral(t1))
 	{	if(t1!=t2) error(TYERR);
 	}
 	else if(car(t1)!=car(t2)) error(TYERR);
@@ -671,17 +839,23 @@ int t1,t2;
 	else if(car(t1)==POINTER || car(t1)==ARRAY ||car(t1)==FUNCTION)
 		compatible(cadr(t1),cadr(t2));
 }
-scalar(t)
-int t;
-{	return(integral(t)||car(t)==POINTER);
-}
-integral(t)
-int t;
-{	return(t==INT||t==CHAR||t==UNSIGNED);
+
+// ----------------------------------------------------------------------------    
+int scalar(int t)
+{
+    return(integral(t)||car(t)==POINTER);
 }
 
-statement()
-{int slfree;
+// ----------------------------------------------------------------------------    
+int integral(int t)
+{
+    return(t==INT||t==CHAR||t==UNSIGNED);
+}
+
+// ----------------------------------------------------------------------------    
+void statement()
+{
+    int slfree;
 	switch(sym)
 	{case IF:
 		doif();
@@ -740,8 +914,11 @@ statement()
 		}
 	}
 }
-doif()
-{int l1,l2,slfree;
+
+// ----------------------------------------------------------------------------    
+void doif()
+{
+    int l1,l2,slfree;
 	getsym();
 	checksym(LPAR);
 	slfree=lfree;
@@ -758,8 +935,11 @@ doif()
 	}
 	else fwddef(l1);
 }
-dowhile()
-{int sbreak,scontinue,slfree,e;
+
+// ----------------------------------------------------------------------------    
+void dowhile()
+{
+    int sbreak,scontinue,slfree,e;
 	sbreak=blabel;
 	scontinue=clabel;
 	blabel=fwdlabel();
@@ -784,8 +964,11 @@ dowhile()
 	clabel=scontinue;
 	blabel=sbreak;
 }
-dodo()
-{int sbreak,scontinue,l,slfree;
+
+// ----------------------------------------------------------------------------    
+void dodo()
+{
+    int sbreak,scontinue,l,slfree;
 	sbreak=blabel;
 	scontinue=clabel;
 	blabel=fwdlabel();
@@ -805,8 +988,11 @@ dodo()
 	clabel=scontinue;
 	blabel=sbreak;
 }
-dofor()
-{int sbreak,scontinue,l,e,slfree;
+
+// ----------------------------------------------------------------------------    
+void dofor()
+{
+    int sbreak,scontinue,l,e,slfree;
 	sbreak=blabel;
 	scontinue=clabel;
 	blabel=fwdlabel();
@@ -845,8 +1031,11 @@ dofor()
 	clabel=scontinue;
 	blabel=sbreak;
 }
-doswitch()
-{int sbreak,scase,sdefault,slfree;
+
+// ----------------------------------------------------------------------------    
+void doswitch()
+{
+    int sbreak,scase,sdefault,slfree;
 	sbreak=blabel;
 	blabel=fwdlabel();
 	sdefault=dlabel;
@@ -867,13 +1056,19 @@ doswitch()
 	fwddef(blabel);
 	blabel=sbreak;
 }
-docomp()
-{	getsym();
+
+// ----------------------------------------------------------------------------    
+void docomp()
+{
+    getsym();
 	while(sym!=RC) statement();
 	getsym();
 }
-docase()
-{int c,n,l,slfree;
+
+// ----------------------------------------------------------------------------    
+void docase()
+{
+    int c,n,l,slfree;
 	c=0;
 	n=2;
 	slfree=lfree;
@@ -901,15 +1096,21 @@ docase()
 	jcond(cslabel=fwdlabel(),1);
 	fwddef(l);
 }
-dodefault()
-{	getsym();
+
+// ----------------------------------------------------------------------------    
+void dodefault()
+{	
+    getsym();
 	checksym(COLON);
 	if (dlabel) error(STERR);
 	if (!cslabel) jmp(cslabel = fwdlabel());
 	dlabel = backdef();
 }
-doreturn()
-{int slfree;
+
+// ----------------------------------------------------------------------------    
+void doreturn()
+{
+    int slfree;
 	if(getsym()==SM)
 	{	getsym();
 		return2();
@@ -931,8 +1132,11 @@ doreturn()
 		return;
 	}
 }
-return2()
-{	control=0;
+
+// ----------------------------------------------------------------------------    
+void return2()
+{	
+    control=0;
 	switch(lvar)
 	{case 0:
 		ret("");
@@ -953,16 +1157,24 @@ return2()
 		return;
 	}
 }
-ret(reg)
-char *reg;
-{	printf("\tPULS\t%sU,PC\n",reg);
+
+// ----------------------------------------------------------------------------    
+void ret(char *reg)
+{
+    printf("\tPULS\t%sU,PC\n",reg);
 }
-unlink2()
-{	printf("\tLEAS\t,U\n");
+
+// ----------------------------------------------------------------------------    
+void unlink2()
+{
+    printf("\tLEAS\t,U\n");
 	ret("");
 }
-dogoto()
-{NMTBL *nptr0;
+
+// ----------------------------------------------------------------------------    
+void dogoto()
+{
+    NMTBL *nptr0;
 	getsym();
 	nptr0=nptr;
 	checksym(IDENT);
@@ -974,8 +1186,11 @@ dogoto()
 	else error(STERR);
 	checksym(SM);
 }
-dolabel()
-{	if(nptr->sc == FLABEL) fwddef(nptr->dsp);
+
+// ----------------------------------------------------------------------------    
+void dolabel()
+{
+    if(nptr->sc == FLABEL) fwddef(nptr->dsp);
 	else if(nptr->sc != EMPTY) error(TYERR);
 	nptr->sc = BLABEL;
 	nptr->dsp = backdef();
@@ -983,17 +1198,25 @@ dolabel()
 	checksym(COLON);
 }
 
-expr()
-{	return(rvalue(expr0()));
+// ----------------------------------------------------------------------------    
+int expr()
+{
+    return(rvalue(expr0()));
 }
-expr0()
-{int e;
+
+// ----------------------------------------------------------------------------    
+int expr0()
+{
+    int e;
 	e=expr1();
 	while(sym==COMMA) {getsym();e=list3(COMMA,e,rvalue(expr1()));}
 	return e;
 }
-expr1()
-{int e1,e2,t,op;
+
+// ----------------------------------------------------------------------------    
+int expr1()
+{
+    int e1,e2,t,op;
 	e1=expr2();
 	switch (sym)
 	{case ASS:
@@ -1029,8 +1252,11 @@ expr1()
 		return(e1);
 	}
 }
-expr2()
-{int e1,e2,e3,t;
+
+// ----------------------------------------------------------------------------    
+int expr2()
+{
+    int e1,e2,e3,t;
 	e1=expr3();
 	if(sym==COND)
 	{	e1=rvalue(e1);
@@ -1047,8 +1273,11 @@ expr2()
 	}
 	return(e1);
 }
-expr3()
-{int e;
+
+// ----------------------------------------------------------------------------    
+int expr3()
+{
+    int e;
 	e=expr4();
 	while(sym==LOR)
 	{	e=rvalue(e);
@@ -1058,8 +1287,11 @@ expr3()
 	}
 	return(e);
 }
-expr4()
-{int e;
+
+// ----------------------------------------------------------------------------    
+int expr4()
+{
+    int e;
 	e=expr5();
 	while(sym==LAND)
 	{	e=rvalue(e);
@@ -1069,8 +1301,11 @@ expr4()
 	}
 	return(e);
 }
-expr5()
-{int e1,e2,t;
+
+// ----------------------------------------------------------------------------    
+int expr5()
+{
+    int e1,e2,t;
 	e1=expr6();
 	while(sym==BOR)
 	{	e1=rvalue(e1);
@@ -1081,8 +1316,11 @@ expr5()
 	}
 	return(e1);
 }
-expr6()
-{int e1,e2,t;
+
+// ----------------------------------------------------------------------------    
+int expr6()
+{
+    int e1,e2,t;
 	e1=expr7();
 	while(sym==EOR)
 	{	e1=rvalue(e1);
@@ -1093,8 +1331,11 @@ expr6()
 	}
 	return(e1);
 }
-expr7()
-{int e1,e2,t;
+
+// ----------------------------------------------------------------------------    
+int expr7()
+{
+    int e1,e2,t;
 	e1=expr8();
 	while(sym==BAND)
 	{	e1=rvalue(e1);
@@ -1105,8 +1346,11 @@ expr7()
 	}
 	return(e1);
 }
-expr8()
-{int e,op;
+
+// ----------------------------------------------------------------------------    
+int expr8()
+{
+    int e,op;
 	e=expr9();
 	while((op=sym)==EQ||op==NEQ)
 	{	e=rvalue(e);
@@ -1116,8 +1360,11 @@ expr8()
 	}
 	return e;
 }
-expr9()
-{int e1,e2,t,op;
+
+// ----------------------------------------------------------------------------    
+int expr9()
+{
+    int e1,e2,t,op;
 	e1=expr10();
 	while((op=sym)==GT||op==GE||op==LT||op==LE)
 	{	e1=rvalue(e1);
@@ -1130,8 +1377,11 @@ expr9()
 	}
 	return e1;
 }
-expr10()
-{int e1,e2,t,op;
+
+// ----------------------------------------------------------------------------    
+int expr10()
+{
+    int e1,e2,t,op;
 	e1=expr11();
 	while((op=sym)==RSHIFT||op==LSHIFT)
 	{	e1=rvalue(e1);
@@ -1142,8 +1392,11 @@ expr10()
 	}
 	return e1;
 }
-expr11()
-{int e1,e2,t,op;
+
+// ----------------------------------------------------------------------------    
+int expr11()
+{
+    int e1,e2,t,op;
 	e1=expr12();
 	while((op=sym)==ADD||op==SUB)
 	{	e1=rvalue(e1);
@@ -1154,8 +1407,11 @@ expr11()
 	}
 	return e1;
 }
-expr12()
-{int e1,e2,t,op;
+
+// ----------------------------------------------------------------------------    
+int expr12()
+{
+    int e1,e2,t,op;
 	e1=expr13();
 	while((op=sym)==MUL||op==DIV||op==MOD)
 	{	e1=rvalue(e1);
@@ -1166,8 +1422,11 @@ expr12()
 	}
 	return e1;
 }
-expr13()
-{int e,op;
+
+// ----------------------------------------------------------------------------    
+int expr13()
+{
+    int e,op;
 	switch (op = sym)
 	{case INC: case DEC:
 		getsym();
@@ -1254,8 +1513,11 @@ expr13()
 	}
 	return e;
 }
-expr14()
-{int e1,t;
+
+// ----------------------------------------------------------------------------    
+int expr14()
+{
+    int e1,t;
 	switch(sym)
 	{case IDENT:
 		switch(nptr->sc)
@@ -1310,9 +1572,31 @@ expr14()
 	}
 	return expr16(e1);
 }
-expr16(e1)
-int e1;
-{int e2,t;
+
+// ----------------------------------------------------------------------------    
+expr15(int e1)
+{
+    int t,args;
+	t=type;
+	if(integral(t)||car(t)!=FUNCTION)
+		error(TYERR);
+	t=cadr(t);
+	getsym();
+	args=0;
+	while(sym!=RPAR)
+	{	args=list2(rvalue(expr1()),args);
+		if(sym!=COMMA) break;
+		getsym();
+	}
+	checksym(RPAR);
+	if(t==CHAR) type= INT;else type=t;
+	return list3(FUNCTION,e1,args);
+}
+
+// ----------------------------------------------------------------------------    
+int expr16(int e1)
+{
+    int e2,t;
 	while(1)
 		if(sym==LBRA)
 		{	e1=rvalue(e1);
@@ -1330,9 +1614,11 @@ int e1;
 	if(car(e1)==FNAME) type=list2(POINTER,type);
 	return e1;
 }
-rvalue(e)
-int e;
-{	if(type==CHAR)
+
+// ----------------------------------------------------------------------------    
+int rvalue(int e)
+{
+    if(type==CHAR)
 	{	type= INT;
 		switch(car(e))
 		{case GVAR:
@@ -1361,13 +1647,16 @@ int e;
 	default:return(e);
 	}
 }
-lcheck(e)
-int e;
-{	if(!scalar(type)||car(e)!=GVAR&&car(e)!=LVAR&&car(e)!=INDIRECT)
+
+// ----------------------------------------------------------------------------    
+void lcheck(int e)
+{   
+    if(!scalar(type)||car(e)!=GVAR&&car(e)!=LVAR&&car(e)!=INDIRECT)
 		error(LVERR);
 }
-indop(e)
-int e;
+
+// ----------------------------------------------------------------------------    
+int indop(int e)
 {	if(type!=INT&&type!=UNSIGNED)
 		if(car(type)==POINTER) type=cadr(type);
 		else error(TYERR);
@@ -1375,8 +1664,11 @@ int e;
 	if(car(e)==ADDRESS) return(cadr(e));
 	return(list2(INDIRECT,e));
 }
-strop(e)
-{	getsym();
+
+// ----------------------------------------------------------------------------    
+int strop(e)
+{
+    getsym();
 	if (sym!=IDENT||nptr->sc!=FIELD) error(TYERR);
 	if (integral(type)||car(type)!=STRUCT && car(type)!=UNION)
 		e=rvalue(e);
@@ -1396,9 +1688,11 @@ strop(e)
 	getsym();
 	return e;
 }
-binop(op,e1,e2,t1,t2)
-int op,e1,e2,t1,t2;
-{int e;
+
+// ----------------------------------------------------------------------------    
+int binop(int op, int e1, int e2, int t1, int t2)
+{
+    int e;
 	if(car(e1)==CONST&&car(e2)==CONST)
 	{	e1=cadr(e1);
 		e2=cadr(e2);
@@ -1497,45 +1791,37 @@ int op,e1,e2,t1,t2;
 	if(op==BOR||op==EOR||op==BAND) return(list3(op,e1,e2));
 	return(list3(type==UNSIGNED?op+US:op,e1,e2));
 }
-expr15(e1)
-int e1;
-{int t,args;
-	t=type;
-	if(integral(t)||car(t)!=FUNCTION)
-		error(TYERR);
-	t=cadr(t);
-	getsym();
-	args=0;
-	while(sym!=RPAR)
-	{	args=list2(rvalue(expr1()),args);
-		if(sym!=COMMA) break;
-		getsym();
-	}
-	checksym(RPAR);
-	if(t==CHAR) type= INT;else type=t;
-	return list3(FUNCTION,e1,args);
-}
-typeid(s)
-int s;
+
+// ----------------------------------------------------------------------------    
+int typeid(int s)
 {	return (integral(s) || s==SHORT || s==LONG || s==STRUCT || s==UNION ||
 		(s==IDENT && nptr->sc==TYPE));
 }
-typename()
-{int t;
+
+// ----------------------------------------------------------------------------    
+int typename()
+{
+    int t;
 	type=t=typespec();
 	ndecl0();
 	reverse(t);
 	return type;
 }
-ndecl0()
-{	if(sym==MUL)
+
+// ----------------------------------------------------------------------------    
+int ndecl0()
+{
+    if(sym==MUL)
 	{	getsym();
 		return type=list2(POINTER,ndecl0());
 	}
 	return ndecl1();
 }
-ndecl1()
-{int i,t;
+
+// ----------------------------------------------------------------------------    
+int ndecl1()
+{
+    int i,t;
 	if(sym==LPAR)
 		if(getsym()==RPAR) {type=list2(FUNCTION,type); getsym();}
 		else
@@ -1558,10 +1844,10 @@ ndecl1()
 		else return type;
 }
 
-bexpr(e1,cond,l1)
-int e1,l1;
-char cond;
-{int e2,l2;
+// ----------------------------------------------------------------------------    
+void bexpr(int e1, char cond, int l1)
+{
+    int e2,l2;
 	if (chk) return;
 	e2=cadr(e1);
 	switch(car(e1))
@@ -1631,39 +1917,50 @@ char cond;
 		return;
 	}
 }
-rexpr(e1,l1,s)
-int e1,l1;
-char *s;
-{	gexpr(list3(SUB,cadr(e1),caddr(e1)));
+
+// ----------------------------------------------------------------------------    
+void rexpr(int e1, int l1, char *s)
+{
+    gexpr(list3(SUB,cadr(e1),caddr(e1)));
 	printf("\tLB%s\t_%d\n",s,l1);
 }
-jcond(l,cond)
-int l;
-char cond;
-{	printf("\tLB%s\t_%d\n",cond?"NE":"EQ",l);
+
+// ----------------------------------------------------------------------------    
+void jcond(int l, char cond)
+{
+    printf("\tLB%s\t_%d\n",cond?"NE":"EQ",l);
 }
-jmp(l)
-int l;
-{	control=0;
+
+// ----------------------------------------------------------------------------    
+void jmp(int l)
+{
+    control=0;
 	printf("\tLBRA\t_%d\n",l);
 }
-fwdlabel()
-{	return labelno++;
+
+// ----------------------------------------------------------------------------    
+int fwdlabel()
+{
+    return labelno++;
 }
-fwddef(l)
-int l;
+
+// ----------------------------------------------------------------------------    
+fwddef(int l)
 {	control=1;
 	printf("_%d\n",l);
 }
-backdef()
-{	control=1;
+
+// ----------------------------------------------------------------------------    
+int backdef()
+{	
+    control=1;
 	printf("_%d\n",labelno);
 	return labelno++;
 }
-
-gexpr(e1)
-int e1;
-{int e2,e3;
+// ----------------------------------------------------------------------------    
+void gexpr(int e1)
+{
+    int e2,e3;
 	if (chk) return;
 	e2 = cadr(e1);
 	switch (car(e1))
@@ -1845,10 +2142,12 @@ int e1;
 		lddim(1);
 	}
 }
-string(e1)
-int e1;
-{char *s;
-int i,l,lb;
+
+// ----------------------------------------------------------------------------    
+void string(int e1)
+{
+    char *s;
+    int i,l,lb;
 	s=(char *)cadr(e1);
 	lb=fwdlabel();
 	if ((l = caddr(e1)) < 128)
@@ -1863,10 +2162,12 @@ int i,l,lb;
 	while (l);
 	fwddef(lb);
 }
-function(e1)
-int e1;
-{int e2,e3,e4,e5,nargs;
-NMTBL *n;
+
+// ----------------------------------------------------------------------------    
+void function(int e1)
+{
+    int e2,e3,e4,e5,nargs;
+    NMTBL *n;
 	e2 = cadr(e1);
 	nargs = 0;
 	for (e3 = caddr(e1); e3; e3 = cadr(e3))
@@ -1895,9 +2196,11 @@ NMTBL *n;
 	}
 	if (nargs) printf("\tLEAS\t%d,S\n",2*nargs);
 }
-indirect(e1)
-int e1;
-{int e2,e3,e4;
+
+// ----------------------------------------------------------------------------    
+void indirect(int e1)
+{
+    int e2,e3,e4;
 	e3 = cadr(e2 = cadr(e1));
 	switch(car(e2))
 	{case RGVAR: case RLVAR:
@@ -1923,9 +2226,10 @@ int e1;
 	}
 }
 
-machinop(e1)
-int e1;
-{int e2,e3;
+// ----------------------------------------------------------------------------    
+void machinop(int e1)
+{
+    int e2,e3;
 	e2 = cadr(e1);
 	switch (car(e3 = caddr(e1)))
 	{case RGVAR: case RLVAR: case CONST:
@@ -1941,10 +2245,11 @@ int e1;
 	}
 }
 
-rindirect(e1)
-int e1;
-{char *op;
-int e2,e3,e4,byte,l;
+// ----------------------------------------------------------------------------    
+void rindirect(int e1)
+{
+    char *op;
+    int e2,e3,e4,byte,l;
 	op = ((byte = (car(e1) == CRINDIRECT)) ? "LDB" : "LDD");
 	e3 = cadr(e2 = cadr(e1));
 	switch (car(e2))
@@ -2012,10 +2317,12 @@ int e2,e3,e4,byte,l;
 	indexx(op,0);
 	sextend(byte);
 }
-assign(e1)
-int e1;
-{char *op;
-int e2,e3,e4,e5,l;
+
+// ----------------------------------------------------------------------------    
+void assign(int e1)
+{
+    char *op;
+    int e2,e3,e4,e5,l;
 	op = (car(e1) == CASS ? "STB" : "STD");
 	e3 = cadr(e2 = cadr(e1));
 	e4 = caddr(e1);
@@ -2078,10 +2385,12 @@ int e2,e3,e4,e5,l;
 	indexx(op,0);
 	return;
 }
-assop(e1)
-int e1;
-{int e2,e3,byte,op;
-char *ldop,*stop;
+
+// ----------------------------------------------------------------------------    
+void assop(int e1)
+{
+    int e2,e3,byte,op;
+    char *ldop,*stop;
 	ldop = ((byte = (car(e1) == CASSOP)) ? "LDB" : "LDD");
 	stop = (byte ? "STB" : "STD");
 	e2 = cadr(e1);
@@ -2130,14 +2439,17 @@ char *ldop,*stop;
 		}
 	}
 }
-simpop(op)
-int op;
+
+// ----------------------------------------------------------------------------    
+int simpop(int op)
 {	return (op == ADD || op == SUB ||
 		op == BAND || op == EOR || op == BOR);
 }
-oprt(op,e1)
-int op,e1;
-{int e2;
+
+// ----------------------------------------------------------------------------    
+void oprt(int op, int e1)
+{
+    int e2;
 	e2 = cadr(e1);
 	switch (car(e1))
 	{case RGVAR:
@@ -2151,10 +2463,11 @@ int op,e1;
 		return;
 	}
 }
-oprt1(op,index,n)
-int op,n;
-char *index;
-{	switch (op)
+
+// ----------------------------------------------------------------------------    
+void oprt1(int op, char *index, int n)
+{	
+    switch (op)
 	{case ADD:
 		printf("\tADDD\t%d,%s\n",n,index);
 		return;
@@ -2166,20 +2479,21 @@ char *index;
 		return;
 	}
 }
-dualop(op,index,n)
-int op;
-char *index;
-int n;
-{char *ops;
+
+// ----------------------------------------------------------------------------    
+void dualop(int op, char *index, int n)
+{
+    char *ops;
 	ops =  ((op == BAND) ? "AND" :
 		(op == EOR)  ? "EOR" :
 		(op == BOR)  ? "OR"  : (char *)DEBUG);
 	printf("\t%sA\t%d,%s\n\t%sB\t%d+1,%s\n",ops,n,index,ops,n,index);
 }
 
-oprtc(op,n)
-int op,n;
-{	switch (op)
+// ----------------------------------------------------------------------------    
+void oprtc(int op, int n)
+{
+    switch (op)
 	{case ADD:
 		adddim(n);
 		return;
@@ -2191,18 +2505,21 @@ int op,n;
 		return;
 	}
 }
-dualc(op,n)
-int op;
-int n;
-{char *ops;
+
+// ----------------------------------------------------------------------------    
+void dualc(int op, int n)
+{
+    char *ops;
 	ops =  ((op == BAND) ? "AND" :
 		(op == EOR)  ? "EOR" :
 		(op == BOR)  ? "OR"  : (char *)DEBUG);
 	printf("\t%sA\t#%d\n\t%sB\t#%d\n",ops,(n >> 8) & 0xff,ops,n & 0xff);
 }
-tosop(op)
-int op;
-{	switch (op)
+
+// ----------------------------------------------------------------------------    
+void tosop(int op)
+{	
+    switch (op)
 	{case ADD:
 		addds();
 		return;
@@ -2217,67 +2534,105 @@ int op;
 		library(op);
 	}
 }
-dualtosop(op)
-int op;
-{char *ops;
+
+// ----------------------------------------------------------------------------    
+void dualtosop(int op)
+{
+    char *ops;
 	ops =  ((op == BAND) ? "AND" :
 		(op == EOR)  ? "EOR" :
 		(op == BOR)  ? "OR"  : (char *)DEBUG);
 	printf("\t%sA\t,S+\n\t%sB\t,S+\n",ops,ops);
 }
-pushd()
-{	printf("\tPSHS\tD\n");
-}
-pushx()
-{	printf("\tPSHS\tX\n");
-}
-pulld()
-{	printf("\tPULS\tD\n");
-}
-pulx()
-{	printf("\tPULS\tX\n");
-}
-tfrdx()
-{	printf("\tTFR\tD,X\n");
-}
-tfrxd()
-{	printf("\tTFR\tX,D\n");
-}
-/*
-exgdx()
-{	printf("\tEXG\tD,X\n");
-}
-*/
-asld()
-{	printf("\tASLB\n\tROLA\n");
-}
-adddim(n)
-{	printf("\tADDD\t#%d\n",n);
-}
-subdim(n)
-{	printf("\tSUBD\t#%d\n",n);
-}
-cmpdimm(n)
-int n;
-{	printf("\tCMPD\t#%d\n",n);
-}
-addds()
-{	printf("\tADDD\t,S++\n");
-}
-subds()
-{	printf("\tSUBD\t,S++\n");
-}
-clrd()
-{	printf("\tCLRA\n\tCLRB\n");
-}
-lddim(n)
-int n;
-{	printf("\tLDD\t#%d\n",n);
+
+// ----------------------------------------------------------------------------    
+void pushd()
+{
+    printf("\tPSHS\tD\n");
 }
 
-ldd(e)
-int e;
-{	switch (car(e))
+// ----------------------------------------------------------------------------    
+void pushx()
+{
+    printf("\tPSHS\tX\n");
+}
+
+// ----------------------------------------------------------------------------    
+void pulld()
+{
+    printf("\tPULS\tD\n");
+}
+
+// ----------------------------------------------------------------------------    
+void pulx()
+{
+    printf("\tPULS\tX\n");
+}
+
+// ----------------------------------------------------------------------------    
+void tfrdx()
+{
+    printf("\tTFR\tD,X\n");
+}
+
+// ----------------------------------------------------------------------------    
+void tfrxd()
+{
+    printf("\tTFR\tX,D\n");
+}
+
+// ----------------------------------------------------------------------------    
+void asld()
+{	
+    printf("\tASLB\n\tROLA\n");
+}
+
+// ----------------------------------------------------------------------------    
+void adddim(n)
+{	
+    printf("\tADDD\t#%d\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void subdim(n)
+{	
+    printf("\tSUBD\t#%d\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void cmpdimm(int n)
+{	
+    printf("\tCMPD\t#%d\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void addds()
+{
+    printf("\tADDD\t,S++\n");
+}
+
+// ----------------------------------------------------------------------------    
+void subds()
+{
+    printf("\tSUBD\t,S++\n");
+}
+
+// ----------------------------------------------------------------------------    
+void clrd()
+{	
+    printf("\tCLRA\n\tCLRB\n");
+}
+
+// ----------------------------------------------------------------------------    
+void lddim(int n)
+{
+    printf("\tLDD\t#%d\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void ldd(int e)
+{
+    switch (car(e))
 	{case GVAR:
 		lddy(cadr(e));
 		return;
@@ -2289,21 +2644,28 @@ int e;
 	}
 }
 
-lddx()
-{	printf("\tLDD\t,X\n");
-}
-lddy(n)
-int n;
-{	printf("\tLDD\t%d,Y\n",n);
-}
-lddu(n)
-int n;
-{	printf("\tLDD\t%d,U\n",n);
+// ----------------------------------------------------------------------------    
+void lddx()
+{	
+    printf("\tLDD\t,X\n");
 }
 
-std(e)
-int e;
-{	switch (car(e))
+// ----------------------------------------------------------------------------    
+void lddy(int n)
+{
+    printf("\tLDD\t%d,Y\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void lddu(int n)
+{	
+    printf("\tLDD\t%d,U\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void std(int e)
+{
+    switch (car(e))
 	{case GVAR:
 		stdy(cadr(e));
 		return;
@@ -2314,60 +2676,77 @@ int e;
 		DEBUG;
 	}
 }
-stdx()
-{	printf("\tSTD\t,X\n");
-}
-stdy(n)
-int n;
-{	printf("\tSTD\t%d,Y\n",n);
-}
-stdu(n)
-int n;
-{	printf("\tSTD\t%d,U\n",n);
+
+// ----------------------------------------------------------------------------    
+void stdx()
+{
+    printf("\tSTD\t,X\n");
 }
 
-ldbx()
-{	printf("\tLDB\t,X\n");
-}
-/*
-stbx()
-{	printf("\tSTB\t,X\n");
-}
-*/
-ldby(n)
-int n;
-{	printf("\tLDB\t%d,Y\n",n);
-}
-ldbu(n)
-int n;
-{	printf("\tLDB\t%d,U\n",n);
-}
-predecx(op,l)
-char *op;
-int l;
-{	printf("\t%s\t,%sX\n",op,(l == -1 ? "-" : "--"));
-}
-postincx(op,l)
-char *op;
-int l;
-{	printf("\t%s\t,X%s\n",op,(l == 1 ? "+" : "++"));
-}
-leaxy(n)
-int n;
-{	printf("\tLEAX\t%d,Y\n",n);
-}
-leaxu(n)
-int n;
-{	printf("\tLEAX\t%d,U\n",n);
-}
-leaxpcr(n)
-NMTBL *n;
-{	printf("\tLEAX\t%s,PCR\n",n->nm);
+// ----------------------------------------------------------------------------    
+void stdy(int n)
+{
+    printf("\tSTD\t%d,Y\n",n);
 }
 
-ldx(e)
-int e;
-{	switch (car(e))
+// ----------------------------------------------------------------------------    
+void stdu(int n)
+{
+    printf("\tSTD\t%d,U\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void ldbx()
+{
+    printf("\tLDB\t,X\n");
+}
+
+// ----------------------------------------------------------------------------    
+void ldby(int n)
+{
+    printf("\tLDB\t%d,Y\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void ldbu(int n)
+{
+    printf("\tLDB\t%d,U\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void predecx(char *op, int l)
+{
+    printf("\t%s\t,%sX\n",op,(l == -1 ? "-" : "--"));
+}
+
+// ----------------------------------------------------------------------------    
+void postincx(char *op, int l)
+{
+    printf("\t%s\t,X%s\n",op,(l == 1 ? "+" : "++"));
+}
+
+// ----------------------------------------------------------------------------    
+void leaxy(int n)
+{
+    printf("\tLEAX\t%d,Y\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void leaxu(int n)
+{	
+    printf("\tLEAX\t%d,U\n",n);
+}
+
+// ----------------------------------------------------------------------------    
+void leaxpcr(NMTBL *n)
+{
+    printf("\tLEAX\t%s,PCR\n",n->nm);
+}
+
+// ----------------------------------------------------------------------------    
+void ldx(int e)
+{	
+    switch (car(e))
 	{case GVAR: case RGVAR:
 		ldxy(cadr(e));
 		return;
@@ -2379,23 +2758,22 @@ int e;
 	}
 }
 
-ldxy(n)
-int n;
-{	printf("\tLDX\t%d,Y\n",n);
+// ----------------------------------------------------------------------------    
+void ldxy(int n)
+{
+    printf("\tLDX\t%d,Y\n",n);
 }
-ldxu(n)
-int n;
-{	printf("\tLDX\t%d,U\n",n);
+
+// ----------------------------------------------------------------------------    
+void ldxu(int n)
+{
+    printf("\tLDX\t%d,U\n",n);
 }
-/*
-ldxi(n)
-int n;
-{	printf("\tLDX\t#%d\n",n);
-}
-*/
-stx(e)
-int e;
-{	switch (car(e))
+
+// ----------------------------------------------------------------------------    
+void stx(int e)
+{
+    switch (car(e))
 	{case GVAR:
 		stxy(cadr(e));
 		return;
@@ -2407,38 +2785,52 @@ int e;
 	}
 }
 
-stxy(n)
-int n;
-{	printf("\tSTX\t%d,Y\n",n);
-}
-stxu(n)
-int n;
-{	printf("\tSTX\t%d,U\n",n);
+// ----------------------------------------------------------------------------    
+void stxy(int n)
+{	
+    printf("\tSTX\t%d,Y\n",n);
 }
 
-sex()
-{	printf("\tSEX\n");
-}
-incx()
-{	printf("\tINC\t,X\n");
-}
-decx()
-{	printf("\tDEC\t,X\n");
-}
-opdx(op)
-char *op;
-{	printf("\t%s\tD,X\n",op);
-}
-indexx(op,n)
-char *op;
-int n;
-{	printf("\t%s\t%d,X\n",op,n);
+// ----------------------------------------------------------------------------    
+void stxu(int n)
+{	
+    printf("\tSTX\t%d,U\n",n);
 }
 
-index_(op,e)
-char *op;
-int e;
-{	switch (car(e))
+// ----------------------------------------------------------------------------    
+void sex()
+{	
+    printf("\tSEX\n");
+}
+
+// ----------------------------------------------------------------------------    
+void incx()
+{	
+    printf("\tINC\t,X\n");
+}
+
+// ----------------------------------------------------------------------------    
+void decx()
+{	
+    printf("\tDEC\t,X\n");
+}
+
+// ----------------------------------------------------------------------------    
+void opdx(char *op)
+{
+    printf("\t%s\tD,X\n",op);
+}
+
+// ----------------------------------------------------------------------------    
+void indexx(char *op, int n)
+{
+    printf("\t%s\t%d,X\n",op,n);
+}
+
+// ----------------------------------------------------------------------------    
+void index_(char *op, int e)
+{
+    switch (car(e))
 	{case GVAR:
 		indexy(op,cadr(e));
 		return;
@@ -2450,22 +2842,22 @@ int e;
 	}
 }
 
-indexy(op,n)
-char *op;
-int n;
-{	printf("\t%s\t%d,Y\n",op,n);
-}
-indexu(op,n)
-char *op;
-int n;
-{	printf("\t%s\t%d,U\n",op,n);
+// ----------------------------------------------------------------------------    
+void indexy(char *op, int n)
+{
+    printf("\t%s\t%d,Y\n",op,n);
 }
 
+// ----------------------------------------------------------------------------    
+void indexu(char *op, int n)
+{
+    printf("\t%s\t%d,U\n",op,n);
+}
 
-indir(op,e)
-char *op;
-int e;
-{	switch (car(e))
+// ----------------------------------------------------------------------------    
+void indir(char *op, int e)
+{
+    switch (car(e))
 	{case RGVAR:
 		indiry(op,cadr(e));
 		return;
@@ -2477,31 +2869,38 @@ int e;
 	}
 }
 
-indiry(op,n)
-char *op;
-int n;
-{	printf("\t%s\t[%d,Y]\n",op,n);
+// ----------------------------------------------------------------------------    
+void indiry(char *op, int n)
+{
+    printf("\t%s\t[%d,Y]\n",op,n);
 }
-indiru(op,n)
-char *op;
-int n;
-{	printf("\t%s\t[%d,U]\n",op,n);
+
+// ----------------------------------------------------------------------------    
+void indiru(char *op, int n)
+{
+    printf("\t%s\t[%d,U]\n",op,n);
 }
-sextend(byte)
-int byte;
-{	if (byte) sex();
+
+// ----------------------------------------------------------------------------    
+void sextend(int byte)
+{
+    if (byte) sex();
 }
-binexpr(e1)
-int e1;
-{	gexpr(caddr(e1));
+
+// ----------------------------------------------------------------------------    
+void binexpr(int e1)
+{	
+    gexpr(caddr(e1));
 	pushd();
 	gexpr(cadr(e1));
 	pulx();
 	library(car(e1));
 }
-library(op)
-int op;
-{	printf("\tLBSR\t_0000%d\n",
+
+// ----------------------------------------------------------------------------    
+void library(int op)
+{
+    printf("\tLBSR\t_0000%d\n",
 	       ((op == MUL || op == UMUL) ? 1 :
 		(op == DIV)	? 2 :
 		(op == UDIV)	? 3 :
@@ -2512,16 +2911,20 @@ int op;
 		(op == RSHIFT)	? 8 :
 		(op == URSHIFT) ? 9 : DEBUG));
 }
-cexpr(e)
-int e;
-{	if (car(e) != CONST) error(CNERR);
+
+// ----------------------------------------------------------------------------    
+int cexpr(e)
+{
+    if (car(e) != CONST) error(CNERR);
 	return (cadr(e));
 }
 
-getsym()
-{NMTBL *nptr0,*nptr1;
-int i;
-char c;
+// ----------------------------------------------------------------------------    
+int getsym()
+{
+    NMTBL *nptr0,*nptr1;
+    int i;
+    char c;
 	if (alpha(skipspc()))
 	{	i = hash = 0;
 		while (alpha(ch) || digit(ch))
@@ -2646,21 +3049,29 @@ char c;
 		return getsym();
 	}
 }
-postequ(s1,s2)
-int s1,s2;
-{	if(ch=='=') {getch();return sym=s2;}
+
+// ----------------------------------------------------------------------------    
+int postequ(int s1, int s2)
+{
+    if(ch=='=') {getch();return sym=s2;}
 	return sym=s1;
 }
-alpha(c)
-char c;
-{	return('a'<=c&&c<='z'||'A'<=c&&c<='Z'||c=='_');
+// ----------------------------------------------------------------------------    
+int alpha(char c)
+{
+    return('a'<=c&&c<='z'||'A'<=c&&c<='Z'||c=='_');
 }
-digit(c)
-char c;
-{	return('0'<=c&&c<='9');
+
+// ----------------------------------------------------------------------------    
+int digit(char c)
+{
+    return('0'<=c&&c<='9');
 }
+
+// ----------------------------------------------------------------------------    
 NMTBL *gsearch()
-{NMTBL *nptr,*iptr;
+{
+    NMTBL *nptr,*iptr;
 	iptr=nptr= &ntable[hash % GSYMS];
 	while(nptr->sc!=EMPTY && neqname(nptr->nm))
 	{	if (++nptr== &ntable[GSYMS]) nptr=ntable;
@@ -2669,8 +3080,11 @@ NMTBL *gsearch()
 	if (nptr->sc == EMPTY) copy(nptr->nm);
 	return nptr;
 }
+
+// ----------------------------------------------------------------------------    
 NMTBL *lsearch()
-{NMTBL *nptr,*iptr;
+{
+    NMTBL *nptr,*iptr;
 	iptr=nptr= &ntable[hash%LSYMS+GSYMS];
 	while(nptr->sc!=EMPTY && neqname(nptr->nm))
 	{	if (++nptr== &ntable[LSYMS+GSYMS]) nptr= &ntable[GSYMS];
@@ -2679,21 +3093,28 @@ NMTBL *lsearch()
 	if (nptr->sc == EMPTY) copy(nptr->nm);
 	return nptr;
 }
-neqname(p)
-char *p;
-{char *q;
+
+// ----------------------------------------------------------------------------    
+int neqname(char *p)
+{
+    char *q;
 	q=name;
 	while(*p) if(*p++ != *q++) return 1;
 	return *q!=0;
 }
-copy(p)
-char *p;
-{char *q;
+
+// ----------------------------------------------------------------------------    
+void copy(char *p)
+{
+    char *q;
 	q=name;
 	while(*p++= *q++);
 }
-getstring()
-{	getch();
+
+// ----------------------------------------------------------------------------    
+void getstring()
+{	
+    getch();
 	symval = 0;
 	sptr = cheapp;
 	while (ch != '"')
@@ -2705,18 +3126,27 @@ getstring()
 	*cheapp++ = '\0';
 	symval++;
 }
-skipspc()
-{	while(ch=='\t'||ch=='\n'||ch==' '||ch=='\r') getch();
+
+// ----------------------------------------------------------------------------    
+int skipspc()
+{	
+    while(ch=='\t'||ch=='\n'||ch==' '||ch=='\r') getch();
 	return ch;
 }
-getch()
-{	if(*chptr) return ch= *chptr++;
+
+// ----------------------------------------------------------------------------    
+int getch()
+{	
+    if(*chptr) return ch= *chptr++;
 	if(mflag) {mflag=0;chptr=chptrsave;return ch=chsave;}
 	getline();
 	return getch();
 }
+
+// ----------------------------------------------------------------------------    
 char escape()
-{char c;
+{
+    char c;
 	if ((c=ch) == '\\')
 	{	if (digit(c=getch()))
 		{	c = ch-'0';
@@ -2748,9 +3178,12 @@ char escape()
 	getch();
 	return c;
 }
+
+// ----------------------------------------------------------------------------    
 FILE *getfname()
-{int i;
-char name[LBUFSIZE];
+{
+    int i;
+    char name[LBUFSIZE];
 	getch();
 	if(skipspc()!='"') error(INCERR);
 	for(i=0;(getch()!='"' && ch!='\n');)
@@ -2759,9 +3192,12 @@ char name[LBUFSIZE];
 	name[i]=0;
 	return ( (filep+1)->fcb = fopen(name,"r") );
 }
-getline()
-{int i;
-int c;
+
+// ----------------------------------------------------------------------------    
+void getline()
+{
+    int i;
+    int c;
 	lineno++;
 	glineno++;
 	chptr=linebuf;
@@ -2826,50 +3262,63 @@ int c;
 	}
 }
 
-macroeq(s)
-char *s;
-{char *p;
+// ----------------------------------------------------------------------------    
+int macroeq(char *s)
+{
+    char *p;
 	for (p = chptr; *s;) if (*s++ != *p++) return 0;
 	chptr = p;
 	return 1;
 }
 
-car(e)
-int e;
-{	return heap[e];
+// ----------------------------------------------------------------------------    
+int car(int e)
+{
+    return heap[e];
 }
-cadr(e)
-int e;
-{	return heap[e+1];
+
+// ----------------------------------------------------------------------------    
+int cadr(int e)
+{
+    return heap[e+1];
 }
-caddr(e)
-int e;
-{	return heap[e+2];
+
+// ----------------------------------------------------------------------------    
+int caddr(int e)
+{
+    return heap[e+2];
 }
-cadddr(e)
-int e;
+
+// ----------------------------------------------------------------------------    
+int cadddr(int e)
 {	return heap[e+3];
 }
-list2(e1,e2)
-int e1,e2;
-{int e;
+
+// ----------------------------------------------------------------------------    
+int list2(int e1, int e2)
+{
+    int e;
 	e=getfree(2);
 	heap[e]=e1;
 	heap[e+1]=e2;
 	return e;
 }
-list3(e1,e2,e3)
-int e1,e2,e3;
-{int e;
+
+// ----------------------------------------------------------------------------    
+int list3(int e1, int e2, int e3)
+{
+    int e;
 	e=getfree(3);
 	heap[e]=e1;
 	heap[e+1]=e2;
 	heap[e+2]=e3;
 	return e;
 }
-list4(e1,e2,e3,e4)
-int e1,e2,e3,e4;
-{int e;
+
+// ----------------------------------------------------------------------------    
+int list4(int e1, int e2, int e3, int e4)
+{
+    int e;
 	e=getfree(4);
 	heap[e]=e1;
 	heap[e+1]=e2;
@@ -2877,9 +3326,11 @@ int e1,e2,e3,e4;
 	heap[e+3]=e4;
 	return e;
 }
-getfree(n)
-int n;
-{int e;
+
+// ----------------------------------------------------------------------------    
+int getfree(int n)
+{
+    int e;
 	switch (mode)
 	{case GDECL: case GSDECL: case GUDECL: case GTDECL:
 		e=gfree;
@@ -2892,8 +3343,10 @@ int n;
 	if(lfree<gfree) error(HPERR);
 	return e;
 }
-rplacad(e,n)
-int e,n;
-{	heap[e+1]=n;
+
+// ----------------------------------------------------------------------------    
+int rplacad(int e, int n)
+{
+    heap[e+1]=n;
 	return e;
 }

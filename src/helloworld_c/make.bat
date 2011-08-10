@@ -1,2 +1,5 @@
-..\..\tools\mc09\mc09.exe -ohello.asm hello.c
-..\..\tools\as09\as09.exe hello.asm
+..\..\tools\Release\mc09.exe hello.c
+type ..\common\c.asm > hello.asm
+type c.out >> hello.asm
+..\..\tools\Release\as09.exe hello.asm > listing.txt
+

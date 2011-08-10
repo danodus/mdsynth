@@ -198,8 +198,8 @@ NET "VGA_VSYNC"     LOC = "B11"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FA
 #
 NET "J18_IO<1>"     LOC = "AA21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
 NET "J18_IO<2>"     LOC = "AB21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
-NET "J18_IO<3>"     LOC = "AA19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
-NET "J18_IO<4>"     LOC = "AB19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<3>"     LOC = "AA19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<4>"     LOC = "AB19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
 #
 #NET "J19_IO<1>"     LOC = "Y18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
 #NET "J19_IO<2>"     LOC = "W18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
@@ -278,10 +278,10 @@ NET "BTN_SOUTH"     LOC = "T15"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
 ## Mechanical Switches (SW)
 ###############################################################################
 #
-NET "SW<0>"         LOC = "V8"   | IOSTANDARD = LVCMOS33 ;
-NET "SW<1>"         LOC = "U10"  | IOSTANDARD = LVCMOS33 ;
-NET "SW<2>"         LOC = "U8"   | IOSTANDARD = LVCMOS33 ;
-NET "SW<3>"         LOC = "T9"   | IOSTANDARD = LVCMOS33 ;
+#NET "SW<0>"         LOC = "V8"   | IOSTANDARD = LVCMOS33 ;
+#NET "SW<1>"         LOC = "U10"  | IOSTANDARD = LVCMOS33 ;
+#NET "SW<2>"         LOC = "U8"   | IOSTANDARD = LVCMOS33 ;
+#NET "SW<3>"         LOC = "T9"   | IOSTANDARD = LVCMOS33 ;
 #
 ###############################################################################
 ## Serial Ports (RS232)

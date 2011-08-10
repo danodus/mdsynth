@@ -42,15 +42,11 @@
 		</File>
 		<File Path="$PPRDIR/src/sound/dac.vhd">
 		</File>
-		<File Path="$PPRDIR/src/sound/div_by_12.vhd">
-		</File>
 		<File Path="$PPRDIR/src/sound/sinewave.vhd">
 		</File>
 		<File Path="$PPRDIR/src/sound/sound.vhd">
 		</File>
 		<File Path="$PPRDIR/src/sound/nco.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/pitch_to_freq.vhd">
 		</File>
 		<Config>
 			<Option Name="DesignMode" Val="RTL"/>

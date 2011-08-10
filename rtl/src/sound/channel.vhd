@@ -1,4 +1,4 @@
--- MD-Synthesizer
+-- MDSynth
 --
 -- Author: Daniel Cliche (dcliche@meldora.com)
 -- Copyright (c) 2011, Meldora Inc. All rights reserved.
@@ -33,8 +33,10 @@ entity channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
            waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
-           pitch_message:    in unsigned(6 downto 0);            -- 60 = C4
-           pitch_carrier:    in unsigned(6 downto 0);            -- 60 = C4
+           phase_delta_message:   in unsigned(11 downto 0);
+           octave_message:        in unsigned(3 downto 0);
+           phase_delta_carrier:   in unsigned(11 downto 0);
+           octave_carrier:        in unsigned(3 downto 0);
            output:   out std_logic);
 end channel;
 
@@ -53,12 +55,6 @@ component sinewave is
 			  data_out: 	out integer range -128 to 127);
 end component;
 
-component pitch_to_freq is
-    port ( pitch:         in unsigned(6 downto 0);      -- 60 = C4
-           phase_delta:   out unsigned(11 downto 0);
-           octave:        out unsigned(3 downto 0));
-end component;
-
 component nco is
     port ( clk:     in std_logic;
            phase_delta:  in unsigned(11 downto 0);
@@ -70,12 +66,6 @@ signal counter : unsigned(15 downto 0) := (others => '0');
 
 signal dac_in : std_logic_vector(7 downto 0);
 
-signal phase_delta_carrier : unsigned(11 downto 0);
-signal phase_delta_message : unsigned(11 downto 0);
-
-signal octave_carrier : unsigned(3 downto 0);
-signal octave_message : unsigned(3 downto 0);
-
 signal phase_carrier : unsigned(7 downto 0);
 signal phase_message : unsigned(7 downto 0);
 signal phase_modulated  : unsigned(7 downto 0);
@@ -84,9 +74,6 @@ signal sine_message : integer range -128 to 127 := 0;
 signal sine_modulated : integer range -128 to 127 := 0;
 
 begin
-
-    pitch_to_freq_message0 : pitch_to_freq port map (pitch => pitch_message, phase_delta => phase_delta_message, octave => octave_message);
-    pitch_to_freq_carrier0 : pitch_to_freq port map (pitch => pitch_carrier, phase_delta => phase_delta_carrier, octave => octave_carrier);
 
     nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta_carrier, octave => octave_carrier, phase => phase_carrier);
     nco_message0 : nco port map (clk => clk, phase_delta => phase_delta_message, octave => octave_message, phase => phase_message);

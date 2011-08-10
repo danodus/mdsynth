@@ -2,10 +2,10 @@
 <DARoots Version="1" Minor="12">
 	<FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
 		<Filter Type="Constrs"/>
-		<File Path="$PPRDIR/../../src/s3astarter.ucf">
+		<File Path="$PPRDIR/src/s3astarter.ucf">
 		</File>
 		<Config>
-			<Option Name="TargetConstrsFile" Val="$PPRDIR/../../src/s3astarter.ucf"/>
+			<Option Name="TargetConstrsFile" Val="$PPRDIR/src/s3astarter.ucf"/>
 			<Option Name="TargetPart" Val="xc3s700afg484-4"/>
 		</Config>
 	</FileSet>

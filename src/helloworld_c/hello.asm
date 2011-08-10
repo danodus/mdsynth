@@ -1,9 +1,7 @@
-
-
 *
-* micro-C driver under FLEX
+*    Adaptation of the micro-C driver under FLEX
 *
-*	12-Dec-81	M.Ohta,H.Tezuka
+*	   12-Dec-81  M.Ohta,H.Tezuka
 *
 
 	ORG	$100
@@ -198,7 +196,6 @@ STACK	EQU	*
 	JSR	_INITIALIZE
 	JSR	main
 	BRA	*
-	
 curx	EQU	0
 cury	EQU	1
 printc
@@ -266,6 +263,26 @@ _2
 	LDD	#57394
 	TFR	D,X
 	LDB	0,Y
+	SEX
+	STB	0,X
+	PULS	U,PC
+moveto
+	PSHS	U
+	LEAU	,S
+	LDB	5,U
+	SEX
+	STB	0,Y
+	LDB	7,U
+	SEX
+	STB	1,Y
+	LDD	#57394
+	TFR	D,X
+	LDB	0,Y
+	SEX
+	STB	0,X
+	LDD	#57395
+	TFR	D,X
+	LDB	1,Y
 	SEX
 	STB	0,X
 	PULS	U,PC

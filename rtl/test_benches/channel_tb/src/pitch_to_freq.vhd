@@ -1,4 +1,4 @@
--- MD-Synthesizer
+-- MDSynth
 --
 -- Author: Daniel Cliche (dcliche@meldora.com)
 -- Copyright (c) 2011, Meldora Inc. All rights reserved.

@@ -173,7 +173,8 @@ entity mdsynth is
 	 
 	 -- Audio
 	 AUD_L        : out std_logic;
-	 AUD_R        : out std_logic
+	 AUD_R        : out std_logic;
+     J18_IO       : out std_logic_vector(1 downto 0)	 
 	 );
 end mdsynth;
 
@@ -256,6 +257,9 @@ architecture my_computer of mdsynth is
   signal cpu_data_in    : std_logic_vector(7 downto 0);
   signal cpu_data_out   : std_logic_vector(7 downto 0);
 
+  signal audio_left     : std_logic;
+  signal audio_right    : std_logic;
+  
 -----------------------------------------------------------------
 --
 --                     Clock generator
@@ -520,7 +524,7 @@ component sound is
 	clk_50     : in  std_logic;
     rst        : in  std_logic;
     cs         : in  std_logic;
-    addr       : in  std_logic_vector(1 downto 0);
+    addr       : in  std_logic_vector(2 downto 0);
     rw         : in  std_logic;
     data_in    : in  std_logic_vector(7 downto 0);
 	data_out   : out std_logic_vector(7 downto 0);
@@ -759,11 +763,11 @@ my_sound_left : sound port map (
     clk_50    => sys_clk,
     rst     => cpu_rst,
     cs      => soundl_cs,
-    addr    => cpu_addr(1 downto 0),
+    addr    => cpu_addr(2 downto 0),
     rw        => cpu_rw,
     data_in    => cpu_data_out,
     data_out   => soundl_data_out,
-    audio_out    => aud_l 
+    audio_out    => audio_left 
 );
 
 my_sound_right : sound port map (
@@ -771,11 +775,11 @@ my_sound_right : sound port map (
     clk_50    => sys_clk,
     rst     => cpu_rst,
     cs      => soundr_cs,
-    addr    => cpu_addr(1 downto 0),
+    addr    => cpu_addr(2 downto 0),
     rw        => cpu_rw,
     data_in    => cpu_data_out,
     data_out   => soundr_data_out,
-    audio_out    => aud_r 
+    audio_out    => audio_right 
 );
 
 ----------------------------------------------------------------------
@@ -928,6 +932,13 @@ begin
 
 end process;
 
+process(audio_left, audio_right)
+begin
+    aud_l <= audio_left;
+    aud_r <= audio_right;
+   	j18_io(0) <= audio_left;
+	j18_io(1) <= audio_right;
+end process;
 
 end my_computer; --===================== End of architecture =======================--
 

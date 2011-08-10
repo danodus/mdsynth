@@ -1,8 +1,7 @@
-
 *
-* micro-C driver under FLEX
+*    Adaptation of the micro-C driver under FLEX
 *
-*	12-Dec-81	M.Ohta,H.Tezuka
+*	   12-Dec-81  M.Ohta,H.Tezuka
 *
 
 	ORG	$100
@@ -197,4 +196,3 @@ STACK	EQU	*
 	JSR	_INITIALIZE
 	JSR	main
 	BRA	*
-	

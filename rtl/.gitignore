@@ -1,3 +1,5 @@
 *.runs
 *.log
 *.jou
+*.jou_backup
+*.log_backup
