@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2001, Meldora Inc.
+    Copyright (c) 2011, Meldora Inc.
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
@@ -26,6 +26,7 @@
 char curx;
 char cury;
 
+#define ACIA	0xE000
 #define KBD		0xE020
 #define VDU		0xE030
 
@@ -83,6 +84,7 @@ void clearscr()
 printh4(d4)
 unsigned d4;
 {
+	d4 &= 0xF;
 	if (d4 > 9) {
 		printc(d4 - 10 + 'A');
 	} else {
@@ -94,16 +96,44 @@ unsigned d4;
 void printh8(d8)
 unsigned d8;
 {
+	d8 &= 0xFF;
 	printh4(d8 >> 4);
-	printh4(d8 & 0xF);
+	printh4(d8);
 }
 
-/* Get a character */
-char getch()
+/* Print 16-bit hex */
+void printh16(d16)
+unsigned d16;
 {
-	/* Wait until the keyboard is ready */
-	while (!(*(KBD) & 0x1));
+	printh8(d16 >> 8);
+	printh8(d16);
+}
+
+/* Get a character from the PS/2 keyboard */
+unsigned getch()
+{
+	unsigned c;
+	
+	/* Check if the keyboard is ready */
+	if (!(*(KBD) & 0x1))
+		return 0;
 	
 	/* Return the key value */
-	return *(KBD + 1);
+	c = *(KBD + 1);
+	return c & 0xFF;
 }
+
+/* Get a character from the serial port */
+unsigned sgetch()
+{
+	unsigned c;
+	
+	/* Check if the ACIA is ready */
+	if (!(*(ACIA) & 0x1))
+		return 0;
+	
+	/* Return the character value */
+	c = *(ACIA + 1);
+	return c & 0xFF;
+}
+

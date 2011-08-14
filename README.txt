@@ -11,7 +11,7 @@ Languages: VHDL, 6809 assembly, C
 1. Overview
 ============================================================
 
-In its current state, the sound chip is a simple wave generator using a sigma-delta DAC and a numerically-controlled oscillator It integrates a 6809-based system with keyboard support and video display output. The conversion to MIDI pitch is currently done by the sound chip itself, but will eventually be done by the 6809-based system for flexibility.
+In its current state, the sound chip is a simple wave generator using a sigma-delta DAC and a numerically-controlled oscillator. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
 Four types of waveform are available:
 	- Square
 	- Sawtooth
@@ -29,18 +29,23 @@ http://members.optushome.com.au/jekent/system09/
 2.1 6809 Toolset
 ================
 
-A public domain C compiler has been added to the tools. All the source files are provided, including the toolset which include the following:
+All the source files of the toolset are provided. The following is provided:
+
 - A 6809 assembler (tools/as09);
 - A C compiler (tools/mc09);
 - S19 to VHDL (tools/s19tovhd) for producing the ROM file.
 
-The toolset executables are included for Windows under the Release directory. A Visual Studio 2008 Express solution is also included.
+The toolset executables are included for Windows under the Release directory. A Microsoft Visual C++ 2008 Express solution is also included.
 
 The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-1 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
 The chain is the following:
 	"C" -- [ C compiler ] --> "ASM" -- [ 6809 assembler ] --> "S19" -- [ Serial upload with SYS09BUG ROM ] --> FPGA Block RAM Memory
 
+The C compiler based on the public domain Micro-C is tiny (around 3K lines of code in a single file) and is quite impressive for its size (something I tend to appreciate when working with a 8-bit CPU!). I like the idea of having a small compiler easily adaptable for other processors. Obviously, no optimization is done and everything is done in a single pass, so there is no separation between data and code. It also only implement a subset of the C language. 
+
+If you plan to use this tiny C compiler, please read the README file located the project for known limitations and issues I encountered.
+	
 2.2. Sound Chip Addresses
 =========================
 	
@@ -72,7 +77,8 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 11. Type "1000" (this is the starting address of the synthesizer project);
 12. Type "g". You will see the user interface on the monitor of your synthesizer system;
 13. Follow the on-screen instructions in order to play and change parameters;
-14. Press the South button to go back to the SYS09BUG prompt.
+14. Optional: Quit your serial terminal and start MidiSerial in order to play with your MIDI keyboard (see 2.3);
+14. Press the South button in order to go back to the SYS09BUG prompt.
 
 2.2. Auxiliary Output
 =====================
@@ -82,6 +88,11 @@ There are two audio outputs:
 	- Auxiliary audio ouput on J18, pins AA21 and AB21 being left and right channels respectively.
 	
 You will need a RC filter at the output in order to see the waveform with an oscilloscope. Refer to the Xilinx application note 154 for more details about the DAC.
+
+2.3. MIDI Input from Serial Port
+================================
+
+The synthesizer is able to receive the MIDI note on/note off events from the serial port at 57600-N-8-1. A tool named MidiSerial allowing such serial interface is available here: http://blipbox.org/blog/projects/midiserial/.
 
 ============================================================
 3. Test benches
@@ -157,3 +168,8 @@ The frequency given to NCO is the following:
 
 The formula is the following: y(t) = sin(m(t) + 2*pi*freq_carrier*t)
 where m(t) = sin(2*pi*freq_message*t)
+
+4.3 Monophonic Pitch Stack
+==========================
+
+The synthesizer has currently only a single voice, but we need to keep track of all notes being held in order to always play the latest held note, if any. In order to achieve this, a stack is used, the tip of the stack being the currently played pitch. When a note is release, the corresponding entry is removed from the stack. The first element of the stack is has a pitch of zero (quiet).

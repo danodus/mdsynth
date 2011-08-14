@@ -24,6 +24,8 @@
 #define SNDL	0xE080
 #define SNDR	0xE090
 
+#define PSTACK_SIZE	16
+
 char *sndl;
 char *sndr;
 
@@ -92,11 +94,15 @@ int main(argc, argv)
 int argc;
 char **argv;
 {
-	char c;
+	char pstack[PSTACK_SIZE];
+	int psti;
+	
+	unsigned c;
 	char note;
 	char octave;
 	char pitch;
-	int quiet;
+	int i;
+	int newpitch;
 
 	sndl = SNDL;
 	sndr = SNDR;
@@ -126,11 +132,11 @@ char **argv;
 	prints("Copyright (c) 2011, Meldora Inc.");
 	
 	moveto(10, 3);
-	prints(" W E R   Y U");
+	prints(" W E   T Y U");
 	moveto(10, 4);
 	prints("A S D F G H J");
 	moveto(10, 5);
-	prints("Z, X: Octave +/-   1, 2, 3, 4: Square/Tri/Sine/PhMod");
+	prints("Z, X: Octave +/-   1, 2, 3, 4: Square/Saw/Sine/PhMod");
 	moveto(10, 6);
 	prints("C, V: PhMod Carrier PhD +/-     Any other key: Quiet");
 
@@ -138,138 +144,193 @@ char **argv;
 	prints("Octave:");
 	moveto(0, 10);
 	prints("CarrPhD:");
-	moveto(0, 11);
-	prints("Pitch:");
 	
+	pstack[0] = 0;
+	psti = 0;
+	
+	note = -1;
 	octave = 5;
 	while (1) {
-		c = getch();
-		switch (c) {
-			case 'a':
-			case 'A':
-			note = 0;			
-			break;
-
-			case 'w':
-			case 'W':
-			note = 1;
-			break;
-
-			case 's':
-			case 'S':
-			note = 2;
-			break;
-
-			case 'E':
-			case 'e':
-			note = 3;
-			break;
-
-			case 'd':
-			case 'D':
-			note = 4;
-			break;
-
-			case 'r':
-			case 'R':
-			note = 5;
-			break;
+	
+		/* First, we check if we have an incoming MIDI note from the serial port */
+		c = sgetch();
+		if (c) {
+			if (c == 0x90) {
+				while (!(c = sgetch()));
+				if (psti < PSTACK_SIZE - 1) {
+					psti++;
+					pitch = c;
+					pstack[psti] = pitch;
+				}
+				while (!(c = sgetch()));
+			} else if (c == 0x80) {
+				while (!(c = sgetch()));
+				for (i = 1; i < psti; i++)
+					if (pstack[i] == c) {
+						for (; i < psti; i++)
+							pstack[i] = pstack[i + 1];
+						break;
+					}
+				if (psti > 0)
+					psti--;
+				pitch = pstack[psti];
+				while (!(c = sgetch()));
+			}
 			
-			case 'f':
-			case 'F':
-			note = 6;
-			break;
-			
-			case 'g':
-			case 'G':
-			note = 7;
-			break;
-			
-			case 'y':
-			case 'Y':
-			note = 8;
-			break;
-			
-			case 'h':
-			case 'H':
-			note = 9;
-			break;
-			
-			case 'u':
-			case 'U':
-			note = 10;
-			break;
-			
-			case 'j':
-			case 'J':
-			note = 11;
-			break;
-			
-			case 'z':
-			case 'Z':
-			if (octave > 0)
-				octave--;
-			break;
-			
-			case 'x':
-			case 'X':
-			if (octave < 9)
-				octave++;
-			break;
-			
-			case '1':
-			waveform = 1;
-			break;
-			
-			case '2':
-			waveform = 2;
-			break;
-			
-			case '3':
-			waveform = 3;
-			break;
-			
-			case '4':
-			waveform = 4;
-			break;
-
-			case 'c':
-			carrphd-=8;
-			break;
-
-			case 'C':
-			carrphd-=128;
-			break;
-			
-			case 'v':
-			carrphd+=8;
-			break;
-			
-			case 'V':
-			carrphd+=128;
-			break;
-
-			default:
-			note = -1;
-		}
-		
-		moveto(10, 9);
-		printh8(octave);
-		moveto(10, 10);
-		printh8(carrphd >> 8);
-		printh8(carrphd & 0xff);
-
-		if (note >= 0) {
-			pitch = 12 * octave + note;
-			moveto(10, 11);
-			printh8(pitch);
+			/* We print the pitch stack */
+			moveto(0, 13);
+			for (i = 0; i < PSTACK_SIZE; i++) {
+				if (i <= psti) {
+					printh8(pstack[i]);
+				} else {
+					prints("  ");
+				}
+			}
+				
 			play(pitch);
-		} else {
-			moveto(10, 11);
-			prints("--");
-			play(0);
 		}
-	}
+	
+		/* We check if we have an incoming key */
+		c = getch();
+		if (c) {
+			newpitch = 1;
+			switch (c) {
+				case 'a':
+				case 'A':
+				note = 0;
+				break;
+
+				case 'w':
+				case 'W':
+				note = 1;
+				break;
+
+				case 's':
+				case 'S':
+				note = 2;
+				break;
+
+				case 'E':
+				case 'e':
+				note = 3;
+				break;
+
+				case 'd':
+				case 'D':
+				note = 4;
+				break;
+
+				case 'f':
+				case 'F':
+				note = 5;
+				break;
+				
+				case 't':
+				case 'T':
+				note = 6;
+				break;
+				
+				case 'g':
+				case 'G':
+				note = 7;
+				break;
+				
+				case 'y':
+				case 'Y':
+				note = 8;
+				break;
+				
+				case 'h':
+				case 'H':
+				note = 9;
+				break;
+				
+				case 'u':
+				case 'U':
+				note = 10;
+				break;
+				
+				case 'j':
+				case 'J':
+				note = 11;
+				break;
+				
+				case 'z':
+				case 'Z':
+				if (octave > 0)
+					octave--;
+				break;
+				
+				case 'x':
+				case 'X':
+				if (octave < 9)
+					octave++;
+				break;
+				
+				case '1':
+				waveform = 1;
+				newpitch = 0;
+				break;
+				
+				case '2':
+				waveform = 2;
+				newpitch = 0;
+				break;
+				
+				case '3':
+				waveform = 3;
+				newpitch = 0;
+				break;
+				
+				case '4':
+				waveform = 4;
+				newpitch = 0;
+				break;
+
+				case 'c':
+				carrphd-=8;
+				newpitch = 0;
+				break;
+
+				case 'C':
+				carrphd-=128;
+				newpitch = 0;
+				break;
+				
+				case 'v':
+				carrphd+=8;
+				newpitch = 0;
+				break;
+				
+				case 'V':
+				carrphd+=128;
+				newpitch = 0;
+				break;
+
+				default:
+				note = -1; /* quiet */
+			} /* switch */
+			
+			if (newpitch) {
+				if (note >= 0) {
+					pitch = 12 * octave + note;
+				} else {
+					pitch = 0;
+				}
+			}
+			
+			moveto(10, 9);
+			printh8(octave);
+			moveto(10, 10);
+			printh8(carrphd >> 8);
+			printh8(carrphd & 0xff);
+
+			play(pitch);
+			
+		} /* if a key is available */
+
+	} /* while 1 */
+	
 
 	return 0;
 }

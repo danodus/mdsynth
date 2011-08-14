@@ -9,3 +9,16 @@ Major limitations compared to standard C compilers are:
 
 Non standard features:
 	1) #asm and #endasm construction (dangerous, use only after ';' or '}')
+
+
+Some random notes:
+
+- I saw parsing issues with argument named x
+	void moveto(x, y)
+	char x;
+	char y;
+	{...}
+- No support for 'unsigned char' (this is unfortunate)
+- Issue MSB of v not cleared with:
+	unsigned v;
+	v = (*VDU);
