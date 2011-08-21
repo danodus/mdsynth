@@ -33,6 +33,8 @@ entity channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
            waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
+           gain_message:          in unsigned(5 downto 0);
+           gain_modulated:        in unsigned(5 downto 0);
            phase_delta_message:   in unsigned(11 downto 0);
            octave_message:        in unsigned(3 downto 0);
            phase_delta_carrier:   in unsigned(11 downto 0);
@@ -51,6 +53,7 @@ end component;
 
 component sinewave is
 	port (    clk:          in std_logic;
+              gain:         in unsigned(5 downto 0);
 	          phase:		in  unsigned(7 downto 0);
 			  data_out: 	out integer range -128 to 127);
 end component;
@@ -78,8 +81,8 @@ begin
     nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta_carrier, octave => octave_carrier, phase => phase_carrier);
     nco_message0 : nco port map (clk => clk, phase_delta => phase_delta_message, octave => octave_message, phase => phase_message);
 
-    sinewave_message0 : sinewave port map (clk => clk, phase => phase_message, data_out => sine_message);
-    sinewave_modulated0 : sinewave port map (clk => clk, phase => phase_modulated, data_out => sine_modulated);
+    sinewave_message0 : sinewave port map (clk => clk, gain => gain_message, phase => phase_message, data_out => sine_message);
+    sinewave_modulated0 : sinewave port map (clk => clk, gain => gain_modulated, phase => phase_modulated, data_out => sine_modulated);
 
     dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
 

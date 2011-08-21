@@ -25,11 +25,13 @@
 -- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 -- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
--- Base + 0: Waveform (0x00: None, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: FM)
+-- Base + 0: Waveform (0x00: None, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
 -- Base + 1: Message Pitch Hi (see below)
 -- Base + 2: Message Pitch Low (see below)
 -- Base + 3: Carrier Pitch Hi (see below)
 -- Base + 4: Carrier Pitch Low (see below)
+-- Base + 5: Message Gain (6-bit, phase modulation only)
+-- Base + 6: Modulated Gain (6-bit, phase modulation only)
 --
 -- The pitch is a 16-bit value with the following format: 
 --     bits 15 downto 12: octave    (A4 is octave 5)
@@ -62,6 +64,8 @@ component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
            waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
+           gain_message:          in unsigned(5 downto 0);
+           gain_modulated:        in unsigned(5 downto 0);
            phase_delta_message:   in unsigned(11 downto 0);
            octave_message:        in unsigned(3 downto 0);
            phase_delta_carrier:   in unsigned(11 downto 0);
@@ -79,9 +83,12 @@ signal octave_message: unsigned(3 downto 0);
 signal phase_delta_carrier: unsigned(11 downto 0);
 signal octave_carrier: unsigned(3 downto 0);
 
+signal gain_message: unsigned(5 downto 0) := to_unsigned(63, 6);
+signal gain_modulated: unsigned(5 downto 0) := to_unsigned(63, 6);
+
 begin
 
-    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, phase_delta_message => phase_delta_message, octave_message => octave_message, phase_delta_carrier => phase_delta_carrier, octave_carrier => octave_carrier, output => audio_out);
+    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta_message => phase_delta_message, octave_message => octave_message, phase_delta_carrier => phase_delta_carrier, octave_carrier => octave_carrier, output => audio_out);
 
     process(clk)
     begin
@@ -97,6 +104,8 @@ begin
                     when "010" => pitch_message(7 downto 0) <= unsigned(data_in);
                     when "011" => pitch_carrier(15 downto 8) <= unsigned(data_in);
                     when "100" => pitch_carrier(7 downto 0) <= unsigned(data_in);
+                    when "101" => gain_message(5 downto 0) <= unsigned(data_in(5 downto 0));
+                    when "110" => gain_modulated(5 downto 0) <= unsigned(data_in(5 downto 0));
                     when others => waveform <= (others=>'0');
                 end case;
             end if;

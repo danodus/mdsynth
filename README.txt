@@ -1,5 +1,5 @@
 MDSynth
-FPGA-based synthesizer system for the Xilinx Spartan-3A Starter Kit
+FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
 Author: Daniel Cliche (dcliche@meldora.com)
 Copyright (c) 2011, Meldora Inc. All rights reserved.
@@ -11,13 +11,15 @@ Languages: VHDL, 6809 assembly, C
 1. Overview
 ============================================================
 
-In its current state, the sound chip is a simple wave generator using a sigma-delta DAC and a numerically-controlled oscillator. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
+The sound chip is a sigma-delta DAC and a numerically-controlled oscillator. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
 Four types of waveform are available:
-	- Square
-	- Sawtooth
-	- Sine
-	- Phase modulation (similar to frequency modulation but easier to implement)
+	- Square (fixed gain)
+	- Sawtooth (fixed gain)
+	- Sine (fixed gain)
+	- Phase modulation (variable gain, similar to frequency modulation but easier to implement)
 
+In phase modulation, the gains for both oscillators are applied without multiplications with the help of logarithmic and exponential tables. The technique is described below.
+	
 ============================================================
 2. Complete synthesizer as a 6809-based system
 ============================================================
@@ -58,6 +60,8 @@ Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 2: Message Phase Delta LSB (8-bit)
 Base + 3: Carrier Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 4: Carrier Phase Delta LSB (8-bit)
+Base + 5: Message Gain (6-bit, 63=1.0, phase modulation only)
+Base + 6: Modulated Gain (6-bit, 63=1.0, phase modulation only)
 
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
 
@@ -70,7 +74,7 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 4. Connect speakers to the synthesizer;
 5. Connect a serial cable to the synthesizer;
 6. Start a serial terminal at 57600-N-8-1;
-7. Program the FPGA using the PlanAhead project "rtl/mdsynth.ppr";
+7. Program the FPGA using the PlanAhead project "rtl/mdsynth.ppr" (Spartan-3A) "rtl/mdsynth-s3estarter" (Spartan-3E);
 8. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
 9. Upload the text file "src/synth/synth.s19" using your serial terminal (Note: Forget the two "WHAT?" messages after the upload);
 10. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
@@ -80,12 +84,20 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 14. Optional: Quit your serial terminal and start MidiSerial in order to play with your MIDI keyboard (see 2.3);
 14. Press the South button in order to go back to the SYS09BUG prompt.
 
-2.2. Auxiliary Output
-=====================
+2.2. Audio Outputs
+==================
+
+2.2.1. Spartan-3A
+=================
 
 There are two audio outputs:
-	- Standard audio output of the board;
+	- Standard audio output connector of the board;
 	- Auxiliary audio ouput on J18, pins AA21 and AB21 being left and right channels respectively.
+
+2.2.2. Spartan-3E
+=================
+	- Main audio output on J1, pins B4 and A4 being left and right audio channels respectively;
+	- Auxiliary audio output on J2, pins A6 and B6 being left and right audio channels respectively.
 	
 You will need a RC filter at the output in order to see the waveform with an oscilloscope. Refer to the Xilinx application note 154 for more details about the DAC.
 
@@ -108,11 +120,7 @@ Description
 
 The pitch requested from the channel is increasing over time from 0 to 127.
 
-There are two audio outputs:
-	- Standard audio output of the board;
-	- Auxiliary audio ouput on J18, pins AA21 and AB21 being left and right channels respectively.
-	
-You will need a RC filter at the output in order to see the waveform with an oscilloscope. Refer to the Xilinx application note 154 for more details about the DAC.
+See section 2.2 for details about the audio outputs.
 
 This test has a single voice with a single channel per voice. Each channel has a pitch control and a waveform selection. The same channel is connected to both the left and right audio outputs.
 
@@ -166,10 +174,56 @@ The frequency given to NCO is the following:
 4.2 Phase Modulation
 ====================
 
-The formula is the following: y(t) = sin(m(t) + 2*pi*freq_carrier*t)
-where m(t) = sin(2*pi*freq_message*t)
+The formula is the following: y(t) = modulated_gain * sin(m(t) + 2*pi*freq_carrier*t)
+where m(t) = message_gain * sin(2*pi*freq_message*t)
 
 4.3 Monophonic Pitch Stack
 ==========================
 
 The synthesizer has currently only a single voice, but we need to keep track of all notes being held in order to always play the latest held note, if any. In order to achieve this, a stack is used, the tip of the stack being the currently played pitch. When a note is release, the corresponding entry is removed from the stack. The first element of the stack is has a pitch of zero (quiet).
+
+4.4 Gain Calculation without Multiplications
+============================================
+
+It is possible to use only additions for the gain calculation using this method:
+
+We know that:
+	log(e^a * e^b) = log(e^(a+b)) = a + b
+If gain = e^a and sine = e^b, we have:
+	log(gain * sine) = log(gain) + log(sine)
+	gain*sine = e^(log(gain) + log(sine))
+
+We want the gain*sine result using lookup tables as shown here:
+	result(gain, phi) = exptable(loggain(gain) + logsine(phi));
+	
+The following will produce the tables for a 8-bit quarter cycle (copy and paste in GNU Octave):
+	f1 = 64;
+	logsine_size = 64;
+	loggain_size = 64;
+	exptable_size = (f1/32)*(256 + 256);
+	wave_max = 127;
+
+	logsine = abs(round(f1 * log(sin(linspace(0, pi/2, logsine_size))))); logsine(1) = 256 * (f1/32) - 1;
+	loggain = abs(round(f1 * log(linspace(0, 1, loggain_size)))); loggain(1) = 256 * (f1/32) - 1;
+	exptable = round(wave_max * exp(linspace(0, exptable_size - 1, exptable_size)/ -f1));
+
+# In order to compare the 8-bit result (blue) with a full-resolution sine (red):
+	
+	gain = 1.0
+	hold off
+	plot(exptable(logsine + loggain(loggain_size * gain) + 1), "b");
+	hold on
+	plot(gain * wave_max * sin(linspace(0, pi/2, logsine_size)), "r");
+	hold off
+
+# output to CSV files
+
+	csvwrite("logsine.csv", logsine);
+	csvwrite("loggain.csv", loggain);
+	csvwrite("exptable.csv", exptable);
+
+============================================================
+5. Known Issues
+============================================================
+
+- On the Spartan-3A Starter Kit with 3-bit for RGB components, the video brightness is lower than on the Spartan-3E because I drive only the MSB bit.

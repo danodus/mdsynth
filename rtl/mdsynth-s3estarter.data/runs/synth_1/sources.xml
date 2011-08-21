@@ -2,17 +2,17 @@
 <DARoots Version="1" Minor="12">
 	<FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
 		<Filter Type="Srcs"/>
-		<File Path="$PPRDIR/src/acia6850.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/sound.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/sinewave.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/nco.vhd">
+		<File Path="$PPRDIR/src/sound/channel.vhd">
 		</File>
 		<File Path="$PPRDIR/src/sound/dac.vhd">
 		</File>
-		<File Path="$PPRDIR/src/sound/channel.vhd">
+		<File Path="$PPRDIR/src/sound/nco.vhd">
+		</File>
+		<File Path="$PPRDIR/src/sound/sinewave.vhd">
+		</File>
+		<File Path="$PPRDIR/src/sound/sound.vhd">
+		</File>
+		<File Path="$PPRDIR/src/acia6850.vhd">
 		</File>
 		<File Path="$PPRDIR/src/ACIA_Clock.vhd">
 		</File>

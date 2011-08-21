@@ -4,6 +4,16 @@
 		<Filter Type="Srcs"/>
 		<File Path="$PPRDIR/src/acia6850.vhd">
 		</File>
+		<File Path="$PPRDIR/src/sound/sound.vhd">
+		</File>
+		<File Path="$PPRDIR/src/sound/sinewave.vhd">
+		</File>
+		<File Path="$PPRDIR/src/sound/nco.vhd">
+		</File>
+		<File Path="$PPRDIR/src/sound/dac.vhd">
+		</File>
+		<File Path="$PPRDIR/src/sound/channel.vhd">
+		</File>
 		<File Path="$PPRDIR/src/ACIA_Clock.vhd">
 		</File>
 		<File Path="$PPRDIR/src/bit_funcs.vhd">
@@ -37,16 +47,6 @@
 		<File Path="$PPRDIR/src/trap.vhd">
 		</File>
 		<File Path="$PPRDIR/src/vdu8.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/channel.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/dac.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/sinewave.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/sound.vhd">
-		</File>
-		<File Path="$PPRDIR/src/sound/nco.vhd">
 		</File>
 		<Config>
 			<Option Name="DesignMode" Val="RTL"/>

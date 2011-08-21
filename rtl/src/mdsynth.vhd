@@ -174,7 +174,8 @@ entity mdsynth is
 	 -- Audio
 	 AUD_L        : out std_logic;
 	 AUD_R        : out std_logic;
-     J18_IO       : out std_logic_vector(1 downto 0)	 
+	 AUX_AUD_L    : out std_logic;
+	 AUX_AUD_R    : out std_logic
 	 );
 end mdsynth;
 
@@ -936,8 +937,8 @@ process(audio_left, audio_right)
 begin
     aud_l <= audio_left;
     aud_r <= audio_right;
-   	j18_io(0) <= audio_left;
-	j18_io(1) <= audio_right;
+   	aux_aud_l <= audio_left;
+	aux_aud_r <= audio_right;
 end process;
 
 end my_computer; --===================== End of architecture =======================--

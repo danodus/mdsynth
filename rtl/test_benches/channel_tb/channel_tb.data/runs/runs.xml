@@ -1,37 +1,6 @@
 <?xml version="1.0"?>
 <Runs Version="1" Minor="6">
-	<Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current" Dir="$PRUNDIR/synth_1" LaunchTime="1312918729">
-		<File Type="PA-XST" Name="channel_tb.xst"/>
-		<File Type="RUN-SRCS" Name="$PDATADIR/runs/synth_1/sources.xml"/>
-		<File Type="XST-NGC" Name="channel_tb.ngc"/>
-		<File Type="PA-XSTPRJ" Name="channel_tb.prj"/>
-		<File Type="RUN-CONSTRS" Name="$PDATADIR/runs/synth_1/constrs_in.xml"/>
-		<File Type="XST-SRP" Name="channel_tb.srp"/>
-	</Run>
-	<Run Id="impl_1" Type="Ft2:EntireDesign" SynthRun="synth_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current" Dir="$PRUNDIR/impl_1" LaunchTime="1312918781">
-		<File Type="PA-EDIF" Name="channel_tb.edf"/>
-		<File Type="PAR-PAD" Name="channel_tb_routed_pad.txt"/>
-		<File Type="PA-UCF" Name="channel_tb.ucf"/>
-		<File Type="PAR-PAR" Name="channel_tb_routed.par"/>
-		<File Type="PAR-UNR" Name="channel_tb_routed.unroutes"/>
-		<File Type="BG-BIT" Name="channel_tb.bit"/>
-		<File Type="BG-DRC" Name="channel_tb.drc"/>
-		<File Type="BG-BGN" Name="channel_tb.bgn"/>
-		<File Type="TRCE-TWR" Name="channel_tb.twr"/>
-		<File Type="PA-CONSTRSDIR" Name=".constrs"/>
-		<File Type="TRCE-TWX" Name="channel_tb.twx"/>
-		<File Type="XDL-XDL" Name="channel_tb_routed.xdl"/>
-		<File Type="WBT-USG" Name="usage_statistics_webtalk.html"/>
-		<File Type="WBT-LOG" Name="webtalk.log"/>
-		<File Type="RUN-CONSTRS" Name="$PDATADIR/runs/impl_1/constrs_in.xml"/>
-		<File Type="NGDB-NGD" Name="channel_tb.ngd"/>
-		<File Type="NGDB-BLD" Name="channel_tb.bld"/>
-		<File Type="MAP-NCD" Name="channel_tb.ncd"/>
-		<File Type="MAP-PCF" Name="channel_tb.pcf"/>
-		<File Type="MAP-MRP" Name="channel_tb.mrp"/>
-		<File Type="MAP-MAP" Name="channel_tb.map"/>
-		<File Type="MAP-PSR" Name="channel_tb.psr"/>
-		<File Type="PAR-NCD" Name="channel_tb_routed.ncd"/>
-	</Run>
+	<Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current"/>
+	<Run Id="impl_1" Type="Ft2:EntireDesign" SynthRun="synth_1" Part="xc3s700afg484-4" ConstrsSet="constrs_1" State="current"/>
 </Runs>
 

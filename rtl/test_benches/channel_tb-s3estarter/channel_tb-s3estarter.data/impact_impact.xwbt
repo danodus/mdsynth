@@ -1,0 +1,8 @@
+INTSTYLE=impact
+INFILE=E:\Xilinx\mdsynth\rtl\test_benches\channel_tb-s3estarter\channel_tb-s3estarter.data\impact.xsl
+OUTFILE=E:\Xilinx\mdsynth\rtl\test_benches\channel_tb-s3estarter\channel_tb-s3estarter.data\impact.xsl
+FAMILY=Multiple
+PART=Multiple
+WORKINGDIR=E:\Xilinx\mdsynth\rtl\test_benches\channel_tb-s3estarter\channel_tb-s3estarter.data
+LICENSE=iMPACT
+USER_INFO=iMPACT

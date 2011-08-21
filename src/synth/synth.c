@@ -31,6 +31,8 @@ char *sndr;
 
 unsigned waveform;
 unsigned carrphd;	/* carrier phase delta */
+unsigned gainmsg;	/* message gain */
+unsigned gainmod;	/* modulated gain */
 
 /* Phase deltas */
 unsigned phds[12];
@@ -75,12 +77,20 @@ unsigned pitch;
 		sndl[2] = phd;
 		sndl[3] = carrphd >> 8;
 		sndl[4] = carrphd;
+		
+		sndl[5] = gainmsg;
+		sndl[6] = gainmod;
+		
 		sndl[0] = waveform;
 		
 		sndr[1] = phd >> 8;
 		sndr[2] = phd;
 		sndr[3] = carrphd >> 8;
 		sndr[4] = carrphd;
+		
+		sndr[5] = gainmsg;
+		sndr[6] = gainmod;
+		
 		sndr[0] = waveform;
 	} else {
 		/* Turn off the oscillators */
@@ -123,6 +133,9 @@ char **argv;
 	carrphd = 1024;
 	waveform = 1;
 	
+	gainmsg = 63;
+	gainmod = 63;
+	
 	clearscr();
 
 	moveto(0, 0);
@@ -136,14 +149,33 @@ char **argv;
 	moveto(10, 4);
 	prints("A S D F G H J");
 	moveto(10, 5);
-	prints("Z, X: Octave +/-   1, 2, 3, 4: Square/Saw/Sine/PhMod");
+	prints("Z, X: Octave +/-");
 	moveto(10, 6);
-	prints("C, V: PhMod Carrier PhD +/-     Any other key: Quiet");
-
-	moveto(0, 9);
+	prints("C, V: PhMod Carrier PhD +/- (PhMod only)");
+	moveto(10, 7);
+	prints("B, N: Signal Gain +/- (PhMod only)");
+	moveto(10, 8);
+	prints("M, ',': Modulation Gain +/- (PhMod only)");
+	moveto(10, 9);
+	prints("1, 2, 3, 4: Square/Saw/Sine/PhMod");
+	moveto(10, 10);
+	prints("Spacebar: Quiet");
+	
+	moveto(0, 12);
 	prints("Octave:");
-	moveto(0, 10);
-	prints("CarrPhD:");
+	moveto(0, 13);
+	prints("CarrPhD:");	
+	moveto(0, 14);
+	prints("Message Gain:");
+	moveto(0, 15);
+	prints("Modulated Gain:");
+
+	moveto(0, 17);
+	prints("Phase Modulation:");
+	moveto(10, 18);
+	prints("y(t) = modulated_gain * sin(m(t) + 2*pi*freq_carrier*t)");
+	moveto(10, 19);
+	prints("where m(t) = message_gain * sin(2*pi*freq_message*t)");
 	
 	pstack[0] = 0;
 	psti = 0;
@@ -306,9 +338,33 @@ char **argv;
 				carrphd+=128;
 				newpitch = 0;
 				break;
-
-				default:
-				note = -1; /* quiet */
+				
+				case 'b':
+				case 'B':
+				if (gainmsg > 0)
+					gainmsg--;
+				break;
+				
+				case 'n':
+				case 'N':
+				if (gainmsg < 63)
+					gainmsg++;
+				break;
+				
+				case 'm':
+				case 'M':
+				if (gainmod > 0)
+					gainmod--;
+				break;
+				
+				case ',':
+				case '<':
+				if (gainmod < 63)
+					gainmod++;
+				break;
+				
+				case ' ':
+					note = -1; /* quiet */
 			} /* switch */
 			
 			if (newpitch) {
@@ -319,11 +375,15 @@ char **argv;
 				}
 			}
 			
-			moveto(10, 9);
+			moveto(16, 12);
 			printh8(octave);
-			moveto(10, 10);
+			moveto(16, 13);
 			printh8(carrphd >> 8);
 			printh8(carrphd & 0xff);
+			moveto(16, 14);
+			printh8(gainmsg);			
+			moveto(16, 15);
+			printh8(gainmod);
 
 			play(pitch);
 			
