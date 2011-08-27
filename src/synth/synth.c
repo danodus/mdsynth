@@ -30,6 +30,8 @@ char *sndl;
 char *sndr;
 
 unsigned waveform;
+char octave;
+
 unsigned carrphd;	/* carrier phase delta */
 unsigned gainmsg;	/* message gain */
 unsigned gainmod;	/* modulated gain */
@@ -99,6 +101,19 @@ unsigned pitch;
 	}
 }
 
+void prtstatus()
+{
+	moveto(16, 12);
+	printh8(octave);
+	moveto(16, 13);
+	printh8(carrphd >> 8);
+	printh8(carrphd & 0xff);
+	moveto(16, 14);
+	printh8(gainmsg);			
+	moveto(16, 15);
+	printh8(gainmod);
+}
+
 /* Main */
 int main(argc, argv)
 int argc;
@@ -109,7 +124,6 @@ char **argv;
 	
 	unsigned c;
 	char note;
-	char octave;
 	char pitch;
 	int i;
 	int newpitch;
@@ -207,10 +221,26 @@ char **argv;
 					psti--;
 				pitch = pstack[psti];
 				while (!(c = sgetch()));
+			} else if (c == 0xB0) {
+				while (!(c = sgetch()));
+				if (c == 0x17) {
+					while (!(c = sgetch()));
+					waveform = c >> 4;
+				} else if (c == 0x18) {
+					while (!(c = sgetch()));
+					carrphd = c << 6;
+				} else if (c == 0x19) {
+					while (!(c = sgetch()));
+					gainmsg = c >> 1;
+				} else if (c == 0x1A) {
+					while (!(c = sgetch()));
+					gainmod = c >> 1;
+				}				
+				
 			}
 			
 			/* We print the pitch stack */
-			moveto(0, 13);
+			moveto(0, 23);
 			for (i = 0; i < PSTACK_SIZE; i++) {
 				if (i <= psti) {
 					printh8(pstack[i]);
@@ -218,7 +248,8 @@ char **argv;
 					prints("  ");
 				}
 			}
-				
+			
+			prtstatus();			
 			play(pitch);
 		}
 	
@@ -375,16 +406,7 @@ char **argv;
 				}
 			}
 			
-			moveto(16, 12);
-			printh8(octave);
-			moveto(16, 13);
-			printh8(carrphd >> 8);
-			printh8(carrphd & 0xff);
-			moveto(16, 14);
-			printh8(gainmsg);			
-			moveto(16, 15);
-			printh8(gainmod);
-
+			prtstatus();
 			play(pitch);
 			
 		} /* if a key is available */

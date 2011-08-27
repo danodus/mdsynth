@@ -15,7 +15,7 @@ The sound chip is a sigma-delta DAC and a numerically-controlled oscillator. It 
 Four types of waveform are available:
 	- Square (fixed gain)
 	- Sawtooth (fixed gain)
-	- Sine (fixed gain)
+	- Sine (variable gain)
 	- Phase modulation (variable gain, similar to frequency modulation but easier to implement)
 
 In phase modulation, the gains for both oscillators are applied without multiplications with the help of logarithmic and exponential tables. The technique is described below.
@@ -60,7 +60,7 @@ Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 2: Message Phase Delta LSB (8-bit)
 Base + 3: Carrier Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 4: Carrier Phase Delta LSB (8-bit)
-Base + 5: Message Gain (6-bit, 63=1.0, phase modulation only)
+Base + 5: Message Gain (6-bit, 63=1.0, sine and phase modulation only)
 Base + 6: Modulated Gain (6-bit, 63=1.0, phase modulation only)
 
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
