@@ -24,6 +24,7 @@
 #include "as.h"
 #include "table09.h"
 #include "pseudo.h"
+#include "util.h"
 
 /*
  *      install --- add a symbol to the table

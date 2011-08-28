@@ -19,29 +19,11 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef __eval_h__
+#define __eval_h__
 
-#ifndef __util_h_
-#define __util_h_
+eval();
+get_term();
+is_op(c);
 
-fatal(str);
-error(str);
-warn(str);
-delim(c);
-char *skip_white(ptr);
-emit(byte);
-any(c,str);
-lobyte(i);
-hibyte(i);
-hexout(int byte);
-alpha(c);
-alphan(c);
-char *alloc(nbytes);
-eword(wd);
-head(str1,str2);
-int FNameGet(NameString);
-print_line();
-char mapdn(c);
-
-
-
-#endif // __util_h__
+#endif // __eval_h__

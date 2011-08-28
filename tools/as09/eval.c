@@ -21,6 +21,9 @@
 
 
 #include "as.h"
+#include "util.h"
+#include "eval.h"
+#include "ffwd.h"
 
 /*
  *      eval --- evaluate expression

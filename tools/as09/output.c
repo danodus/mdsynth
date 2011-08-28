@@ -19,7 +19,7 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+#include "output.h"
 #include "as.h"
 
 /*

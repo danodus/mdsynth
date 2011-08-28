@@ -23,6 +23,7 @@
 #ifndef __do09_h__
 #define __do09_h__
 
+localinit();
 set_mode();
 
 #endif // __do09_h__

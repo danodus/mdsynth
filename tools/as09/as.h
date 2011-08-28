@@ -204,4 +204,11 @@ void pouterror();
 void f_record();
 void NewPage();
 
+initialize();
+re_init();
+make_pass();
+char *FGETS(s, n, iop);
+parse_line();
+process();
+
 #endif // __as_h__

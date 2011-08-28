@@ -22,8 +22,10 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#include <io.h>
 
 #include "as.h"
+#include "util.h"
 
 
 /*
@@ -42,11 +44,11 @@ char Fwd_name[] = { "Fwd_refs" } ;
  */
 fwdinit()
 {
- Forward = open(Fwd_name,O_CREAT | O_TRUNC | O_WRONLY, FILEMODE); //creat(Fwd_name,FILEMODE);
+ Forward = _open(Fwd_name,O_CREAT | O_TRUNC | O_WRONLY, FILEMODE); //creat(Fwd_name,FILEMODE);
  if(Forward <0)
   fatal("Can't create temp file");
- close(Forward); /* close and reopen for reads and writes */
- Forward = open(Fwd_name,UPDATE);
+ _close(Forward); /* close and reopen for reads and writes */
+ Forward = _open(Fwd_name,UPDATE);
  if(Forward <0)
   fatal("Forward ref file has gone.");
 }
@@ -58,9 +60,9 @@ fwdreinit()
 {
  F_ref   = 0;
  Ffn     = 0;
- lseek(Forward,0L,ABS);   /* rewind forward refs */
- read(Forward,&Ffn,sizeof(Ffn));
- read(Forward,&F_ref,sizeof(F_ref)); /* read first forward ref into mem */
+ _lseek(Forward,0L,ABS);   /* rewind forward refs */
+ _read(Forward,&Ffn,sizeof(Ffn));
+ _read(Forward,&F_ref,sizeof(F_ref)); /* read first forward ref into mem */
 #ifdef DEBUG
  printf("First fwd ref: %d,%d\n",Ffn,F_ref);
 #endif
@@ -71,8 +73,8 @@ fwdreinit()
  */
 fwdmark()
 {
- write(Forward,&Cfn,sizeof(Cfn));
- write(Forward,&Line_num,sizeof(Line_num));
+ _write(Forward,&Cfn,sizeof(Cfn));
+ _write(Forward,&Line_num,sizeof(Line_num));
 }
 
 /*
@@ -82,11 +84,11 @@ fwdnext()
 {
  int stat;
 
- stat = read(Forward,&Ffn,sizeof(Ffn));
+ stat = _read(Forward,&Ffn,sizeof(Ffn));
 #ifdef DEBUG
  printf("Ffn stat=%d ",stat);
 #endif
- stat = read(Forward,&F_ref,sizeof(F_ref));
+ stat = _read(Forward,&F_ref,sizeof(F_ref));
 #ifdef DEBUG
  printf("F_ref stat=%d  ",stat);
 #endif
@@ -105,9 +107,9 @@ fwd_done()
 {
 	int stat;
 
-	stat = close(Forward); /* Have to close first on MS-DOS or you leave lost clusters. */
+	stat = _close(Forward); /* Have to close first on MS-DOS or you leave lost clusters. */
 #ifndef DEBUG
 	if( stat == 0 )        /* If close was successful, delete file */
-		unlink(Fwd_name);
+		_unlink(Fwd_name);
 #endif
 }

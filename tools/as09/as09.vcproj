@@ -218,6 +218,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\eval.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ffwd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ifd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\output.h"
+				>
+			</File>
+			<File
 				RelativePath=".\pseudo.h"
 				>
 			</File>

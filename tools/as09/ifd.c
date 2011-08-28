@@ -21,6 +21,8 @@
 
 
 #include "as.h"
+#include "util.h"
+#include "ifd.h"
 
 /* IfMachine() --- This function implements the IFD & IFND conditional
                 assembly machine.

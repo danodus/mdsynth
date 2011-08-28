@@ -22,6 +22,8 @@
 
 #include "as.h"
 #include "do09.h"
+#include "util.h"
+#include "eval.h"
 
 /*
  *      MC6809 specific processing
@@ -55,6 +57,13 @@ int     rcycl[]= { 2,2, 2, 2, 2, 2,  0,0,1,1,1,1,0};
 #define IND     1       /* indexed */
 #define INDIR   2       /* indirect */
 #define OTHER   3       /* NOTA */
+
+
+do_gen(op,mode);
+regnum();
+do_indexed(op);
+abd_index(pbyte);
+rtype(r);
 
 /*
  *      localinit --- machine specific initialization

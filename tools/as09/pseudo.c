@@ -19,9 +19,13 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "pseudo.h"
-
 #include <stdio.h>
+
+#include "pseudo.h"
+#include "symtab.h"
+#include "eval.h"
+#include "util.h"
+#include "ifd.h"
 
 struct oper pseudo[NPSE] = {
 "=",    PSEUDO, EQU,    0,      /* ver TER_2.09 25 Jul 89 */

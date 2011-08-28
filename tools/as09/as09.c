@@ -21,13 +21,17 @@
 
 /* This is an adaptation of the public domain tool as09 from System09. */ 
 
-#include "as.h"
-
 #include <stdlib.h>
 #include <string.h>
 
-char mapdn();
-char *alloc();
+#include "as.h"
+#include "util.h"
+#include "output.h"
+#include "ffwd.h"
+#include "do09.h"
+#include "symtab.h"
+#include "pseudo.h"
+
 /*
 * as --- cross assembler main program
 
@@ -182,6 +186,7 @@ initialize()
 		fatal("Can't create object file");
 	fwdinit();                /* forward ref init */
 	localinit();              /* target machine specific init. */
+    return 0;
 }
 
 re_init()
@@ -195,6 +200,7 @@ re_init()
 	Ctotal = 0;
 	N_page = 0;
 	fwdreinit();
+    return 0;
 }
 
 make_pass()
@@ -307,6 +313,7 @@ process()
 		do_op(i->opcode,i->class);
 		if(Cflag)Ctotal += Cycles;
 	}
+    return 0;
 }
 
 #ifndef IBM

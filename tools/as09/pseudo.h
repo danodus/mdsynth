@@ -54,5 +54,6 @@
 #define NPSE    28
 extern struct oper pseudo[NPSE];
 
+do_pseudo(op);
 
 #endif // __pseudo_h__
