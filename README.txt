@@ -11,7 +11,7 @@ Languages: VHDL, 6809 assembly, C
 1. Overview
 ============================================================
 
-The sound chip is a sigma-delta DAC and a numerically-controlled oscillator. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
+The sound chip includes a sigma-delta DAC and two numerically-controlled oscillators. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
 Four types of waveform are available:
 	- Square (fixed gain)
 	- Sawtooth (fixed gain)
@@ -57,11 +57,10 @@ Two sound chips are available at the following base addresses:
 
 Base + 0: Waveform (0x00: None, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
 Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
-Base + 2: Message Phase Delta LSB (8-bit)
-Base + 3: Carrier Octave (4-bit) + Phase Delta MSB (4-bit)
-Base + 4: Carrier Phase Delta LSB (8-bit)
-Base + 5: Message Gain (6-bit, 63=1.0, sine and phase modulation only)
-Base + 6: Modulated Gain (6-bit, 63=1.0, phase modulation only)
+Base + 2: Phase Delta LSB (8-bit)
+Base + 3: Carrier Octave (4-bit)
+Base + 4: Message Gain (6-bit, 63=1.0, sine and phase modulation only)
+Base + 5: Modulated Gain (6-bit, 63=1.0, phase modulation only)
 
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
 
@@ -174,13 +173,13 @@ The frequency given to NCO is the following:
 4.2 Phase Modulation
 ====================
 
-The formula is the following: y(t) = modulated_gain * sin(m(t) + 2*pi*freq_carrier*t)
-where m(t) = message_gain * sin(2*pi*freq_message*t)
+The formula is the following: y(t) = modulated_gain * sin(m(t) + 2*pi*octave_carrier*freq*t)
+where m(t) = message_gain * sin(2*pi*octave_message*freq*t)
 
 4.3 Monophonic Pitch Stack
 ==========================
 
-The synthesizer has currently only a single voice, but we need to keep track of all notes being held in order to always play the latest held note, if any. In order to achieve this, a stack is used, the tip of the stack being the currently played pitch. When a note is release, the corresponding entry is removed from the stack. The first element of the stack is has a pitch of zero (quiet).
+The synthesizer has currently only a single voice, but we need to keep track of all notes being held in order to always play the latest held note, if any. In order to achieve this, a stack is used, the tip of the stack being the currently played pitch. When a note is release, the corresponding entry is removed from the stack. The first element of the stack has a pitch of zero (quiet).
 
 4.4 Gain Calculation without Multiplications
 ============================================

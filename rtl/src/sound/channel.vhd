@@ -35,9 +35,8 @@ entity channel is
            waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
-           phase_delta_message:   in unsigned(11 downto 0);
+           phase_delta:           in unsigned(11 downto 0);
            octave_message:        in unsigned(3 downto 0);
-           phase_delta_carrier:   in unsigned(11 downto 0);
            octave_carrier:        in unsigned(3 downto 0);
            output:   out std_logic);
 end channel;
@@ -78,8 +77,8 @@ signal sine_modulated : integer range -128 to 127 := 0;
 
 begin
 
-    nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta_carrier, octave => octave_carrier, phase => phase_carrier);
-    nco_message0 : nco port map (clk => clk, phase_delta => phase_delta_message, octave => octave_message, phase => phase_message);
+    nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave_carrier, phase => phase_carrier);
+    nco_message0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave_message, phase => phase_message);
 
     sinewave_message0 : sinewave port map (clk => clk, gain => gain_message, phase => phase_message, data_out => sine_message);
     sinewave_modulated0 : sinewave port map (clk => clk, gain => gain_modulated, phase => phase_modulated, data_out => sine_modulated);
@@ -108,7 +107,7 @@ begin
                     -- Sine wave
                     dac_in <= std_logic_vector(to_unsigned(128 + sine_message, 8));
                 when "100" =>
-                    -- FM (implemented as phase modulation)
+                    -- PM
                     dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
                 when others =>
                     dac_in(7 downto 0) <= (others => '0');

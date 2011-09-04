@@ -30,9 +30,8 @@ char *sndl;
 char *sndr;
 
 unsigned waveform;
-char octave;
-
-unsigned carrphd;	/* carrier phase delta */
+char octave;		/* main octave */
+char octcarr;		/* carrier octave */
 unsigned gainmsg;	/* message gain */
 unsigned gainmod;	/* modulated gain */
 
@@ -77,21 +76,19 @@ unsigned pitch;
 
 		sndl[1] = phd >> 8;
 		sndl[2] = phd;
-		sndl[3] = carrphd >> 8;
-		sndl[4] = carrphd;
+		sndl[3] = octcarr;
 		
-		sndl[5] = gainmsg;
-		sndl[6] = gainmod;
+		sndl[4] = gainmsg;
+		sndl[5] = gainmod;
 		
 		sndl[0] = waveform;
 		
 		sndr[1] = phd >> 8;
 		sndr[2] = phd;
-		sndr[3] = carrphd >> 8;
-		sndr[4] = carrphd;
+		sndr[3] = octcarr;
 		
-		sndr[5] = gainmsg;
-		sndr[6] = gainmod;
+		sndr[4] = gainmsg;
+		sndr[5] = gainmod;
 		
 		sndr[0] = waveform;
 	} else {
@@ -106,8 +103,7 @@ void prtstatus()
 	moveto(16, 12);
 	printh8(octave);
 	moveto(16, 13);
-	printh8(carrphd >> 8);
-	printh8(carrphd & 0xff);
+	printh8(octcarr);
 	moveto(16, 14);
 	printh8(gainmsg);			
 	moveto(16, 15);
@@ -144,7 +140,7 @@ char **argv;
 	phds[10] = 1251;
 	phds[11] = 1326;
 
-	carrphd = 1024;
+	octcarr = 4;
 	waveform = 1;
 	
 	gainmsg = 63;
@@ -165,7 +161,7 @@ char **argv;
 	moveto(10, 5);
 	prints("Z, X: Octave +/-");
 	moveto(10, 6);
-	prints("C, V: PM Carrier PhD +/- (PM only)");
+	prints("C, V: Octave Carrier +/- (PM only)");
 	moveto(10, 7);
 	prints("B, N: Message Gain +/- (Sine and PM only)");
 	moveto(10, 8);
@@ -178,7 +174,7 @@ char **argv;
 	moveto(0, 12);
 	prints("Octave:");
 	moveto(0, 13);
-	prints("CarrPhD:");	
+	prints("Octave Carrier:");	
 	moveto(0, 14);
 	prints("Message Gain:");
 	moveto(0, 15);
@@ -187,9 +183,9 @@ char **argv;
 	moveto(0, 17);
 	prints("Phase Modulation:");
 	moveto(10, 18);
-	prints("y(t) = modulated_gain * sin(m(t) + 2*pi*freq_carrier*t)");
+	prints("y(t) = modulated_gain * sin(m(t) + 2*pi*octave_carrier*freq*t)");
 	moveto(10, 19);
-	prints("where m(t) = message_gain * sin(2*pi*freq_message*t)");
+	prints("where m(t) = message_gain * sin(2*pi*octave*freq*t)");
 	
 	pstack[0] = 0;
 	psti = 0;
@@ -228,7 +224,7 @@ char **argv;
 					waveform = c >> 4;
 				} else if (c == 0x18) {
 					c = sgetch();
-					carrphd = c << 6;
+					octcarr = c >> 4;
 				} else if (c == 0x19) {
 					c = sgetch();
 					gainmsg = c >> 1;
@@ -351,25 +347,17 @@ char **argv;
 				break;
 
 				case 'c':
-				carrphd-=8;
-				newpitch = 0;
-				break;
-
 				case 'C':
-				carrphd-=128;
-				newpitch = 0;
+				if (octcarr > 0)
+					octcarr--;
 				break;
 				
 				case 'v':
-				carrphd+=8;
-				newpitch = 0;
-				break;
-				
 				case 'V':
-				carrphd+=128;
-				newpitch = 0;
+				if (octcarr < 15)
+					octcarr++;
 				break;
-				
+								
 				case 'b':
 				case 'B':
 				if (gainmsg > 0)
