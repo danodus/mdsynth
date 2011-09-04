@@ -15,56 +15,9 @@
 *                                 ATLANTA, GA  30345
 *                                 PH. 404-320-1043
 *
-* MODIFIED TO SYS09BUG VER 1.0
+* MODIFIED TO SYS09BUG
 * FOR:     SYSTEM09 FPGA SYSTEM
 * BY:      JOHN KENT
-* DATE:    21ST NOVEMBER 2006
-* REMOVED: DISK BOOTS
-*          MEMORY TEST
-* ADDED:   ADM3A VDU DRIVER
-*
-* MODIFIED TO SYS09BUG VER 1.1
-* BY:      JOHN KENT
-* DATE:    7TH JANUARY 2007
-* ADDED:   'U' USER EXTENTION COMMANDS AT $F000
-*          CONDITIONAL ASSEMBLY OF FLOPPY BOOTS
-*          AND REALTIME CLOCK
-*
-* MODIFIED TO SYS09BUG VER 1.2
-* BY:      JOHN KENT
-* DATE:    21ST MAY 2007
-* ADDED:   COMPACT FLASH BOOT TO FPGA VERSION
-*          REMOVED PORT REDIRECTION ON PUNCH & LOAD
-*
-* Modified to SYS09BUG VER 1.3
-* BY:      JOHN KENT
-* DATE:    8TH JAN 2008
-* ADDED:   CONDITIONALS FOR SPARTAN3E STARTER BOARD
-*          WITH ONLY 32K OF RAM
-*
-* Modified to SYS09BUG VER 1.4
-* BY:      JOHN KENT
-* DATE:    3RD FEB 2008
-* ADDED:   CONDITIONALS FOR XESS BOARD WITH IDE
-*          SEPERATE CONDITIONAL FOR S3 STARTER AND B5-X300
-*          16 BIT IDE DISK BOOT STRAP ROUTINE
-*
-* Modified to SYS09BUG VER 1.5
-* BY:      JOHN KENT
-* DATE:    7TH SEP 2008
-* ADDED:   ADDED "B3-S2+" STRING
-*
-* Modified to SYS09BUG VER 1.6
-* BY:      JOHN KENT
-* DATE:    2ND DEC 2008
-* ADDED:   ADDED HARDWARE FLOW CONTROL
-*
-* CHANGED: SEPARARTED OPTIONS EQUATES AND BODY INTO SEPARATE FILES
-*
-* Modified to SYS09BUG VER 1.7
-* BY:     JOHN KENT
-* DATE:   16TH OCT 2010
-* ADDED:  "DE2-70" STRING
 * 
 *       *** COMMANDS ***
 *
@@ -106,17 +59,11 @@ IRQ     RMB   2         ; INTERRUPT VECTOR
 SWI     RMB   2         ; SOFTWARE INTERRUPT VECTOR
 SVCVO   RMB   2         ; SUPERVISOR CALL VECTOR ORGIN
 SVCVL   RMB   2         ; SUPERVISOR CALL VECTOR LIMIT
-        IFD DATOPT
-LRARAM  RMB  16         ; LRA ADDRESSES
-        ENDIF DATOPT
 CPORT   RMB   2         ; RE-VECTORABLE CONTROL PORT
 ECHO    RMB   1         ; ECHO FLAG
 BPTBL   RMB  24         ; BREAKPOINT TABLE BASE ADDR
-        IFD  TRAOPT
 NMISAV  RMB   2         ; NMI Jump Vector Backup
 TRACNT  RMB   2         ; Trace Count
-        ENDIF TRAOPT
-        IFD VDUOPT
 *
 **************************************************
 *   VDU8 DISPLAY DRIVER VARIABLES                                    *
@@ -129,21 +76,6 @@ ROWADX  RMB   1         ; CURSOR ROW
 *
 NEWROW  RMB   1         ; NEW ROW TEMP FOR ESCAPE
 ESCFLG  RMB   1         ; ESCAPE SEQUENCE ACTIVE
-        ENDIF VDUOPT
-        IFD DG640OPT
-*
-***************************************************
-*   DG640 MEMORY MAPPED DISPLAY DRIVER VARIABLES  *
-***************************************************
-*
-***** ALWAYS KEEP THESE TWO BYTES TOGETHER *****
-COLADX  RMB   1        ; CURSOR COLUMN
-ROWADX  RMB   1        ; CURSOR ROW
-*************************************************
-CURSOR  RMB   2        ; ABSOLUTE SCREEN ADDRESS
-NEWROW  RMB   1        ; NEW ROW TEMP FOR ESCAPE
-ESCFLG  RMB   1        ; ESCAPE SEQUENCE ACTIVE
-        ENDIF DG640OPT
 *
 *
 ***************************************************
@@ -162,15 +94,6 @@ ESCFLG  RMB   1        ; ESCAPE SEQUENCE ACTIVE
         FDB   PSTRNG
         FDB   LRA
 *
-        IFD   ADSOPT
-        FDB   PCHK     ; CHECK FOR PRINTER INPUT
-        FDB   PINIZ    ; INITIATE PRINTER
-        FDB   POUTCH   ; OUTPUT CH. TO PRINTER
-        FDB   VINIZ
-        FDB   VOUTCH
-        FDB   ACINIZ
-        FDB   AOUTCH
-        ENDIF ADSOPT
 *
 * MONITOR
 *
@@ -211,24 +134,7 @@ CLRSTK  CLR   ,-S
         LDX   #MSG1   ; POINT TO MONITOR MESSAGE
         LBSR  PDATA   ; PRINT MSG
 *
-        IFD   DATOPT
-        LDX   #LRARAM ; POINT TO LRA RAM STORAGE AREA
-        CLRA  START   ; TOTAL AT ZERO
-        LDB   #13     ; TOTAL UP ALL ACTIVE RAM MEMORY
-FNDREL  TST   B,X     ; TEST FOR RAM AT NEXT LOC.
-        BEQ   RELPAS  ; IF NO RAM GO TO NEXT LOC.
-        ADDA  #4      ; ELSE ADD 4K TO TOTAL
-        DAA           ; ADJ. TOTAL FOR DECIMAL
-RELPAS  DECB          ; SUB. 1 FROM LOCS. TO TEST
-        BPL   FNDREL  ; PRINT TOTAL OF RAM
-        LBSR  OUT2H   ; OUTPUT HEX BYTE AS ASCII
-        LDX   #MSG2   ; POINT TO MSG 'K' CR/LF + 3 NULS
-        LBSR  PDATA   ; PRINT MSG
-        ENDIF DATOPT
-*
-        IFD   TRAOPT
         LBSR  TRAINZ
-        ENDIF TRAOPT
 *
 ***** NEXTCMD *****
 *
@@ -435,10 +341,8 @@ SWIE    TFR  S,U     ; TRANSFER STACK TO USER POINTER
         BSR  RPLSWI  ; GO REPLACE SWI WITH ORIGINAL DATA
 REGPR   LBSR REGSTR  ; GO PRINT REGISTERS
 *
-        IFD TRAOPT
         LDX #0
         STX TRACNT
-        ENDIF TRAOPT
 *
         LBRA NEXTCMD ; GET NEXT COMMAND
 *
@@ -471,7 +375,6 @@ FNDBP   LDA  ,Y+     ; LOAD DATA BYTE
 BPADJ   LEAY -3,Y    ; MOVE POINTER TO BEGIN OF BP ENTRY
         RTS
 *
-        IFD TRAOPT
 *
 ** TRACE from address AAAA BB bytes
 *
@@ -562,356 +465,7 @@ TRAINZ  LDA #$32     ; SELECT DDRA, CA2 LOW, NMI DISABLED
         STA TBCTRL
         RTS
 *
-        ENDIF TRAOPT
-        IFD  MFDCOPT
 *
-** "U" MINI DISK BOOT
-*
-MINBOOT TST  CMDFDC
-        CLR  DRVFDC
-        LDX  #$0000
-LOOP    LEAX $01,X
-        CMPX #$0000
-        BNE  LOOP
-        LDA  #$0F
-        STA  CMDFDC
-        BSR  DELAY
-LOOP1   LDB  CMDFDC
-        BITB #$01
-        BNE  LOOP1
-        LDA  #$01
-        STA  SECFDC
-        BSR  DELAY
-        LDA  #$8C
-        STA  CMDFDC
-        BSR  DELAY
-        LDX  #$C000
-        BRA  LOOP3
-LOOP2   BITB #$02
-        BEQ  LOOP3
-        LDA  DATFDC
-        STA ,X+
-LOOP3   LDB  CMDFDC
-        BITB #$01
-        BNE  LOOP2
-        BITB #$2C
-        BEQ  LOOP4
-        RTS
-*
-LOOP4   LDX  #$C000
-        STX  $0A,U
-        TFR  U,S
-        RTI
-*
-DELAY   LDB  #$04
-LOOP5   DECB
-        BNE  LOOP5
-        RTS
-        ENDIF MFDCOPT
-*
-        IFD  DMAFOPT
-*
-*** "D" DISK BOOT FOR DMAF2 ***
-*
-DBOOT   LDA  #$DE
-        STA  DRVREG
-        LDA  #$FF
-        STA  PRIREG  ; $FAF8
-        STA  CCREG
-        STA  AAAREG
-        STA  BBBREG
-        TST  CCREG
-        LDA  #$D8
-        STA  COMREG
-        LBSR DLY
-DBOOT0  LDA  COMREG
-        BMI  DBOOT0
-        LDA  #$09
-        STA  COMREG
-        LBSR DLY
-*
-DISKWT  LDA  COMREG  ; FETCH DRIVE STATUS
-        BITA #1      ; TEST BUSY BIT
-        BNE  DISKWT  ; LOOP UNTIL NOT BUSY
-*
-        BITA #$10
-        BNE  DBOOT
-*
-        LDX  #$C000  ; LOGICAL ADDR. = $C000
-        BSR LRA      ; GET 20 BIT PHYSICAL ADDR. OF LOG. ADDR.
-        ORA  #$10
-        STA  CCCREG
-        TFR  X,D
-        COMA  ;
-        COMB  ;
-        STD  ADDREG
-        LDX  #$FEFF  ; LOAD DMA BYTE COUNT = $100
-        STX  CNTREG  ; STORE IN COUNT REGISTER
-        LDA  #$FF    ; LOAD THE CHANNEL REGISTER
-        STA  CCREG
-        LDA  #$FE    ; SET CHANNEL 0
-        STA  PRIREG
-        LDA  #1      ; SET SECTOR TO "1"
-        STA  SECREG  ; ISSUE COMMAND
-        LDA  #$8C    ; SET SINGLE SECTOR READ
-        STA  COMREG  ; ISSUE COMMAND
-        BSR  DLY
-*
-* THE FOLLOWING CODE TESTS THE STATUS OF THE
-* CHANNEL CONTROL REGISTER. IF "D7" IS NOT
-* ZERO THEN IT WILL LOOP WAITING FOR "D7"
-* TO GO TO ZERO. IF AFTER 65,536 TRIES IT
-* IS STILL A ONE THE BOOT OPERATION WILL
-* BE STARTED OVER FROM THE BEGINING.
-*
-        CLRB         ;
-DBOOT1  PSHS B       ; $FB55
-        CLRB         ;
-DBOOT2  TST  CCREG
-        BPL  DBOOT3
-        DECB  ;
-        BNE  DBOOT2
-        PULS B
-        DECB
-        BNE  DBOOT1
-        BRA  DBOOT
-DBOOT3  PULS B
-        LDA  COMREG
-        BITA #$1C
-        BEQ  DBOOT4
-        RTS  ;
-*
-*
-DBOOT4  LDB  #$DE
-        STB  DRVREG
-        LDX  #$C000
-        STX  10,U
-        TFR  U,S     ; $FB7B
-        RTI  ;
-        ENDIF DMAFOPT
-*
-        IFD CF8OPT
-*
-* COMPACT FLASH BOOT
-*
-CFBOOT  BSR  WAITRDY
-        LDA  #HEADLBA
-        STA  CF_HEAD
-        BSR  WAITRDY
-        LDA  #FEAT8BIT
-        STA  CF_FEATURE
-        LDA  #CMDFEATURE
-        STA  CF_COMAND
-        BSR  WAITRDY
-*
-* READ SECTORS FROM CF
-*
-CFREAD  LDA  #$01
-        STA  CF_SECCNT
-        CLRA
-        STA  CF_SECNUM
-        STA  CF_CYLLO
-        STA  CF_CYLHI
-*
-        LDA  #CMDREAD ; IDE READ MULTIPLE
-        STA  CF_COMAND
-        BSR  WAITRDY
-        LDX  #$C000
-*
-* READ LOOP
-*
-RDLOOP  BSR  WAITDRQ
-        LDA  CF_DATA
-        STA  ,X+
-        CMPX #$C200
-        BNE  RDLOOP
-*
-        LDX  #$C000
-        STX  $0A,U
-        TFR  U,S
-        RTI
-*
-* WAIT UNTIL READY
-*
-WAITRDY LDA  CF_STATUS
-        BITA #BUSY
-        BNE  WAITRDY
-        LDA  CF_STATUS
-        BITA #DRDY
-        BEQ  WAITRDY
-        RTS
-*
-* WAIT FOR DATA REQUEST
-*
-WAITDRQ LDA  CF_STATUS
-        BITA #DRQ
-        BEQ  WAITDRQ
-        RTS
-        ENDIF CF8OPT
-*
-        IFD IDEOPT
-*
-* XESS 16 BIT IDE BOOT
-*
-IDEBOOT LDD  #AUXRESET
-        STD  CF_AUX
-        LDD #AUXRSTREL
-        STD CF_AUX
-        LDD  #HEADLBA
-        STD  CF_HEAD
-        BSR  WAITRDY
-*
-* READ SECTORS FROM CF
-*
-        LDD  #$01
-        STD  CF_SECCNT
-        CLRB
-        STD  CF_SECNUM
-        STD  CF_CYLLO
-        STD  CF_CYLHI
-*
-        LDB  #CMDREAD ; IDE READ MULTIPLE
-        STD  CF_COMAND
-        BSR  WAITRDY
-        LDX  #$C000
-*
-* READ LOOP
-*
-RDLOOP  BSR  WAITDRQ
-        LDD  CF_DATA
-        STB  ,X+
-        CMPX #$C100
-        BNE  RDLOOP
-*
-        LDX  #$C000
-        STX  $0A,U
-        TFR  U,S
-        RTI
-*
-* WAIT UNTIL READY
-*
-WAITRDY LDD  CF_STATUS
-        BITB #BUSY
-        BNE  WAITRDY
-        LDD  CF_STATUS
-        BITB #DRDY
-        BEQ  WAITRDY
-        RTS
-*
-* WAIT FOR DATA REQUEST
-*
-WAITDRQ LDD  CF_STATUS
-        BITB #DRQ
-        BEQ  WAITDRQ
-        RTS
-        ENDIF IDEOPT
-*
-        IFD RTCOPT
-*
-* CLOCK INTER FACE UTILITY
-*
-* TIME <Hours> <Minuits> <Seconds>
-* If no argument is specified, the current time
-* will be displayed.
-*
-* READ A REGISTER FROM THE COUNTER.
-* The X Index rgister points to the register
-* to be read. The Status Register is checked
-* before and after the register is read before
-* returning a value in accumulator A
-*
-RDCLK  TST CLKSTA
-       BNE RDCLK
-RDCLK1 LDA 0,X
-       TST CLKSTA
-       BNE RDCLK1
-       RTS
-*
-* MAIN PROGRAM:
-*
-TIMSET LDX #COUNTR    ; POINT TO TIMER
-      LBSR BYTE       ; READ HOURS
-      BVS  SHOWTM     ; NO ARG, DISP TIME
-      STA HOUR,X
-      LBSR OUT1S
-      LBSR BYTE       ; READ MINUITES
-      BVS  SHOWTM
-      STA MINUIT,X
-      LBSR OUT1S
-      LBSR BYTE       ; SECONDS.
-      BVS SHOWTM
-      STA SECOND,X
-*
-* DISPLAY CURRENT TIME
-*
-SHOWTM LBSR PCRLF
-       LDX #COUNTR+HOUR
-       LDB #3
-SHOWLP BSR RDCLK
-       LBSR OUT2H
-       LDA #':
-       LBSR OUTCH
-       LEAX -1,X
-       DECB
-       BNE SHOWLP
-       RTS
-*
-* INITIATE CLOCK.
-* MASK INTERRUPTS.
-*
-CLKINZ CLR CINTCR     ; MASK ALL INTERRUPTS
-       TST CINTSR     ; CLEAR ANY INTERRUPTS
-       RTS
-       ENDIF RTCOPT
-       IFD DATOPT
-*
-***** LRA LOAD REAL ADDRESS *****
-*
-* THE FOLLOWING CODE LOADS THE 20-BIT
-* PHYSICAL ADDRESS OF A MEMORY BYTE
-* INTO THE "A" AND "X" REGISTERS. THIS
-* ROUTINE IS ENTERED WITH THE LOGICAL
-* ADDRESS OF A MEMORY BYTE IN THE "IX"
-* REGISTER. EXIT IS MADE WITH THE HIGH-
-* ORDER FOUR BITS OF THE 20-BIT PHYSICAL
-* ADDRESS IN THE "A" REGISTER, AND THE
-* LOW-ORDER 16-BITS OF THE 20-BIT
-* PHYSICAL ADDRESS IN THE "IX" REGISTER.
-* ALL OTHER REGISTERS ARE PRESERVED.
-* THIS ROUTINE IS REQUIRED SINCE THE
-* DMAF1 AND DMAF2 DISK CONTROLLERS MUST
-* PRESENT PHYSICAL ADDRESSES ON THE
-* SYSTEM BUS.
-*
-LRA     PSHS A,B,X,Y  ; PUSH REGISTERS ON STACK
-        LDA  2,S      ; GET MSB LOGICAL ADDR FRM X REG ON STACK
-        LSRA          ;
-        LSRA          ; ADJ FOR INDEXED INTO
-        LSRA          ; CORRESPONDING LOCATION
-        LSRA          ; IN LRA TABLE
-        LDY  #LRARAM  ; LOAD LRA TABLE BASE ADDRESS
-        LDB  A,Y      ; GET PHYSICAL ADDR. DATA FROM LRA TABLE
-        LSRB          ; ADJ. REAL ADDR. TO REFLECT EXTENDED
-        LSRB          ; PHYSICAL ADDRESS.
-        LSRB          ; EXTENDED MS 4-BITS ARE RETURNED
-        LSRB          ; IN THE "A" ACCUMULATOR
-        STB  ,S       ; MS 4 BITS IN A ACCUM. STORED ON STACK
-        LDB  A,Y      ; LOAD REAL ADDRESS DATA FROM LRA TABLE
-        COMB          ; COMP TO ADJ FOR PHYSICAL ADDR. IN X REG
-        ASLB          ; ADJ DATA FOR RELOCATION IN X REG
-        ASLB          ;
-        ASLB          ; $FB97
-        ASLB          ;
-        LDA  2,S      ; GET MS BYTE OF LOGICAL ADDR.
-        ANDA #$0F     ; MASK MS NIBBLE OF LOGICAL ADDRESS
-        STA  2,S      ; SAVE IT IN X REG ON STACK
-        ORB  2,S      ; SET MS BYTE IN X REG TO ADJ PHY ADDR.
-*
-* PLUS LS NIBBLE OF LOGICAL ADDRESS
-*
-        STB  2,S      ; SAVE AS LS 16 BITS OF PHY ADDR IN X REG ON STACK
-        PULS A,B,X,Y,PC ; POP REGS. FROM STACK
-        ENDIF DATOPT
 *
 * DELAY LOOP
 *
@@ -1285,12 +839,6 @@ PRTBA   BSR  OUTCH    ; PRINT IT
         BNE  OUTBA
         PULS A,PC
 *
-        IFD EXTOPT
-*
-* EXTENDED USER COMMANDS
-*
-USRCMD  JMP [MONEXT+EXTCMD]
-        ENDIF EXTOPT
 *
 *
 ECHON   TST  ECHO     ; IS ECHO REQUIRED ?
@@ -1317,25 +865,15 @@ INCHE   BSR  INCH     ; GET CHAR FROM TERMINAL
 *
 *
 INCH    PSHS X        ; SAVE IX
-        IFD  HFCOPT
-        LDA  #$11     ; SET RTS* LOW, REQUEST FAR END TO TX
-        STA  [CPORT]
-        ENDIF HFCOPT
 GETSTA  LDX  CPORT    ; POINT TO TERMINAL PORT
         LDA  ,X       ; FETCH PORT STATUS
         BITA #1       ; TEST READY BIT, RDRF ?
-        IFD  PS2OPT
         BNE  GETST1
         LDX  #PS2KBD
         LDA  ,X
         BITA #1
-        ENDIF PS2OPT
         BEQ  GETSTA   ; IF NOT RDY, THEN TRY AGAIN
 GETST1  EQU  *
-        IFD  HFCOPT
-        LDA  #$51     ; SET RTS* HIGH, STOP FAR END FROM TXING, UNTIL NEXT INPUT
-        STA  [CPORT]
-        ENDIF HFCOPT
         LDA  1,X      ; FETCH CHAR
         PULS X,PC     ; RESTORE IX
 *
@@ -1349,17 +887,11 @@ GETST1  EQU  *
 *
 *
 INCHEK  PSHS A        ; SAVE A ACCUM
-        IFD  HFCOPT
-        LDA  #$11     ; SET RTS* LOW, REQUEST FAR END TO TX
-        STA  [CPORT]
-        ENDIF HFCOPT
         LDA  [CPORT]  ; FETCH PORT STATUS
         BITA #1       ; TEST READY BIT, RDRF ?
-        IFD  PS2OPT
         BNE  INCHEK1
         LDA  PS2KBD
         BITA #1       ; TEST READY BIT< RDRF ?
-        ENDIF PS2OPT
 INCHEK1 PULS A,PC     ; RESTORE A ACCUM.
 *
 OUT2S   BSR  OUT1S    ; OUTPUT 2 SPACES
@@ -1373,12 +905,7 @@ OUT1S   LDA  #$20     ; OUTPUT 1 SPACE
 * PASSED IN THE A REGISTER.
 * ALL REGISTERS ARE PRESERVED.
 *
-OUTCH   IFD   VDUOPT
-        BSR   VOUTCH
-        ENDIF VDUOPT
-        IFD   DG640OPT
-        BSR   VOUTCH
-        ENDIF DG640OPT
+OUTCH   BSR   VOUTCH
 AOUTCH  PSHS A,X      ; SAVE A ACCUM AND IX
         LDX  CPORT    ; GET ADDR. OF TERMINAL
 FETSTA  LDA  ,X       ; FETCH PORT STATUS
@@ -1393,12 +920,7 @@ FETSTA  LDA  ,X       ; FETCH PORT STATUS
 * IO INITIALIZATION
 *
 IOINIZ  EQU  *
-        IFD  VDUOPT
         BSR  VINIZ
-        ENDIF VDUOPT
-        IFD  DG640OPT
-        BSR  VINIZ
-        ENDIF DG640OPT
 ACINIZ  LDX  CPORT    ; POINT TO CONTROL PORT ADDRESS
         LDA  #3       ; RESET ACIA PORT CODE
         STA  ,X       ; STORE IN CONTROL REGISTER
@@ -1409,7 +931,6 @@ ACINIZ  LDX  CPORT    ; POINT TO CONTROL PORT ADDRESS
         STA  ECHO
         RTS
 *
-        IFD VDUOPT
 *
 ***************************************************
 *      VDU8 ADM3A REGISTER-MAPPED EMULATOR        *
@@ -1635,314 +1156,7 @@ ESCCLS2 CLRB
         STB  VDUCOL,X
         STB  ESCFLG
         RTS
-        ENDIF VDUOPT
 *
-        IFD DG640OPT
-***************************************************
-*      TELEVIDEO-TYPE MEMORY-MAPPED EMULATOR      *
-*                                                 *
-* FOR HARD-WIRED MEMORY-MAPPED DISPLAYS USING THE *
-* HIGH ORDER BIT OF EACH BYTE FOR  REVERSE  VIDEO *
-* CURSORING  (SUCH  AS THE THOMAS INSTRUMENTATION *
-* 16x64 BOARD).                                   *
-***************************************************
-*
-***************************************************
-*               INITIALIZE EMULATOR               *
-***************************************************
-*
-VINIZ   LDX  #0
-        STX  COLADX   ; AND ROWADX
-        STX  NEWROW   ; AND ESCFLG
-        LDX  #SCREEN  ; POINT TO SCREEN
-        STX  CURSOR   ; SET PROGRAM CURSOR
-        LDA  #$1B     ; SEND ESCAPE
-        BSR  VOUTCH
-        LDA  #'Y      ; CLEAR TO END OF SCREEN
-*
-** VIDEO OUTPUT ROUTINE
-*
-VOUTCH  PSHS A,B,X    ; SAVE REGISTERS
-*
-** CLEAR CURSOR
-*
-        LDX  CURSOR
-        LDB  0,X
-        ANDB #$7F
-        STB  0,X
-*
-** CHECK FOR ESCAPE SEQUENCE
-*
-        TST  ESCFLG   ; ESCAPE ACTIVE?
-        BEQ  SOROU1   ; BRANCH IF NOT
-        BSR  ESCAPE   ; ELSE DO ESCAPE
-        BRA  RETURN   ; AND RETURN
-*
-** CHECK FOR CONTROL CHARACTERS
-*
-SOROU1  CMPA #$20     ; CONTROL CODES?
-        BHS  SOROU2
-        BSR  CONTRL   ; BRANCH IF SO
-        BRA  RETURN
-*
-** OUTPUT TEXT CHARACTER
-*
-SOROU2  LDX  CURSOR   ; ELSE GET CURSOR
-        STA  0,X      ; DISPLAY CHARACTER
-        LBSR NEWCOL   ; UPDATE COLUMN
-*
-** DISPLAY CURSOR AND RETURN
-*
-RETURN  LDX  CURSOR   ; AND DISPLAY IT
-        LDB  ,X
-        ORB  #$80     ; WITH REVID
-        STB  ,X
-        PULS A,B,X,PC ; RESTORE REGISTERS AND RETURN
-*
-***************************************************
-*              CONTROL CODE HANDLERS              *
-***************************************************
-*
-CONTRL  CMPA #$08     ; CTRL H - BACKSPACE ?
-        LBEQ BACKSP
-        CMPA #$1B     ; ESCAPE SEQUENCE?
-        LBEQ SETESC
-        CMPA #$D      ; CTRL M - RETURN?
-        LBEQ CRETN
-        CMPA #$0A     ; CTRL J - LINE FEED
-        BNE  RETESC   ; NONE OF THESE, RETURN
-*
-***************************************** LINE FEED
-*
-LINEFD  LDD  COLADX   ; GET CURRENT COLUMN AND ROW
-        INCB          ; BUMP ROW
-        CMPB #NUMLIN  ; SCROLL TIME?
-        LBNE NEWCUR   ; POSITION CURSOR IF NOT
-        LBRA SCROLL   ; ELSE SCROLL IT
-*
-***************************************** LINE FEED
-*
-LINEUP  LDD  COLADX   ; GET CURRENT COLUMN AND ROW
-        TSTB          ; AT TOP OF SCREEN ?
-        BEQ  RETESC   ; YES, RETURN
-        DECB          ; NO, DECREMENT ROW
-        LBRA NEWCUR   ; POSITION CURSOR
-*
-*********************************** BACK SPACE
-*
-BACKSP  LDA  COLADX    ; GET CURRENT COLUMN AND ROW
-        BEQ  RETESC    ; IF AT TOP LEFT CORNER RETURN
-        DECA           ; OTHERWISE BACK STEP ONE CHARACTER
-        LBRA POSCOL    ; POSITION CURSOR
-*
-*********************************** CURSOR RIGHT
-*
-CHRIGHT LDA  COLADX    ; GET CURRENT COLUMN AND ROW
-        INCA           ; MOVE RIGHT ONE CHARACTER
-        CMPA #LINLEN   ; ARE WE AT THE END OF THE LINE ?
-        BEQ  RETESC    ; YES, RETURN
-        LBRA POSCOL    ; NO, POSITION CURSOR
-*
-***************************************************
-*                 ESCAPE HANDLERS                 *
-***************************************************
-*
-ESCAPE  LDB  ESCFLG   ; ARE WE IN AN ESCAPE SEQUENCE ?
-        CMPB #'=      ; ARE WE SETTING CURSOR?
-        BEQ  ESCCUR   ; YES BRANCH TO SET CURSOR
-        CMPA #'Y      ; CLEAR TO END OF SCREEN?
-        LBEQ ESCCLS   ; YES, CLEAR SCREEN
-        CMPA #'T      ; CLEAR TO END OF LINE?
-        BEQ  ESCCLL   ; YES, CLEAR LINE
-        CMPA #'E      ; INSERT LINE?
-        BEQ  ESCINL
-        CMPA #'R      ; DELETE LINE?
-        BEQ  ESCDLL
-        CMPA #'=      ; STARTING CURSOR SET?
-        BNE  CLRESC   ; BRANCH IF NOT
-*
-***************************** START ESCAPE SEQUENCE
-*
-SETESC  STA  ESCFLG   ; ELSE START CURSORING
-        RTS           ; AND RETURN
-*
-CLRESC  CLR  ESCFLG   ; NO OTHERS SUPPORTED
-RETESC  RTS           ;  SO RETURN
-*
-********************************* SET SCREEN CURSOR
-*
-ESCCUR  TST  NEWROW   ; ROW SET?
-        BNE  ESCCU1   ; BRANCH IF SO
-        STA  NEWROW   ; ELSE SET NEW ROW
-        RTS           ;  AND RETURN
-*
-ESCCU1  CLR  ESCFLG
-        SUBA #$20      ; ADJUST COLUMN ADDRESS
-        CMPA #LINLEN-1 ; CHECK FOR ACCEPTABLE COLUM
-        BHI  RETESC    ; NOT OK, DO NOTHING
-*
-ESCCU2  LDB  NEWROW
-        CLR  NEWROW
-        SUBB #$20      ; ADJUST TO ROW ADDRESS
-        CMPB #NUMLIN-1 ; CHECK FOR ACCEPTABLE ROW
-        BHI  RETESC    ; ELSE RETURN DOING NOTHING
-        BRA  NEWCUR    ; GO SET NEW CURSOR IF SO
-*
-*************************** DELETE LINE FROM SCREEN
-*
-ESCDLL  BSR  CRETN     ; GO COL. ZERO
-        LDB  ROWADX
-        CMPB #NUMLIN-1
-        BEQ  SCROL3
-        BRA  SCROL1    ; AND DELETE THIS LINE
-*
-*************************** INSERT LINE INTO SCREEN
-*
-ESCINL  BSR  CRETN     ; GO TO COL. ZERO
-        LDB  ROWADX
-        CMPB #NUMLIN-1
-        BEQ  ESCCLL
-*
-** SCROLL SCREEN DOWN FROM CURSOR
-*
-        LDX  #SCREEN+SCNLEN-LINLEN
-ESCIN0  LDA  ,-X
-        STA  LINLEN,X
-        LDA  SCNLEN,X
-        STA  SCNLEN+LINLEN,X
-        CMPX CURSOR
-        BNE  ESCIN0
-*
-****************** CLEAR FROM CURSOR TO END OF LINE
-*
-ESCCLL  LDA  COLADX    ; GET CURRENT COLUMN
-        LDX  CURSOR    ; GET CURSOR
-        LDB  #$20      ; AND CLEAR CHAR
-ESCLL1  STB  SCNLEN,X  ; CLEAR ATTRIBUTE
-        STB  ,X+       ; CLEAR TEXT
-        INCA
-        CMPA #LINLEN   ; UNTIL END OF LINE
-        BNE  ESCLL1
-        CLR  ESCFLG
-        RTS
-*
-*********************************** CARRIAGE RETURN
-*
-CRETN   CLRA           ; SET COLUMN ZERO
-POSCOL  LDB  ROWADX    ; GET CURRENT ROW
-*
-*********** GENERATE NEW CURSOR POSITION AND RETURN
-*
-NEWCUR  STD  COLADX    ; SAVE NEW ROW AND COLUMN
-        LDA  #LINLEN   ; ELSE ADD A LINE
-        MUL            ; LINLEN * ROWADX
-        ADDB COLADX
-        ADCA #0
-        ADDD #SCREEN   ; ADD SCREEN BASE.
-        STD  CURSOR    ; SAVE NEW CURSOR
-        TFR  D,X       ; GET CURSOR IN X
-        RTS            ; AND RETURN
-*
-********************* UPDATE CURRENT COLUMN AND ROW
-*
-NEWCOL  LDD  COLADX    ; GET ROW AND COLUMN
-        INCA           ; BUMP COLUMN
-        CMPA #LINLEN   ; ROLL?
-        BNE  NEWCUR    ; BRANCH IF NOT
-        CLRA           ; ELSE RESET TO ZERO
-        INCB           ; AND BUMP ROW
-        CMPB #NUMLIN
-        BNE  NEWCUR
-        DECB           ; BOTTOM ROW
-        BSR  NEWCUR
-*
-********************************* SCROLL THE SCREEN
-*
-SCROLL  LDX  #SCREEN   ; POINT TO SCREEN
-SCROL1  LDA  SCNLEN+LINLEN,X
-        STA  SCNLEN,X
-        LDA  LINLEN,X  ; MOVE TWO BYTES
-        STA  ,X+       ; UP ONE LINE
-        CMPX #SCREEN+SCNLEN-LINLEN
-        BNE  SCROL1    ; LOOP UNTIL DONE
-        BRA  SCROL3
-*
-**************** CLEAR FROM CURSOR TO END OF SCREEN
-*
-ESCCLS  LDX   CURSOR   ; GET CURSOR
-SCROL3  LDA   #$20     ; GET A SPACE
-SCROL2  STA   SCNLEN,X ; CLEAR ATTRIBUTES
-        STA   ,X+      ; AND TEXT
-        CMPX  #SCREEN+SCNLEN
-        BNE   SCROL2   ; UNTIL DONE
-        CLR   ESCFLG
-        RTS
-        ENDIF DG640OPT
-*
-        IFD PRTOPT
-*************************************
-*
-** PRINTER DRIVER ROUTINES
-*
-*************************************
-*
-** PINIZ - INITIATE PRINTER PORT
-*
-PINIZ   PSHS B
-        LDD #DIRMSK*256+$04 ; ACCA=DIRMSK ACCB=$04
-        STD PADATA     ; SET DDR AND SELECT DATA
-*
-** RESET PRINTER
-*
-        LDB  #PRESET
-        STB  PADATA
-RESTLP  INCB           ; DELAY FOR RESET
-        BNE  RESTLP
-        STA  PADATA    ; ACCA=DIRMSK
-*
-** INITALIZE PORT B (DATA PORT)
-*
-        LDA  #$2A
-        STA  PBCTRL
-        LDD  #$FF2E    ; ACCA=$FF ACCB =%00101110
-        STD  PBDATA    ; PBDREG   PBCTRL
-*
-** SELECT 66 LINES/PAGE
-*
-        LDA  #$1B
-        BSR  POUTCH
-        LDA  #'C
-        BSR  POUTCH
-        LDA  #66
-        PULS B
-*************************************
-*
-** OUTPUT A CHARACTER TO THE PRINTER
-*
-*************************************
-POUTCH  PSHS B
-        LDB  PBDATA    ; CLEAR INTERRUPT BIT
-*
-** WAIT TILL NOT BUSY
-*
-BUSYLP  LDB  PADATA
-        BITB #PERROR
-        BEQ  PEXIT
-        TSTB
-        BMI  BUSYLP
-*
-** NOW OUTPUT CHARACTER
-*
-        STA  PBDATA
-PEXIT   PULS B,PC
-*************************************
-*
-** PCHK TEST IFD PRINTER READY
-*
-*************************************
-PCHK    TST  PBCTRL    ; TEST STATE OF CRB7
-        RTS            ; SET ON ACKNOWLEDGE
-        ENDIF PRTOPT
 *************************************
 *
 * MONITOR KEYBOARD COMMAND JUMP TABLE
@@ -1985,34 +1199,8 @@ JMPTAB  EQU *
         FDB DISSTK
         FCC 'X'
         FDB XBKPNT
-        IFD MFDCOPT
-        FCC 'D'        ; *** SWTPC USES 'U' FOR MINIBOOT
-        FDB MINBOOT
-        ENDIF MFDCOPT
-        IFD CF8OPT
-        FCC 'D'        ; *** FPGA 8 BIT USES 'D' FOR CFBOOT
-        FDB CFBOOT
-        ENDIF CF8OPT
-        IFD IDEOPT
-        FCC 'D'        ; *** XESS FPGA 16 BIT IDE USES 'D' FOR IDEBOOT
-        FDB IDEBOOT
-        ENDIF IDEOPT
-        IFD DMAFOPT
-        FCC 'U'        ; *** SWTPC USES 'D' FOR DMAF2 BOOT
-        FDB DBOOT
-        ENDIF DMAFOPT
-        IFD EXTOPT
-        FCC 'U'        ; *** IF FPGA, 'U' IS FOR USER
-        FDB USRCMD
-        ENDIF EXTOPT
-        IFD RTCOPT
-        FCC 'T'
-        FDB TIMSET
-        ENDIF RTCOPT
-        IFD TRAOPT
         FCC "T"
         FDB TRACE
-        ENDIF TRAOPT
 *
 TABEND  EQU *
 *
@@ -2037,31 +1225,8 @@ RAMVEC  FDB SWIE       ; USER-V
 * PRINTABLE MESSAGE STRINGS
 *
 MSG1    FCB  $D,$A,$0,$0,$0 * 0, CR/LF, 0
-        FCC  'SYS09BUG 1.7 FOR '
-        IFD  SWTOPT
-        FCC  'SWTPC'
-        ENDIF SWTOPT
-        IFD  ADSOPT
-        FCC  'ADS6809'
-        ENDIF ADSOPT
-        IFD  B3SOPT
-        FCC  'B3-S2+'
-        ENDIF B3SOPT
-        IFD  B5XOPT
-        FCC  'B5-X300'
-        ENDIF B5XOPT
-        IFD  S3SOPT
-        FCC  'S3STARTER'
-        ENDIF S3SOPT
-        IFD  S3EOPT
-        FCC  'S3E'
-        ENDIF S3EOPT
-        IFD  XESOPT
-        FCC  'XESS'
-        ENDIF XESOPT
-        IFD  DE270OPT
-        FCC  'DE2-70'
-        ENDIF DE270OPT
+        FCC  'SYS09BUG FOR '
+        FCC  'MDSYNTH'
         FCC ' - '
         FCB 4
 MSG2    FCB 'K,$0D,$0A,$00,$00,$00,$04 ; K,<CR>,<LF>,3 NULS,<EOT>
@@ -2092,189 +1257,13 @@ MSG18   FCC '  CC: '
 MSG19   FCC 'EFHINZVC'
 MSG20   FCC 'S1'
         FCB 4
-        IFD DATOPT
-*
-* POWER UP/ RESET/ NMI ENTRY POINT
-*
-        ORG $FF00
-*
-*
-START   LDX  #IC11    ; POINT TO DAT RAM IC11
-        LDA  #$0F     ; GET COMPLIMENT OF ZERO
-*
-*
-* INITIALIZE DAT RAM --- LOADS $F-$0 IN LOCATIONS $0-$F
-* OF DAT RAM, THUS STORING COMPLEMENT OF MSB OF ADDRESS
-* IN THE DAT RAM. THE COMPLEMENT IS REQUIRED BECAUSE THE
-* OUTPUT OF IC11, A 74S189, IS THE INVERSE OF THE DATA
-* STORED IN IT.
-*
-*
-DATLP   STA  ,X+       ; STORE & POINT TO NEXT RAM LOCATION
-        DECA           ; GET COMP. VALUE FOR NEXT LOCATION
-        BNE  DATLP     ; ALL 16 LOCATIONS INITIALIZED ?
-*
-* NOTE: IX NOW CONTAINS $0000, DAT RAM IS NO LONGER
-*       ADDRESSED, AND LOGICAL ADDRESSES NOW EQUAL
-*       PHYSICAL ADDRESSES.
-*
-        LDA  #$F0
-        STA  ,X        ; STORE $F0 AT $FFFF
-        LDX  #$D0A0    ; ASSUME RAM TO BE AT $D000-$DFFF
-        LDY  #TSTPAT   ; LOAD TEST DATA PATTERN INTO "Y"
-TSTRAM  LDU  ,X        ; SAVE DATA FROM TEST LOCATION
-        STY  ,X        ; STORE TEST PATTERN AT $D0A0
-        CMPY ,X        ; IS THERE RAM AT THIS LOCATION ?
-        BEQ  CNVADR    ; IF MATCH THERE'S RAM, SO SKIP
-        LEAX -$1000,X  ; ELSE POINT 4K LOWER
-        CMPX #$F0A0    ; DECREMENTED PAST ZER0 YET ?
-        BNE  TSTRAM    ; IF NOT CONTINUE TESTING FOR RAM
-        BRA  START     ; ELSE START ALL OVER AGAIN
-*
-*
-* THE FOLLOWING CODE STORES THE COMPLEMENT OF
-* THE MS CHARACTER OF THE FOUR CHARACTER HEX
-* ADDRESS OF THE FIRST 4K BLOCK OF RAM LOCATED
-* BY THE ROUTINE "TSTRAM" INTO THE DAT RAM. IT
-* IS STORED IN RAM IN THE LOCATION THAT IS
-* ADDRESSED WHEN THE PROCESSOR ADDRESS IS $D---,
-* THUS IF THE FIRST 4K BLOCK OF RAM IS FOUND
-* WHEN TESTING LOCATION $70A0, MEANING THERE
-* IS NO RAM PHYSICALLY ADDRESSED IN THE RANGE
-* $8000-$DFFF, THEN THE COMPLEMENT OF THE
-* "7" IN THE $70A0 WILL BE STORED IN
-* THE DAT RAM. THUS WHEN THE PROCESSOR OUTPUTS
-* AN ADDRESS OF $D---, THE DAT RAM WILL RESPOND
-* BY RECOMPLEMENTING THE "7" AND OUTPUTTING THE
-* 7 ONTO THE A12-A15 ADDRESS LINES. THUS THE
-* RAM THAT IS PHYSICALLY ADDRESSED AT $7---
-* WILL RESPOND AND APPEAR TO THE 6809 THAT IT
-* IS AT $D--- SINCE THAT IS THE ADDRESS THE
-* 6809 WILL BE OUTPUTING WHEN THAT 4K BLOCK
-* OF RAM RESPONDS.
-*
-*
-CNVADR  STU  ,X        ; RESTORE DATA AT TEST LOCATION
-        TFR  X,D       ; PUT ADDR. OF PRESENT 4K BLOCK IN D
-        COMA           ; COMPLEMENT MSB OF THAT ADDRESS
-        LSRA           ; PUT MS 4 BITS OF ADDRESS IN
-        LSRA           ; LOCATION D0-D3 TO ALLOW STORING
-        LSRA           ; IT IN THE DYNAMIC ADDRESS
-        LSRA           ; TRANSLATION RAM.
-        STA  $FFFD     ; STORE XLATION FACTOR IN DAT "D"
-*
-        LDS  #STACK    ; INITIALIZE STACK POINTER
-*
-*
-* THE FOLLOWING CHECKS TO FIND THE REAL PHYSICAL ADDRESSES
-* OF ALL 4K BLKS OF RAM IN THE SYSTEM. WHEN EACH 4K BLK
-* OF RAM IS LOCATED, THE COMPLEMENT OF IT'S REAL ADDRESS
-* IS THEN STORED IN A "LOGICAL" TO "REAL" ADDRESS XLATION
-* TABLE THAT IS BUILT FROM $DFD0 TO $DFDF. FOR EXAMPLE IF
-* THE SYSTEM HAS RAM THAT IS PHYSICALLY LOCATED (WIRED TO
-* RESPOND) AT THE HEX LOCATIONS $0--- THRU $F---....
-*
-*  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-* 4K 4K 4K 4K 4K 4K 4K 4K -- 4K 4K 4K 4K -- -- --
-*
-* ....FOR A TOTAL OF 48K OF RAM, THEN THE TRANSLATION TABLE
-* CREATED FROM $DFD0 TO $DFDF WILL CONSIST OF THE FOLLOWING....
-*
-*  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-* 0F 0E 0D 0C 0B 0A 09 08 06 05 00 00 04 03 F1 F0
-*
-*
-* HERE WE SEE THE LOGICAL ADDRESSES OF MEMORY FROM $0000-$7FFF
-* HAVE NOT BEEN SELECTED FOR RELOCATION SO THAT THEIR PHYSICAL
-* ADDRESS WILL = THEIR LOGICAL ADDRESS; HOWEVER, THE 4K BLOCK
-* PHYSICALLY AT $9000 WILL HAVE ITS ADDRESS TRANSLATED SO THAT
-* IT WILL LOGICALLY RESPOND AT $8000. LIKEWISE $A,$B, AND $C000
-* WILL BE TRANSLATED TO RESPOND TO $9000,$C000, AND $D000
-* RESPECTIVELY. THE USER SYSTEM WILL LOGICALLY APPEAR TO HAVE
-* MEMORY ADDRESSED AS FOLLOWS....
-*
-*  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
-* 4K 4K 4K 4K 4K 4K 4K 4K 4K 4K -- -- 4K 4K -- --
-*
-*
-        LDY  #LRARAM   ; POINT TO LOGICAL/REAL ADDR. TABLE
-        STA  13,Y      ; STORE $D--- XLATION FACTOR AT $DFDD
-        CLR  14,Y      ; CLEAR $DFDE
-        LDA  #$F0      ; DESTINED FOR IC8 AN MEM EXPANSION ?
-        STA  15,Y      ; STORE AT $DFDF
-        LDA  #$0C      ; PRESET NUMBER OF BYTES TO CLEAR
-CLRLRT  CLR  A,Y       ; CLEAR $DFDC THRU $DFD0
-        DECA           ; SUB. 1 FROM BYTES LEFT TO CLEAR
-        BPL  CLRLRT    ; CONTINUE IF NOT DONE CLEARING
-FNDRAM  LEAX -$1000,X  ; POINT TO NEXT LOWER 4K OF RAM
-        CMPX #$F0A0    ; TEST FOR DECREMENT PAST ZERO
-        BEQ  FINTAB    ; SKIP IF FINISHED
-        LDU  ,X        ; SAVE DATA AT CURRENT TEST LOCATION
-        LDY  #TSTPAT   ; LOAD TEST DATA PATTERN INTO Y REG.
-        STY  ,X        ; STORE TEST PATT. INTO RAM TEST LOC.
-        CMPY ,X        ; VERIFY RAM AT TEST LOCATION
-        BNE  FNDRAM    ; IF NO RAM GO LOOK 4K LOWER
-        STU  ,X        ; ELSE RESTORE DATA TO TEST LOCATION
-        LDY  #LRARAM   ; POINT TO LOGICAL/REAL ADDR. TABLE
-        TFR  X,D       ; PUT ADDR. OF PRESENT 4K BLOCK IN D
-        LSRA           ; PUT MS 4 BITS OF ADDR. IN LOC. D0-D3
-        LSRA           ; TO ALLOW STORING IT IN THE DAT RAM.
-        LSRA
-        LSRA
-        TFR  A,B       ; SAVE OFFSET INTO LRARAM TABLE
-        EORA #$0F      ; INVERT MSB OF ADDR. OF CURRENT 4K BLK
-        STA  B,Y       ; SAVE TRANSLATION FACTOR IN LRARAM TABLE
-        BRA  FNDRAM    ; GO TRANSLATE ADDR. OF NEXT 4K BLK
-FINTAB  LDA  #$F1      ; DESTINED FOR IC8 AND MEM EXPANSION ?
-        LDY  #LRARAM   ; POINT TO LRARAM TABLE
-        STA  14,Y      ; STORE $F1 AT $DFCE
-*
-* THE FOLLOWING CHECKS TO SEE IF THERE IS A 4K BLK OF
-* RAM LOCATED AT $C000-$CFFF. IF NONE THERE IT LOCATES
-* THE NEXT LOWER 4K BLK AN XLATES ITS ADDR SO IT
-* LOGICALLY RESPONDS TO THE ADDRESS $C---.
-*
-*
-        LDA  #$0C      ; PRESET NUMBER HEX "C"
-FINDC   LDB  A,Y       ; GET ENTRY FROM LRARAM TABLE
-        BNE  FOUNDC    ; BRANCH IF RAM THIS PHYSICAL ADDR.
-        DECA           ; ELSE POINT 4K LOWER
-        BPL  FINDC     ; GO TRY AGAIN
-        BRA  XFERTF
-FOUNDC  CLR  A,Y       ; CLR XLATION FACTOR OF 4K BLOCK FOUND
-        STB  $0C,Y     ; GIVE IT XLATION FACTOR MOVING IT TO $C---
-*
-* THE FOLLOWING CODE ADJUSTS THE TRANSLATION
-* FACTORS SUCH THAT ALL REMAINING RAM WILL
-* RESPOND TO A CONTIGUOUS BLOCK OF LOGICAL
-* ADDRESSES FROM $0000 AND UP....
-*
-        CLRA           ; START AT ZERO
-        TFR  Y,X       ; START POINTER "X" START OF "LRARAM" TABLE.
-COMPRS  LDB  A,Y       ; GET ENTRY FROM "LRARAM" TABLE
-        BEQ  PNTNXT    ; IF IT'S ZER0 SKIP
-        CLR  A,Y       ; ELSE ERASE FROM TABLE
-        STB  ,X+       ; AND ENTER ABOVE LAST ENTRY- BUMP
-PNTNXT  INCA           ; GET OFFSET TO NEXT ENTRY
-        CMPA #$0C      ; LAST ENTRY YET ?
-        BLT  COMPRS
-*
-* THE FOLLOWING CODE TRANSFER THE TRANSLATION
-* FACTORS FROM THE LRARAM TABLE TO IC11 ON
-* THE MP-09 CPU CARD.
-*
-XFERTF  LDX  #IC11     ; POINT TO DAT RAM IC11
-        LDB  #$10      ; GET NO. OF BYTES TO MOVE
-FETCH   LDA  ,Y+       ; GET BYTE AND POINT TO NEXT
-        STA  ,X+       ; POKE XLATION FACTOR IN IC11
-        DECB           ; SUB 1 FROM BYTES TO MOVE
-        BNE  FETCH     ; CONTINUE UNTIL 16 MOVED
-*
-        ELSE
 LRA     RTS
+
+****************************************************
+* START
+*
 START   LDS  #STACK    ; INITIALIZE STACK POINTER
         CLRB
-        ENDIF DATOPT
 *
         COMB           ; SET "B" NON-ZERO
         STB  ECHO      ; TURN ON ECHO FLAG
