@@ -165,13 +165,13 @@ char **argv;
 	moveto(10, 5);
 	prints("Z, X: Octave +/-");
 	moveto(10, 6);
-	prints("C, V: PhMod Carrier PhD +/- (PhMod only)");
+	prints("C, V: PM Carrier PhD +/- (PM only)");
 	moveto(10, 7);
-	prints("B, N: Signal Gain +/- (PhMod only)");
+	prints("B, N: Message Gain +/- (Sine and PM only)");
 	moveto(10, 8);
-	prints("M, ',': Modulation Gain +/- (PhMod only)");
+	prints("M, ',': Modulation Gain +/- (PM only)");
 	moveto(10, 9);
-	prints("1, 2, 3, 4: Square/Saw/Sine/PhMod");
+	prints("1, 2, 3, 4: Square/Saw/Sine/PM");
 	moveto(10, 10);
 	prints("Spacebar: Quiet");
 	
@@ -199,18 +199,18 @@ char **argv;
 	while (1) {
 	
 		/* First, we check if we have an incoming MIDI note from the serial port */
-		c = sgetch();
-		if (c) {
+		if (scheckch()) {
+			c = sgetch();
 			if (c == 0x90) {
-				while (!(c = sgetch()));
+				c = sgetch();
 				if (psti < PSTACK_SIZE - 1) {
 					psti++;
 					pitch = c;
 					pstack[psti] = pitch;
 				}
-				while (!(c = sgetch()));
+				c = sgetch();
 			} else if (c == 0x80) {
-				while (!(c = sgetch()));
+				c = sgetch();
 				for (i = 1; i < psti; i++)
 					if (pstack[i] == c) {
 						for (; i < psti; i++)
@@ -220,20 +220,20 @@ char **argv;
 				if (psti > 0)
 					psti--;
 				pitch = pstack[psti];
-				while (!(c = sgetch()));
+				c = sgetch();
 			} else if (c == 0xB0) {
-				while (!(c = sgetch()));
+				c = sgetch();
 				if (c == 0x17) {
-					while (!(c = sgetch()));
+					c = sgetch();
 					waveform = c >> 4;
 				} else if (c == 0x18) {
-					while (!(c = sgetch()));
+					c = sgetch();
 					carrphd = c << 6;
 				} else if (c == 0x19) {
-					while (!(c = sgetch()));
+					c = sgetch();
 					gainmsg = c >> 1;
 				} else if (c == 0x1A) {
-					while (!(c = sgetch()));
+					c = sgetch();
 					gainmod = c >> 1;
 				}				
 				
@@ -254,8 +254,8 @@ char **argv;
 		}
 	
 		/* We check if we have an incoming key */
-		c = getch();
-		if (c) {
+		if (checkch()) {
+			c = getch();
 			newpitch = 1;
 			switch (c) {
 				case 'a':

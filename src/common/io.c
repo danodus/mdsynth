@@ -109,18 +109,37 @@ unsigned d16;
 	printh8(d16);
 }
 
+/* Check if a character from the PS/2 keyboard is available */
+int checkch()
+{
+	/* Check if the keyboard is ready */
+	if (*(KBD) & 0x1)
+		return -1;
+
+	return 0;
+}
+
 /* Get a character from the PS/2 keyboard */
 unsigned getch()
 {
 	unsigned c;
 	
-	/* Check if the keyboard is ready */
-	if (!(*(KBD) & 0x1))
-		return 0;
+	/* Wait until the keyboard is ready */
+	while (!(*(KBD) & 0x1));
 	
 	/* Return the key value */
 	c = *(KBD + 1);
 	return c & 0xFF;
+}
+
+/* Check if a character from the serial port is available */
+int scheckch()
+{
+	/* Check if the ACIA is ready */
+	if (*(ACIA) & 0x1)
+		return -1;
+		
+	return 0;
 }
 
 /* Get a character from the serial port */
@@ -128,9 +147,8 @@ unsigned sgetch()
 {
 	unsigned c;
 	
-	/* Check if the ACIA is ready */
-	if (!(*(ACIA) & 0x1))
-		return 0;
+	/* Wait until the the ACIA is ready */
+	while (!(*(ACIA) & 0x1));
 	
 	/* Return the character value */
 	c = *(ACIA + 1);
