@@ -76,7 +76,7 @@ unsigned pitch;
 
 		sndl[1] = phd >> 8;
 		sndl[2] = phd;
-		sndl[3] = octcarr;
+		sndl[3] = octcarr + octave;
 		
 		sndl[4] = gainmsg;
 		sndl[5] = gainmod;
@@ -85,7 +85,7 @@ unsigned pitch;
 		
 		sndr[1] = phd >> 8;
 		sndr[2] = phd;
-		sndr[3] = octcarr;
+		sndr[3] = octcarr + octave;
 		
 		sndr[4] = gainmsg;
 		sndr[5] = gainmod;
@@ -101,9 +101,9 @@ unsigned pitch;
 void prtstatus()
 {
 	moveto(16, 12);
-	printh8(octave);
+	printh4(octave);
 	moveto(16, 13);
-	printh8(octcarr);
+	printh4(octcarr);
 	moveto(16, 14);
 	printh8(gainmsg);			
 	moveto(16, 15);
@@ -140,7 +140,7 @@ char **argv;
 	phds[10] = 1251;
 	phds[11] = 1326;
 
-	octcarr = 4;
+	octcarr = 0;
 	waveform = 1;
 	
 	gainmsg = 63;
@@ -161,7 +161,7 @@ char **argv;
 	moveto(10, 5);
 	prints("Z, X: Octave +/-");
 	moveto(10, 6);
-	prints("C, V: Octave Carrier +/- (PM only)");
+	prints("C, V: Relative Octave Carrier +/- (PM only)");
 	moveto(10, 7);
 	prints("B, N: Message Gain +/- (Sine and PM only)");
 	moveto(10, 8);
@@ -183,7 +183,7 @@ char **argv;
 	moveto(0, 17);
 	prints("Phase Modulation:");
 	moveto(10, 18);
-	prints("y(t) = modulated_gain * sin(m(t) + 2*pi*octave_carrier*freq*t)");
+	prints("y(t) = modulated_gain * sin(m(t) + 2*pi*(octave+octave_carr)*freq*t)");
 	moveto(10, 19);
 	prints("where m(t) = message_gain * sin(2*pi*octave*freq*t)");
 	
@@ -252,109 +252,121 @@ char **argv;
 		/* We check if we have an incoming key */
 		if (checkch()) {
 			c = getch();
-			newpitch = 1;
+			newpitch = 0;
 			switch (c) {
 				case 'a':
 				case 'A':
 				note = 0;
+				newpitch = 1;
 				break;
 
 				case 'w':
 				case 'W':
 				note = 1;
+				newpitch = 1;
 				break;
 
 				case 's':
 				case 'S':
 				note = 2;
+				newpitch = 1;
 				break;
 
 				case 'E':
 				case 'e':
 				note = 3;
+				newpitch = 1;
 				break;
 
 				case 'd':
 				case 'D':
 				note = 4;
+				newpitch = 1;
 				break;
 
 				case 'f':
 				case 'F':
 				note = 5;
+				newpitch = 1;
 				break;
 				
 				case 't':
 				case 'T':
 				note = 6;
+				newpitch = 1;
 				break;
 				
 				case 'g':
 				case 'G':
 				note = 7;
+				newpitch = 1;
 				break;
 				
 				case 'y':
 				case 'Y':
 				note = 8;
+				newpitch = 1;
 				break;
 				
 				case 'h':
 				case 'H':
 				note = 9;
+				newpitch = 1;
 				break;
 				
 				case 'u':
 				case 'U':
 				note = 10;
+				newpitch = 1;
 				break;
 				
 				case 'j':
 				case 'J':
 				note = 11;
+				newpitch = 1;
 				break;
 				
 				case 'z':
 				case 'Z':
-				if (octave > 0)
+				if (octave > 0) {
 					octave--;
+					newpitch = 1;
+				}
 				break;
 				
 				case 'x':
 				case 'X':
-				if (octave < 9)
+				if (octave < 9) {
 					octave++;
+					newpitch = 1;
+				}
 				break;
 				
 				case '1':
 				waveform = 1;
-				newpitch = 0;
 				break;
 				
 				case '2':
 				waveform = 2;
-				newpitch = 0;
 				break;
 				
 				case '3':
 				waveform = 3;
-				newpitch = 0;
 				break;
 				
 				case '4':
 				waveform = 4;
-				newpitch = 0;
 				break;
 
 				case 'c':
 				case 'C':
-				if (octcarr > 0)
+				if (octcarr > -8)
 					octcarr--;
 				break;
 				
 				case 'v':
 				case 'V':
-				if (octcarr < 15)
+				if (octcarr < 7)
 					octcarr++;
 				break;
 								
@@ -384,6 +396,7 @@ char **argv;
 				
 				case ' ':
 					note = -1; /* quiet */
+					newpitch = 1;
 			} /* switch */
 			
 			if (newpitch) {
