@@ -75,7 +75,7 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 6. Start a serial terminal at 57600-N-8-1;
 7. Program the FPGA using the PlanAhead project "rtl/mdsynth.ppr" (Spartan-3A) "rtl/mdsynth-s3estarter" (Spartan-3E);
 8. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
-9. Upload the text file "src/synth/synth.s19" using your serial terminal (Note: Forget the two "WHAT?" messages after the upload);
+9. Upload the text file "src/synth/synth.s19" using your serial terminal;
 10. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
 11. Type "1000" (this is the starting address of the synthesizer project);
 12. Type "g". You will see the user interface on the monitor of your synthesizer system;
