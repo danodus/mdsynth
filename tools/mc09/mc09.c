@@ -266,7 +266,7 @@ int skipspc();
 int getch();
 char escape();
 FILE *getfname();
-void getline();
+void getl();
 int macroeq(char *s);
 int car(int e);
 int cadr(int e);
@@ -342,7 +342,7 @@ int error(int n)
 		if(filep!=filestack)
 		{	lineno=filep->ln;
 			fclose(filep->fcb);
-			fprintf(stderr,"End of inclusion.\n");
+			fprintf(stdout,"End of inclusion.\n");
 			--filep;
 			return 0;
 		}
@@ -352,16 +352,17 @@ int error(int n)
 			return 0;
 		}
 		else if(mode == TOP)
-		{	fprintf(stderr,"\nCompiled %u lines.\n",glineno-1);
-			if (!chk) fprintf(stderr,
+		{	fprintf(stdout,"\nCompiled %u lines.\n",glineno-1);
+			if (!chk) fprintf(stdout,
 				"Total internal labels	: %u.\n",labelno-1);
-			fprintf(stderr,
+			fprintf(stdout,
 				"Total global variables : %u bytes.\n\n",gpc);
-			printf("_%d\tRTS\n_INITIALIZE\tEQU\t_1\n",ilabel);
-			printf("_GLOBALS\tEQU\t%u\n\tEND\n",gpc);
+			fprintf(obuf, "_%d\tRTS\n_INITIALIZE\tEQU\t_1\n",ilabel);
+			fprintf(obuf, "_GLOBALS\tEQU\t%u\n\tEND\n",gpc);
+			fclose(obuf);
 			exit(0);
 		}
-	fprintf(stderr,"%5d:%s.\n",lineno,
+	fprintf(stdout,"%5d:%s.\n",lineno,
 		(n==FILERR) ? "Can't open specified file" :
 		(n==DCERR) ? "Declaration syntax" :
 		(n==STERR) ? "Statement syntax" :
@@ -393,14 +394,14 @@ void errmsg()
 	if (lineno == 0)
         return;
 
-    fprintf(stderr,"%s",linebuf);
+    fprintf(stdout,"%s",linebuf);
 
     lim = (mflag ? chptrsave : chptr);
 
 	for (p = linebuf; p < lim;)
-		fprintf(stderr,(*p++ == '\t') ? "\t" : " ");
+		fprintf(stdout,(*p++ == '\t') ? "\t" : " ");
 
-	fprintf (stderr,"^\n");
+	fprintf (stdout,"^\n");
 }
 
 // ----------------------------------------------------------------------------    
@@ -412,7 +413,7 @@ void checksym(int s)
         p = (s == RPAR) ? "')'" : (s==RBRA) ? "']'": (s==SM) ? "';'":
 		  (s==LPAR) ? "'('": (s==WHILE) ? "'while'":
 		  (s==COLON) ? "':'": "Identifier";
-		fprintf(stderr,"%d:%s expected.\n",lineno,p);
+		fprintf(stdout,"%d:%s expected.\n",lineno,p);
 		errmsg();
 	}
 	else getsym();
@@ -454,14 +455,14 @@ void init()
 	lfree=HEAPSIZE;
 	filep=filestack;
 	newfile();
-	getline();
+	getl();
 	getch();
 }
 
 // ----------------------------------------------------------------------------    
 void newfile()
 {	lineno=0;
-	fprintf(stderr,"%s:\n",av[ac2]);
+	fprintf(stdout,"%s:\n",av[ac2]);
 	if ( (filep->fcb = fopen(av[ac2++],"r")) == NULL ) error(FILERR);
 }
 
@@ -681,7 +682,7 @@ void def(NMTBL *n)
 	sz = size(n->ty = type);
 	switch(mode)
 	{case GDECL:
-		printf("%s\tEQU\t%u\n",n->nm,gpc);
+		fprintf(obuf, "%s\tEQU\t%u\n",n->nm,gpc);
 	case STADECL:
 		nsc = GVAR;
 		ndsp = gpc;
@@ -689,7 +690,7 @@ void def(NMTBL *n)
 		{	t=type;
 			if(!scalar(t))
 				error(TYERR);
-			if(mode==STADECL) printf("\tBRA\t_%d\n",l=fwdlabel());
+			if(mode==STADECL) fprintf(obuf, "\tBRA\t_%d\n",l=fwdlabel());
 			fwddef(ilabel);
 			getsym();
 			slfree=lfree;
@@ -810,8 +811,8 @@ void fdecl(NMTBL *n)
 		mode=STAT;
 	}
 	control=1;
-	printf("%s\n\tPSHS\tU\n\tLEAU\t,S\n",n->nm);
-	if(disp) printf("\tLEAS\t%d,S\n",disp);
+	fprintf(obuf, "%s\n\tPSHS\tU\n\tLEAU\t,S\n",n->nm);
+	if(disp) fprintf(obuf, "\tLEAS\t%d,S\n",disp);
 	lvar= -disp;
 	while(sym!=RC) statement();
 	if (control) return2();
@@ -1049,7 +1050,7 @@ void doswitch()
 	checksym(RPAR);
 	cslabel = control = 0;
 	statement();
-	if(dlabel) printf("_%d\tEQU\t_%d\n",cslabel,dlabel);
+	if(dlabel) fprintf(obuf, "_%d\tEQU\t_%d\n",cslabel,dlabel);
 	else fwddef(cslabel);
 	cslabel=scase;
 	dlabel=sdefault;
@@ -1082,13 +1083,13 @@ void docase()
 	if (control)
 	{	control=0;
 		if (n>127) jmp(l);
-		else printf("\tBRA\t_%d\n",l);
+		else fprintf(obuf, "\tBRA\t_%d\n",l);
 	}
 	if (cslabel) fwddef(cslabel);
 	while(cadr(c))
 	{	cmpdimm(car(c));
 		if((n-=6)>127) jcond(l,0);
-		else printf("\tBEQ\t_%d\n",l);
+		else fprintf(obuf, "\tBEQ\t_%d\n",l);
 		c=cadr(c);
 	}
 	lfree=slfree;
@@ -1161,13 +1162,13 @@ void return2()
 // ----------------------------------------------------------------------------    
 void ret(char *reg)
 {
-    printf("\tPULS\t%sU,PC\n",reg);
+    fprintf(obuf, "\tPULS\t%sU,PC\n",reg);
 }
 
 // ----------------------------------------------------------------------------    
 void unlink2()
 {
-    printf("\tLEAS\t,U\n");
+    fprintf(obuf, "\tLEAS\t,U\n");
 	ret("");
 }
 
@@ -1922,20 +1923,20 @@ void bexpr(int e1, char cond, int l1)
 void rexpr(int e1, int l1, char *s)
 {
     gexpr(list3(SUB,cadr(e1),caddr(e1)));
-	printf("\tLB%s\t_%d\n",s,l1);
+	fprintf(obuf, "\tLB%s\t_%d\n",s,l1);
 }
 
 // ----------------------------------------------------------------------------    
 void jcond(int l, char cond)
 {
-    printf("\tLB%s\t_%d\n",cond?"NE":"EQ",l);
+    fprintf(obuf, "\tLB%s\t_%d\n",cond?"NE":"EQ",l);
 }
 
 // ----------------------------------------------------------------------------    
 void jmp(int l)
 {
     control=0;
-	printf("\tLBRA\t_%d\n",l);
+	fprintf(obuf, "\tLBRA\t_%d\n",l);
 }
 
 // ----------------------------------------------------------------------------    
@@ -1947,14 +1948,14 @@ int fwdlabel()
 // ----------------------------------------------------------------------------    
 fwddef(int l)
 {	control=1;
-	printf("_%d\n",l);
+	fprintf(obuf, "_%d\n",l);
 }
 
 // ----------------------------------------------------------------------------    
 int backdef()
 {	
     control=1;
-	printf("_%d\n",labelno);
+	fprintf(obuf, "_%d\n",labelno);
 	return labelno++;
 }
 // ----------------------------------------------------------------------------    
@@ -2010,11 +2011,11 @@ void gexpr(int e1)
 		return;
 	case MINUS:
 		gexpr(e2);
-		printf("\tNEGA\n\tNEGB\n\tSBCA\t#0\n");
+		fprintf(obuf, "\tNEGA\n\tNEGB\n\tSBCA\t#0\n");
 		return;
 	case BNOT:
 		gexpr(e2);
-		printf("\tCOMA\n\tCOMB\n");
+		fprintf(obuf, "\tCOMA\n\tCOMB\n");
 		return;
 	case PREINC:
 		switch (car(e2))
@@ -2137,7 +2138,7 @@ void gexpr(int e1)
 	default:
 		bexpr(e1,1,e2=fwdlabel());
 		clrd();
-		printf("\tBRA\t*+5\n");
+		fprintf(obuf, "\tBRA\t*+5\n");
 		fwddef(e2);
 		lddim(1);
 	}
@@ -2151,13 +2152,13 @@ void string(int e1)
 	s=(char *)cadr(e1);
 	lb=fwdlabel();
 	if ((l = caddr(e1)) < 128)
-		printf("\tLEAX\t2,PC\n\tBRA\t_%d\n",lb);
+		fprintf(obuf, "\tLEAX\t2,PC\n\tBRA\t_%d\n",lb);
 	else
-		printf("\tLEAX\t3,PC\n\tLBRA\t_%d\n",lb);
+		fprintf(obuf, "\tLEAX\t3,PC\n\tLBRA\t_%d\n",lb);
 	do
-	{	printf("\tFCB\t%d",*s++);
-		for (i=8; --l && --i;) printf(",%d",*s++);
-		printf("\n");
+	{	fprintf(obuf, "\tFCB\t%d",*s++);
+		for (i=8; --l && --i;) fprintf(obuf, ",%d",*s++);
+		fprintf(obuf, "\n");
 	}
 	while (l);
 	fwddef(lb);
@@ -2188,13 +2189,13 @@ void function(int e1)
 	}
 	if (car(e2) == FNAME)
 	{	n=(NMTBL *)cadr(e2);
-		printf("\tLBSR\t%s\n",n->nm);
+		fprintf(obuf, "\tLBSR\t%s\n",n->nm);
 	}
 	else
 	{	gexpr(e2);
-		printf("\tJSR\t,X\n");
+		fprintf(obuf, "\tJSR\t,X\n");
 	}
-	if (nargs) printf("\tLEAS\t%d,S\n",2*nargs);
+	if (nargs) fprintf(obuf, "\tLEAS\t%d,S\n",2*nargs);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2469,10 +2470,10 @@ void oprt1(int op, char *index, int n)
 {	
     switch (op)
 	{case ADD:
-		printf("\tADDD\t%d,%s\n",n,index);
+		fprintf(obuf, "\tADDD\t%d,%s\n",n,index);
 		return;
 	case SUB:
-		printf("\tSUBD\t%d,%s\n",n,index);
+		fprintf(obuf, "\tSUBD\t%d,%s\n",n,index);
 		return;
 	case BAND: case EOR: case BOR:
 		dualop(op,index,n);
@@ -2487,7 +2488,7 @@ void dualop(int op, char *index, int n)
 	ops =  ((op == BAND) ? "AND" :
 		(op == EOR)  ? "EOR" :
 		(op == BOR)  ? "OR"  : (char *)DEBUG);
-	printf("\t%sA\t%d,%s\n\t%sB\t%d+1,%s\n",ops,n,index,ops,n,index);
+	fprintf(obuf, "\t%sA\t%d,%s\n\t%sB\t%d+1,%s\n",ops,n,index,ops,n,index);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2513,7 +2514,7 @@ void dualc(int op, int n)
 	ops =  ((op == BAND) ? "AND" :
 		(op == EOR)  ? "EOR" :
 		(op == BOR)  ? "OR"  : (char *)DEBUG);
-	printf("\t%sA\t#%d\n\t%sB\t#%d\n",ops,(n >> 8) & 0xff,ops,n & 0xff);
+	fprintf(obuf, "\t%sA\t#%d\n\t%sB\t#%d\n",ops,(n >> 8) & 0xff,ops,n & 0xff);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2542,91 +2543,91 @@ void dualtosop(int op)
 	ops =  ((op == BAND) ? "AND" :
 		(op == EOR)  ? "EOR" :
 		(op == BOR)  ? "OR"  : (char *)DEBUG);
-	printf("\t%sA\t,S+\n\t%sB\t,S+\n",ops,ops);
+	fprintf(obuf, "\t%sA\t,S+\n\t%sB\t,S+\n",ops,ops);
 }
 
 // ----------------------------------------------------------------------------    
 void pushd()
 {
-    printf("\tPSHS\tD\n");
+    fprintf(obuf, "\tPSHS\tD\n");
 }
 
 // ----------------------------------------------------------------------------    
 void pushx()
 {
-    printf("\tPSHS\tX\n");
+    fprintf(obuf, "\tPSHS\tX\n");
 }
 
 // ----------------------------------------------------------------------------    
 void pulld()
 {
-    printf("\tPULS\tD\n");
+    fprintf(obuf, "\tPULS\tD\n");
 }
 
 // ----------------------------------------------------------------------------    
 void pulx()
 {
-    printf("\tPULS\tX\n");
+    fprintf(obuf, "\tPULS\tX\n");
 }
 
 // ----------------------------------------------------------------------------    
 void tfrdx()
 {
-    printf("\tTFR\tD,X\n");
+    fprintf(obuf, "\tTFR\tD,X\n");
 }
 
 // ----------------------------------------------------------------------------    
 void tfrxd()
 {
-    printf("\tTFR\tX,D\n");
+    fprintf(obuf, "\tTFR\tX,D\n");
 }
 
 // ----------------------------------------------------------------------------    
 void asld()
 {	
-    printf("\tASLB\n\tROLA\n");
+    fprintf(obuf, "\tASLB\n\tROLA\n");
 }
 
 // ----------------------------------------------------------------------------    
 void adddim(n)
 {	
-    printf("\tADDD\t#%d\n",n);
+    fprintf(obuf, "\tADDD\t#%d\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void subdim(n)
 {	
-    printf("\tSUBD\t#%d\n",n);
+    fprintf(obuf, "\tSUBD\t#%d\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void cmpdimm(int n)
 {	
-    printf("\tCMPD\t#%d\n",n);
+    fprintf(obuf, "\tCMPD\t#%d\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void addds()
 {
-    printf("\tADDD\t,S++\n");
+    fprintf(obuf, "\tADDD\t,S++\n");
 }
 
 // ----------------------------------------------------------------------------    
 void subds()
 {
-    printf("\tSUBD\t,S++\n");
+    fprintf(obuf, "\tSUBD\t,S++\n");
 }
 
 // ----------------------------------------------------------------------------    
 void clrd()
 {	
-    printf("\tCLRA\n\tCLRB\n");
+    fprintf(obuf, "\tCLRA\n\tCLRB\n");
 }
 
 // ----------------------------------------------------------------------------    
 void lddim(int n)
 {
-    printf("\tLDD\t#%d\n",n);
+    fprintf(obuf, "\tLDD\t#%d\n",n);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2647,19 +2648,19 @@ void ldd(int e)
 // ----------------------------------------------------------------------------    
 void lddx()
 {	
-    printf("\tLDD\t,X\n");
+    fprintf(obuf, "\tLDD\t,X\n");
 }
 
 // ----------------------------------------------------------------------------    
 void lddy(int n)
 {
-    printf("\tLDD\t%d,Y\n",n);
+    fprintf(obuf, "\tLDD\t%d,Y\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void lddu(int n)
 {	
-    printf("\tLDD\t%d,U\n",n);
+    fprintf(obuf, "\tLDD\t%d,U\n",n);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2680,67 +2681,67 @@ void std(int e)
 // ----------------------------------------------------------------------------    
 void stdx()
 {
-    printf("\tSTD\t,X\n");
+    fprintf(obuf, "\tSTD\t,X\n");
 }
 
 // ----------------------------------------------------------------------------    
 void stdy(int n)
 {
-    printf("\tSTD\t%d,Y\n",n);
+    fprintf(obuf, "\tSTD\t%d,Y\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void stdu(int n)
 {
-    printf("\tSTD\t%d,U\n",n);
+    fprintf(obuf, "\tSTD\t%d,U\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void ldbx()
 {
-    printf("\tLDB\t,X\n");
+    fprintf(obuf, "\tLDB\t,X\n");
 }
 
 // ----------------------------------------------------------------------------    
 void ldby(int n)
 {
-    printf("\tLDB\t%d,Y\n",n);
+    fprintf(obuf, "\tLDB\t%d,Y\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void ldbu(int n)
 {
-    printf("\tLDB\t%d,U\n",n);
+    fprintf(obuf, "\tLDB\t%d,U\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void predecx(char *op, int l)
 {
-    printf("\t%s\t,%sX\n",op,(l == -1 ? "-" : "--"));
+    fprintf(obuf, "\t%s\t,%sX\n",op,(l == -1 ? "-" : "--"));
 }
 
 // ----------------------------------------------------------------------------    
 void postincx(char *op, int l)
 {
-    printf("\t%s\t,X%s\n",op,(l == 1 ? "+" : "++"));
+    fprintf(obuf, "\t%s\t,X%s\n",op,(l == 1 ? "+" : "++"));
 }
 
 // ----------------------------------------------------------------------------    
 void leaxy(int n)
 {
-    printf("\tLEAX\t%d,Y\n",n);
+    fprintf(obuf, "\tLEAX\t%d,Y\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void leaxu(int n)
 {	
-    printf("\tLEAX\t%d,U\n",n);
+    fprintf(obuf, "\tLEAX\t%d,U\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void leaxpcr(NMTBL *n)
 {
-    printf("\tLEAX\t%s,PCR\n",n->nm);
+    fprintf(obuf, "\tLEAX\t%s,PCR\n",n->nm);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2761,13 +2762,13 @@ void ldx(int e)
 // ----------------------------------------------------------------------------    
 void ldxy(int n)
 {
-    printf("\tLDX\t%d,Y\n",n);
+    fprintf(obuf, "\tLDX\t%d,Y\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void ldxu(int n)
 {
-    printf("\tLDX\t%d,U\n",n);
+    fprintf(obuf, "\tLDX\t%d,U\n",n);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2788,43 +2789,43 @@ void stx(int e)
 // ----------------------------------------------------------------------------    
 void stxy(int n)
 {	
-    printf("\tSTX\t%d,Y\n",n);
+    fprintf(obuf, "\tSTX\t%d,Y\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void stxu(int n)
 {	
-    printf("\tSTX\t%d,U\n",n);
+    fprintf(obuf, "\tSTX\t%d,U\n",n);
 }
 
 // ----------------------------------------------------------------------------    
 void sex()
 {	
-    printf("\tSEX\n");
+    fprintf(obuf, "\tSEX\n");
 }
 
 // ----------------------------------------------------------------------------    
 void incx()
 {	
-    printf("\tINC\t,X\n");
+    fprintf(obuf, "\tINC\t,X\n");
 }
 
 // ----------------------------------------------------------------------------    
 void decx()
 {	
-    printf("\tDEC\t,X\n");
+    fprintf(obuf, "\tDEC\t,X\n");
 }
 
 // ----------------------------------------------------------------------------    
 void opdx(char *op)
 {
-    printf("\t%s\tD,X\n",op);
+    fprintf(obuf, "\t%s\tD,X\n",op);
 }
 
 // ----------------------------------------------------------------------------    
 void indexx(char *op, int n)
 {
-    printf("\t%s\t%d,X\n",op,n);
+    fprintf(obuf, "\t%s\t%d,X\n",op,n);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2845,13 +2846,13 @@ void index_(char *op, int e)
 // ----------------------------------------------------------------------------    
 void indexy(char *op, int n)
 {
-    printf("\t%s\t%d,Y\n",op,n);
+    fprintf(obuf, "\t%s\t%d,Y\n",op,n);
 }
 
 // ----------------------------------------------------------------------------    
 void indexu(char *op, int n)
 {
-    printf("\t%s\t%d,U\n",op,n);
+    fprintf(obuf, "\t%s\t%d,U\n",op,n);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2872,13 +2873,13 @@ void indir(char *op, int e)
 // ----------------------------------------------------------------------------    
 void indiry(char *op, int n)
 {
-    printf("\t%s\t[%d,Y]\n",op,n);
+    fprintf(obuf, "\t%s\t[%d,Y]\n",op,n);
 }
 
 // ----------------------------------------------------------------------------    
 void indiru(char *op, int n)
 {
-    printf("\t%s\t[%d,U]\n",op,n);
+    fprintf(obuf, "\t%s\t[%d,U]\n",op,n);
 }
 
 // ----------------------------------------------------------------------------    
@@ -2900,7 +2901,7 @@ void binexpr(int e1)
 // ----------------------------------------------------------------------------    
 void library(int op)
 {
-    printf("\tLBSR\t_0000%d\n",
+    fprintf(obuf, "\tLBSR\t_0000%d\n",
 	       ((op == MUL || op == UMUL) ? 1 :
 		(op == DIV)	? 2 :
 		(op == UDIV)	? 3 :
@@ -3139,7 +3140,7 @@ int getch()
 {	
     if(*chptr) return ch= *chptr++;
 	if(mflag) {mflag=0;chptr=chptrsave;return ch=chsave;}
-	getline();
+	getl();
 	return getch();
 }
 
@@ -3194,7 +3195,7 @@ FILE *getfname()
 }
 
 // ----------------------------------------------------------------------------    
-void getline()
+void getl()
 {
     int i;
     int c;
@@ -3210,7 +3211,7 @@ void getline()
 		}
 	}
 	*chptr = '\0';
-	if (lsrc && !asmf) printf("* %s",linebuf);
+	if (lsrc && !asmf) fprintf(obuf, "* %s",linebuf);
 	if (*(chptr = linebuf) == '#')
 	{	++chptr;
 		if (macroeq("define"))
@@ -3235,7 +3236,7 @@ void getline()
 			*(chptr = linebuf) = '\0';
 		}
 		else if (macroeq("include"))
-		{	fprintf(stderr,"%s",linebuf);
+		{	fprintf(stdout,"%s",linebuf);
 			if(filep+1 >= filestack + FILES) error(FILERR);
 			if ( ((filep+1)->fcb=getfname()) == NULL) error(FILERR);
 			(filep+1)->ln=lineno;
@@ -3246,10 +3247,10 @@ void getline()
 		else if (macroeq("asm"))
 		{	if (asmf) error(MCERR);
 			asmf = 1;
-			getline();
+			getl();
 			while (asmf)
-			{	printf("%s",linebuf);
-				getline();
+			{	fprintf(obuf, "%s",linebuf);
+				getl();
 			}
 		}
 		else if (macroeq("endasm"))
@@ -3257,7 +3258,7 @@ void getline()
 			asmf = 0;
 		}
 		else if (macroeq(" "))
-			getline();
+			getl();
 		else error(MCERR);
 	}
 }

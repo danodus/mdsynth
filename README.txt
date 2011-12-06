@@ -37,14 +37,14 @@ All the source files of the toolset are provided. The following is provided:
 - A C compiler (tools/mc09);
 - S19 to VHDL (tools/s19tovhd) for producing the ROM file.
 
-The toolset executables are included for Windows under the Release directory. A Microsoft Visual C++ 2008 Express solution is also included.
+You will find Makefiles for Linux. I personally use the great CentOS-6 distribution. This distribution is compatible with Xilinx ISE 13.3.
 
 The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-1 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
 The chain is the following:
 	"C" -- [ C compiler ] --> "ASM" -- [ 6809 assembler ] --> "S19" -- [ Serial upload with SYS09BUG ROM ] --> FPGA Block RAM Memory
 
-The C compiler based on the public domain Micro-C is tiny (around 3K lines of code in a single file) and is quite impressive for its size (something I tend to appreciate when working with a 8-bit CPU!). I like the idea of having a small compiler easily adaptable for other processors. Obviously, no optimization is done and everything is done in a single pass, so there is no separation between data and code. It also only implement a subset of the C language. 
+The C compiler based on the public domain Micro-C is tiny (around 3K lines of code in a single file) and is quite impressive for its size. Obviously, no optimization is done and everything is done in a single pass, so there is no separation between data and code. It also only implement a subset of the C language. 
 
 If you plan to use this tiny C compiler, please read the README file located the project for known limitations and issues I encountered.
 	

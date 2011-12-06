@@ -339,6 +339,10 @@ printh4
 	PSHS	U
 	LEAU	,S
 	LDD	4,U
+	ANDA	#0
+	ANDB	#15
+	STD	4,U
+	LDD	4,U
 	SUBD	#9
 	LBLS	_10
 	LDD	4,U
@@ -359,6 +363,10 @@ _11
 printh8
 	PSHS	U
 	LEAU	,S
+	LDD	4,U
+	ANDA	#0
+	ANDB	#255
+	STD	4,U
 	LDD	#4
 	PSHS	D
 	LDD	4,U
@@ -368,16 +376,29 @@ printh8
 	LBSR	printh4
 	LEAS	2,S
 	LDD	4,U
-	ANDA	#0
-	ANDB	#15
 	PSHS	D
 	LBSR	printh4
 	LEAS	2,S
 	PULS	U,PC
-getch
+printh16
 	PSHS	U
 	LEAU	,S
-_13
+	LDD	#8
+	PSHS	D
+	LDD	4,U
+	PULS	X
+	LBSR	_00009
+	PSHS	D
+	LBSR	printh8
+	LEAS	2,S
+	LDD	4,U
+	PSHS	D
+	LBSR	printh8
+	LEAS	2,S
+	PULS	U,PC
+checkch
+	PSHS	U
+	LEAU	,S
 	LDD	#57376
 	TFR	D,X
 	LDB	0,X
@@ -385,13 +406,76 @@ _13
 	ANDA	#0
 	ANDB	#1
 	SUBD	#0
-	LBEQ	_13
+	LBEQ	_12
+	LDD	#-1
+	PULS	U,PC
 _12
+	CLRA
+	CLRB
+	PULS	U,PC
+getch
+	PSHS	U
+	LEAU	,S
+	LEAS	-2,S
+_14
+	LDD	#57376
+	TFR	D,X
+	LDB	0,X
+	SEX
+	ANDA	#0
+	ANDB	#1
+	SUBD	#0
+	LBEQ	_14
+_13
 	LDD	#57377
 	TFR	D,X
 	LDB	0,X
 	SEX
+	STD	-2,U
+	LDD	-2,U
+	ANDA	#0
+	ANDB	#255
+	PULS	X,U,PC
+scheckch
+	PSHS	U
+	LEAU	,S
+	LDD	#57344
+	TFR	D,X
+	LDB	0,X
+	SEX
+	ANDA	#0
+	ANDB	#1
+	SUBD	#0
+	LBEQ	_15
+	LDD	#-1
 	PULS	U,PC
+_15
+	CLRA
+	CLRB
+	PULS	U,PC
+sgetch
+	PSHS	U
+	LEAU	,S
+	LEAS	-2,S
+_17
+	LDD	#57344
+	TFR	D,X
+	LDB	0,X
+	SEX
+	ANDA	#0
+	ANDB	#1
+	SUBD	#0
+	LBEQ	_17
+_16
+	LDD	#57345
+	TFR	D,X
+	LDB	0,X
+	SEX
+	STD	-2,U
+	LDD	-2,U
+	ANDA	#0
+	ANDB	#255
+	PULS	X,U,PC
 main
 	PSHS	U
 	LEAU	,S
@@ -403,10 +487,10 @@ main
 	CLRB
 	STB	1,Y
 	LEAX	2,PC
-	BRA	_14
+	BRA	_18
 	FCB	72,101,108,108,111,32,87,111
 	FCB	114,108,100,33,0
-_14
+_18
 	PSHS	X
 	LBSR	prints
 	LEAS	2,S

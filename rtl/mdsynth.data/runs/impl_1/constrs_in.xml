@@ -1,13 +1,25 @@
-<?xml version="1.0"?>
-<DARoots Version="1" Minor="12">
-	<FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
-		<Filter Type="Constrs"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<DARoots Version="1"
+		Minor="19">
+	<FileSet Name="constrs_in"
+			Type="Constrs"
+			RelSrcDir="$PSRCDIR/constrs_1">
+		<Filter Type=""/>
 		<File Path="$PPRDIR/src/s3astarter.ucf">
+			<FileInfo>
+				<Attr Name="UsedInSynthesis"
+						Val="1"/>
+				<Attr Name="UsedInImplementation"
+						Val="1"/>
+				<Attr Name="UsedInSimulation"
+						Val="1"/>
+			</FileInfo>
 		</File>
 		<Config>
-			<Option Name="TargetConstrsFile" Val="$PPRDIR/src/s3astarter.ucf"/>
-			<Option Name="TargetPart" Val="xc3s700afg484-4"/>
+			<Option Name="TargetConstrsFile"
+					Val="$PPRDIR/src/s3astarter.ucf"/>
+			<Option Name="ConstrsType"
+					Val="UCF"/>
 		</Config>
 	</FileSet>
 </DARoots>
-
