@@ -173,7 +173,7 @@ int expr16(int e1);
 int rvalue(int e);
 void lcheck(int e);
 int indop(int e);
-int strop(e);
+int strop(int e);
 int binop(int op, int e1, int e2, int t1, int t2);
 int typeid(int s);
 int typename();
@@ -184,7 +184,7 @@ void rexpr(int e1, int l1, char *s);
 void jcond(int l, char cond);
 void jmp(int l);
 int fwdlabel();
-fwddef(int l);
+int fwddef(int l);
 int backdef();
 void gexpr(int e1);
 void string(int e1);
@@ -209,8 +209,8 @@ void pulx();
 void tfrdx();
 void tfrxd();
 void asld();
-void adddim(n);
-void subdim(n);
+void adddim(int n);
+void subdim(int n);
 void cmpdimm(int n);
 void addds();
 void subds();
@@ -252,7 +252,7 @@ void indiru(char *op, int n);
 void sextend(int byte);
 void binexpr(int e1);
 void library(int op);
-int cexpr(e);
+int cexpr(int e);
 int getsym();
 int postequ(int s1, int s2);
 int alpha(char c);
@@ -279,7 +279,7 @@ int getfree(int n);
 int rplacad(int e, int n);
 
 // ----------------------------------------------------------------------------
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     NMTBL *nptr;
     int i;
@@ -338,7 +338,7 @@ main(int argc, char **argv)
 // ----------------------------------------------------------------------------
 int error(int n)
 {
-    if (n == EOFERR)
+    if (n == EOFERR) {
 		if(filep!=filestack)
 		{	lineno=filep->ln;
 			fclose(filep->fcb);
@@ -362,6 +362,8 @@ int error(int n)
 			fclose(obuf);
 			exit(0);
 		}
+	}
+
 	fprintf(stdout,"%5d:%s.\n",lineno,
 		(n==FILERR) ? "Can't open specified file" :
 		(n==DCERR) ? "Declaration syntax" :
@@ -473,7 +475,7 @@ void reserve(char *s, int d)
     char *t;
 	hash=0;
 	t=name;
-	while(*t++ = *s)
+	while((*t++ = *s))
         hash = 7 * (hash + *s++);
 	(nptr = gsearch())->sc = RESERVE;
 	nptr->dsp = d;
@@ -484,82 +486,105 @@ void decl()
 {
     NMTBL *n;
     int t;
-	if(sym == STATIC)
-		if(mode==LDECL)
-		{	getsym();
-			mode=STADECL;
+
+	if (sym == STATIC)
+		if (mode == LDECL) {
+			getsym();
+			mode = STADECL;
 		}
 		else error(DCERR);
-	else if(sym==TYPEDEF)
-		if(mode==GDECL)
-		{	getsym();
+	else if (sym == TYPEDEF) {
+		if(mode == GDECL) {
+			getsym();
 			mode=GTDECL;
-		}
-		else if(mode==LDECL)
-		{	getsym();
+		} else if (mode==LDECL) {
+			getsym();
 			mode=LTDECL;
 		}
 		else error(DCERR);
-	if((t=typespec())==0) return;
-	if(sym==SM) return;
+	}
+	
+	if ((t=typespec()) == 0)
+		return;
+
+	if (sym==SM)
+		return;
+
 	type=t;
 	n=decl0();
 	reverse(t);
-	if(args||sym==LC) {fdecl(n);return;}
+	if (args || sym == LC) {
+		fdecl(n);
+		return;
+	}
+
 	def(n);
-	while(sym==COMMA)
-	{	getsym();
-		type=t;
-		n=decl0();
+
+	while (sym == COMMA) {
+		getsym();
+		type = t;
+		n = decl0();
 		reverse(t);
-		if(args) error(DCERR);
+		if (args)
+			error(DCERR);
 		def(n);
 	}
-	if(sym!=SM) error(DCERR);
-	if(mode==GTDECL) mode=GDECL;
-	if(mode==STADECL||mode==LTDECL) mode=LDECL;
+
+	if (sym != SM)
+		error(DCERR);
+
+	if (mode == GTDECL)
+		mode=GDECL;
+
+	if (mode == STADECL || mode == LTDECL)
+		mode=LDECL;
 }
 
 // ----------------------------------------------------------------------------    
 int typespec()
 {
     int t;
-	switch(sym)
-	{case INT:
+	switch(sym) {
+	case INT:
 	case CHAR:
-		t= sym;
+		t = sym;
 		getsym();
 		break;
 	case STRUCT:
 	case UNION:
-		t=sdecl(sym);
+		t = sdecl(sym);
 		break;
 	case UNSIGNED:
 		t = UNSIGNED;
-		if(getsym()==INT) getsym();
+		if(getsym() == INT)
+			getsym();
 		break;
 	case SHORT:
-		t=CHAR;
-		if(getsym()==INT) getsym();
+		t = CHAR;
+		if(getsym() == INT)
+			getsym();
 		break;
 	case LONG:
-		t=INT;
-		if(getsym()==INT) getsym();
+		t = INT;
+		if(getsym() == INT)
+			getsym();
 		break;
 	default:
-		if(sym==IDENT)
-			if(nptr->sc==TYPE)
-			{	t=nptr->ty;
+		if (sym == IDENT) {
+			if (nptr->sc == TYPE) {
+				t = nptr->ty;
 				getsym();
 				break;
 			}
-			else if(nptr->sc==EMPTY && gnptr->sc==TYPE)
-			{	t=gnptr->ty;
+			else if(nptr->sc == EMPTY && gnptr->sc == TYPE) {
+				t = gnptr->ty;
 				getsym();
 				break;
 			}
-		if(mode==LDECL) return 0;
-		t= INT;
+			if(mode == LDECL)
+				return 0;
+			t = INT;
+		}
 	}
 	return t;
 }
@@ -568,10 +593,10 @@ int typespec()
 struct nametable *decl0()
 {
     NMTBL *n;
-	if(sym==MUL)
+	if(sym == MUL)
 	{	getsym();
-		n=decl0();
-		type=list2(POINTER,type);
+		n = decl0();
+		type = list2(POINTER,type);
 		return n;
 	}
 	return decl1();
@@ -582,88 +607,114 @@ NMTBL *decl1()
 {
     NMTBL *n;
     int i,t;
-	if(sym==LPAR)
-	{	getsym();
+	if(sym == LPAR) {
+		getsym();
 		n=decl0();
 		checksym(RPAR);
 	}
-	else if (sym == IDENT)
-	{	n=nptr;
+	else if (sym == IDENT) {
+		n = nptr;
 		getsym();
 	}
-	else error(DCERR);
-	while(1)
-		if(sym==LBRA)
-			if(getsym()==RBRA)
-			{	getsym();
-				if(mode!=ADECL) error(DCERR);
+	else
+		error(DCERR);
+
+	while(1) {
+		if (sym == LBRA) {
+			if(getsym() == RBRA)
+			{
+				getsym();
+				if (mode != ADECL)
+					error(DCERR);
 				t=type;
-				type=list2(POINTER,type);
+				type = list2(POINTER, type);
 			}
-			else
-			{	t=type;
-				i=cexpr(expr());
+			else {
+				t = type;
+				i = cexpr(expr());
 				checksym(RBRA);
-				type=list3(ARRAY,t,i);
+				type = list3(ARRAY, t, i);
 			}
-		else if(sym==LPAR)
-		{	if(mode==GDECL) {mode=ADECL;getsym();mode=GDECL;}
+		} else if (sym == LPAR) {
+			if (mode == GDECL) {
+				mode = ADECL;
+				getsym();
+				mode = GDECL;
+			}
 			else getsym();
-			if(sym==RPAR) getsym();
-			else
-			{	n->sc=FUNCTION;
+			if (sym == RPAR) {
+				getsym();
+			} else {
+				n->sc = FUNCTION;
 				adecl();
-				n->sc=EMPTY;
+				n->sc = EMPTY;
 			}
-			type=list2(FUNCTION,type);
+			type = list2(FUNCTION, type);
 		}
 		else return n;
+	}
 }
 
 // ----------------------------------------------------------------------------    
 void adecl()
 {	
-    if(mode!=GDECL) error(DCERR);
-	mode=ADECL;
-	args= 2;
-	while(1)
-	{	if(sym!=IDENT) error(DCERR);
+    if (mode != GDECL)
+		error(DCERR);
+
+	mode = ADECL;
+	args = 2;
+	while(1) {
+		if(sym != IDENT)
+			error(DCERR);
 		nptr->ty = INT;
 		nptr->sc = LVAR;
 		nptr->dsp = (args += 2);
-		if(getsym()!=COMMA) break;
+		if(getsym() != COMMA)
+			break;
 		getsym();
 	}
 	checksym(RPAR);
-	mode=GDECL;
+	mode = GDECL;
 	return;
 }
 
 // ----------------------------------------------------------------------------    
 void reverse(int t1)
 {
-    int t2,t3;
-	t2=t1;
-	while(type!=t1)
-	{	t3=cadr(type);
-		rplacad(type,t2);
-		t2=type;
-		type=t3;
+    int t2, t3;
+	t2 = t1;
+	while (type != t1) {
+		t3 = cadr(type);
+		rplacad(type, t2);
+		t2 = type;
+		type = t3;
 	}
-	type=t2;
+	type = t2;
 }
 
 // ----------------------------------------------------------------------------    
 int size(int t)
-{	if(t==CHAR) return 1;
-	if(scalar(t)) return 2;
-	if(car(t)==STRUCT||car(t)==UNION)
-	{	if(cadr(t)==-1) error(DCERR);
+{
+	if (t == CHAR)
+		return 1;
+
+	if (scalar(t))
+		return 2;
+
+	if (car(t) == STRUCT || car(t) == UNION) {
+		if(cadr(t) == -1)
+			error(DCERR);
 		return(cadr(t));
 	}
-	if(car(t)==ARRAY) return(size(cadr(t))*caddr(t));
-	else error(DCERR);
-	/*NOTREACHED*/
+
+	if (car(t) == ARRAY) {
+		return(size(cadr(t)) * caddr(t));
+	} else {
+		 error(DCERR);
+	}
+
+	// Not reached
+	return 0;
 }
 
 // ----------------------------------------------------------------------------    
@@ -676,8 +727,8 @@ void def(NMTBL *n)
 	}
 	if (n->sc!=EMPTY &&
 	    (mode!=ADECL || n->sc!=LVAR || n->ty!=INT) &&
-	    (mode!=GSDECL&&mode!=LSDECL || n->sc!=FIELD || n->dsp!=disp) &&
-	    (mode!=GUDECL&&mode!=LUDECL || n->sc!=FIELD || n->dsp!=0) )
+	    ((mode!=GSDECL && mode!=LSDECL) || n->sc!=FIELD || n->dsp!=disp) &&
+	    ((mode!=GUDECL && mode!=LUDECL) || n->sc!=FIELD || n->dsp!=0) )
 		 error(DCERR);
 	sz = size(n->ty = type);
 	switch(mode)
@@ -919,75 +970,78 @@ void statement()
 // ----------------------------------------------------------------------------    
 void doif()
 {
-    int l1,l2,slfree;
+    int l1, l2, slfree;
 	getsym();
 	checksym(LPAR);
-	slfree=lfree;
-	bexpr(expr(),0,l1=fwdlabel());
-	lfree=slfree;
+	slfree = lfree;
+	bexpr(expr(), 0, l1 = fwdlabel());
+	lfree = slfree;
 	checksym(RPAR);
 	statement();
-	if(sym==ELSE)
-	{	if (l2 = control) jmp(l2=fwdlabel());
+	if(sym == ELSE) {
+		if ((l2 = control))
+			jmp(l2 = fwdlabel());
+
 		fwddef(l1);
 		getsym();
 		statement();
-		if (l2) fwddef(l2);
-	}
-	else fwddef(l1);
+
+		if (l2)
+			fwddef(l2);
+	} else
+		fwddef(l1);
 }
 
 // ----------------------------------------------------------------------------    
 void dowhile()
 {
-    int sbreak,scontinue,slfree,e;
-	sbreak=blabel;
-	scontinue=clabel;
-	blabel=fwdlabel();
-	clabel=backdef();
+    int sbreak, scontinue, slfree, e;
+	sbreak = blabel;
+	scontinue = clabel;
+	blabel = fwdlabel();
+	clabel = backdef();
 	getsym();
 	checksym(LPAR);
-	slfree=lfree;
-	e=expr();
+	slfree = lfree;
+	e = expr();
 	checksym(RPAR);
-	if(sym==SM)
-	{	bexpr(e,1,clabel);
-		lfree=slfree;
+	if(sym == SM) {
+		bexpr(e, 1, clabel);
+		lfree = slfree;
 		getsym();
-	}
-	else
-	{	bexpr(e,0,blabel);
-		lfree=slfree;
+	} else {
+		bexpr(e, 0, blabel);
+		lfree = slfree;
 		statement();
 		jmp(clabel);
 	}
 	fwddef(blabel);
-	clabel=scontinue;
-	blabel=sbreak;
+	clabel = scontinue;
+	blabel = sbreak;
 }
 
 // ----------------------------------------------------------------------------    
 void dodo()
 {
-    int sbreak,scontinue,l,slfree;
-	sbreak=blabel;
-	scontinue=clabel;
-	blabel=fwdlabel();
-	clabel=fwdlabel();
-	l=backdef();
+    int sbreak, scontinue, l, slfree;
+	sbreak = blabel;
+	scontinue = clabel;
+	blabel = fwdlabel();
+	clabel = fwdlabel();
+	l = backdef();
 	getsym();
 	statement();
 	fwddef(clabel);
 	checksym(WHILE);
 	checksym(LPAR);
-	slfree=lfree;
+	slfree = lfree;
 	bexpr(expr(),1,l);
-	lfree=slfree;
+	lfree = slfree;
 	checksym(RPAR);
 	checksym(SM);
 	fwddef(blabel);
-	clabel=scontinue;
-	blabel=sbreak;
+	clabel = scontinue;
+	blabel = sbreak;
 }
 
 // ----------------------------------------------------------------------------    
