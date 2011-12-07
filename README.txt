@@ -84,6 +84,9 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 15. Optional: Quit your serial terminal and start MidiSerial in order to play with your MIDI keyboard (see 2.3);
 16. Press the South button in order to go back to the SYS09BUG prompt.
 
+Note: The steps 9 to 13 can be performed automatically with 'make deploy' from the "src/synth" directory. You will need to install 'pyserial' (http://pyserial.sourceforge.net).
+ 
+
 2.2. Audio Outputs
 ==================
 

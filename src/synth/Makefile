@@ -15,5 +15,8 @@ synth.asm: ../common/c.asm c.out
 c.out: synth.c
 	${CC} $<
 
+deploy:
+	python ../../tools/deploy/deploy.py synth.s19
+
 clean:
 	rm -f synth.asm c.out *.s19
