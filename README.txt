@@ -37,14 +37,14 @@ All the source files of the toolset are provided. The following is provided:
 - A C compiler (tools/mc09);
 - S19 to VHDL (tools/s19tovhd) for producing the ROM file.
 
-You will find Makefiles for Linux. I personally use the great CentOS-6 distribution. This distribution is compatible with Xilinx ISE 13.3.
+You will find Makefiles for Linux. I personally use the great CentOS-6 distribution.
 
 The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-1 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
 The chain is the following:
 	"C" -- [ C compiler ] --> "ASM" -- [ 6809 assembler ] --> "S19" -- [ Serial upload with SYS09BUG ROM ] --> FPGA Block RAM Memory
 
-The C compiler based on the public domain Micro-C is tiny (around 3K lines of code in a single file) and is quite impressive for its size. Obviously, no optimization is done and everything is done in a single pass, so there is no separation between data and code. It also only implement a subset of the C language. 
+The C compiler based on the public domain Micro-C is tiny (around 3K lines of code in a single file) and is quite impressive for its size. Obviously, no optimization is done and everything is done in a single pass, so there is no separation between data and code. It also only implement a subset of the C language.
 
 If you plan to use this tiny C compiler, please read the README file located the project for known limitations and issues I encountered.
 	
@@ -67,21 +67,22 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 2.3. Installation
 =================
 
-1. Open a command prompt, go the the "src/synth" directory and execute "make.bat". This command will produce the "synth.s19" file to upload.
-2. Connect a VGA monitor to the synthesizer (your Xilinx Spartan 3A-Starter Kit board);
-3. Connect a PS/2 keyboard to the synthesizer;
-4. Connect speakers to the synthesizer;
-5. Connect a serial cable to the synthesizer;
-6. Start a serial terminal at 57600-N-8-1;
-7. Program the FPGA using the PlanAhead project "rtl/mdsynth.ppr" (Spartan-3A) "rtl/mdsynth-s3estarter" (Spartan-3E);
-8. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
-9. Upload the text file "src/synth/synth.s19" using your serial terminal;
-10. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
-11. Type "1000" (this is the starting address of the synthesizer project);
-12. Type "g". You will see the user interface on the monitor of your synthesizer system;
-13. Follow the on-screen instructions in order to play and change parameters;
-14. Optional: Quit your serial terminal and start MidiSerial in order to play with your MIDI keyboard (see 2.3);
-14. Press the South button in order to go back to the SYS09BUG prompt.
+1. Go to "src/tools" and execute "make". This command will produce the toolset binaries.
+2. Open a command prompt, go the the "src/synth" directory and execute "make". This command will produce the "synth.s19" file to upload.
+3. Connect a VGA monitor to the synthesizer (your Xilinx Spartan 3A-Starter Kit board);
+4. Connect a PS/2 keyboard to the synthesizer;
+5. Connect speakers to the synthesizer;
+6. Connect a serial cable to the synthesizer;
+7. Start a serial terminal at 57600-N-8-1;
+8. Program the FPGA by creating a projet with the files under the "rtl" folder;
+9. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
+10. Upload the text file "src/synth/synth.s19" using your serial terminal;
+11. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
+12. Type "1000" (this is the starting address of the synthesizer project);
+13. Type "g". You will see the user interface on the monitor of your synthesizer system;
+14. Follow the on-screen instructions in order to play and change parameters;
+15. Optional: Quit your serial terminal and start MidiSerial in order to play with your MIDI keyboard (see 2.3);
+16. Press the South button in order to go back to the SYS09BUG prompt.
 
 2.2. Audio Outputs
 ==================
@@ -225,4 +226,6 @@ The following will produce the tables for a 8-bit quarter cycle (copy and paste 
 5. Known Issues
 ============================================================
 
-- On the Spartan-3A Starter Kit with 3-bit for RGB components, the video brightness is lower than on the Spartan-3E because I drive only the MSB bit.
+- On the Spartan-3A Starter Kit with 3-bit for RGB components, only the MSB bit is drived therefore the video brightness is lower than the maximum;
+- There is still an issue regarding the processing of MIDI events from the serial port: some MIDI events are lost due to the fact that no buffering is currently done with the incoming serial data.
+

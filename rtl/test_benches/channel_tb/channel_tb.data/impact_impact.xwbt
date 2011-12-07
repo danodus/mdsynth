@@ -1,8 +1,0 @@
-INTSTYLE=impact
-INFILE=E:\Xilinx\mdsynth\rtl\test_benches\channel_tb\channel_tb.data\impact.xsl
-OUTFILE=E:\Xilinx\mdsynth\rtl\test_benches\channel_tb\channel_tb.data\impact.xsl
-FAMILY=Multiple
-PART=Multiple
-WORKINGDIR=E:\Xilinx\mdsynth\rtl\test_benches\channel_tb\channel_tb.data
-LICENSE=iMPACT
-USER_INFO=iMPACT
