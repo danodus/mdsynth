@@ -1,6 +1,6 @@
 /*
-    Copyright (c) 2011, Meldora Inc.
 	Copyright (c) 1981, 1987, Masataka Ohta, Hiroshi Tezuka.
+    Copyright (c) 2011, Meldora Inc.
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
@@ -426,7 +426,10 @@ void init()
 {
     NMTBL *nptr;
     int i;
-	for(nptr = ntable,i = GSYMS; i--;) (nptr++)->sc = EMPTY;
+
+	for(nptr = ntable,i = GSYMS; i--;)
+		(nptr++)->sc = EMPTY;
+
 	reserve("int",INT);
 	reserve("void",INT);
 	reserve("char",CHAR);
@@ -450,12 +453,13 @@ void init()
 	reserve("sizeof",SIZEOF);
 	reserve("long",LONG);
 	reserve("short",SHORT);
-	gpc=glineno=mflag=0;
-	gfree=ilabel=1;
-	labelno=2;
-	cheapp=cheap;
-	lfree=HEAPSIZE;
-	filep=filestack;
+
+	gpc = glineno = mflag =0;
+	gfree = ilabel = 1;
+	labelno = 2;
+	cheapp = cheap;
+	lfree = HEAPSIZE;
+	filep = filestack;
 	newfile();
 	getl();
 	getch();
@@ -465,7 +469,8 @@ void init()
 void newfile()
 {	lineno=0;
 	fprintf(stdout,"%s:\n",av[ac2]);
-	if ( (filep->fcb = fopen(av[ac2++],"r")) == NULL ) error(FILERR);
+	if ( (filep->fcb = fopen(av[ac2++],"r")) == NULL )
+		error(FILERR);
 }
 
 // ----------------------------------------------------------------------------    
@@ -494,7 +499,7 @@ void decl()
 		}
 		else error(DCERR);
 	else if (sym == TYPEDEF) {
-		if(mode == GDECL) {
+		if (mode == GDECL) {
 			getsym();
 			mode=GTDECL;
 		} else if (mode==LDECL) {
@@ -510,8 +515,8 @@ void decl()
 	if (sym==SM)
 		return;
 
-	type=t;
-	n=decl0();
+	type = t;
+	n = decl0();
 	reverse(t);
 	if (args || sym == LC) {
 		fdecl(n);
@@ -566,7 +571,7 @@ int typespec()
 		break;
 	case LONG:
 		t = INT;
-		if(getsym() == INT)
+		if (getsym() == INT)
 			getsym();
 		break;
 	default:
@@ -1233,20 +1238,23 @@ void dogoto()
 	getsym();
 	nptr0=nptr;
 	checksym(IDENT);
-	if(nptr0->sc == BLABEL || nptr0->sc == FLABEL) jmp(nptr0->dsp);
-	else if(nptr0->sc == EMPTY)
-	{	nptr0->sc = FLABEL;
+	if (nptr0->sc == BLABEL || nptr0->sc == FLABEL) {
+		jmp(nptr0->dsp);
+	} else if (nptr0->sc == EMPTY) {
+		nptr0->sc = FLABEL;
 		jmp(nptr0->dsp = fwdlabel());
-	}
-	else error(STERR);
+	} else
+		error(STERR);
 	checksym(SM);
 }
 
 // ----------------------------------------------------------------------------    
 void dolabel()
 {
-    if(nptr->sc == FLABEL) fwddef(nptr->dsp);
-	else if(nptr->sc != EMPTY) error(TYERR);
+    if (nptr->sc == FLABEL) {
+		fwddef(nptr->dsp);
+	} else if (nptr->sc != EMPTY)
+		error(TYERR);
 	nptr->sc = BLABEL;
 	nptr->dsp = backdef();
 	getsym();
@@ -1263,46 +1271,63 @@ int expr()
 int expr0()
 {
     int e;
-	e=expr1();
-	while(sym==COMMA) {getsym();e=list3(COMMA,e,rvalue(expr1()));}
+	e = expr1();
+	while(sym == COMMA) {
+		getsym();
+		e = list3(COMMA,e,rvalue(expr1()));
+	}
 	return e;
 }
 
 // ----------------------------------------------------------------------------    
 int expr1()
 {
-    int e1,e2,t,op;
-	e1=expr2();
-	switch (sym)
-	{case ASS:
+    int e1, e2, t, op;
+	e1 = expr2();
+	switch (sym) {
+	case ASS:
 		lcheck(e1);
-		t=type;
+		t = type;
 		getsym();
-		e2=rvalue(expr1());
-		if(t==CHAR) {type= INT;return(list3(CASS,e1,e2));}
-		type=t;
-		return(list3(ASS,e1,e2));
-	case ADD+AS: case SUB+AS: case MUL+AS: case DIV+AS: case MOD+AS:
-	case RSHIFT+AS: case LSHIFT+AS: case BAND+AS: case EOR+AS: case BOR+AS:
+		e2 = rvalue(expr1());
+		if(t == CHAR) {
+			type= INT;
+			return (list3(CASS,e1,e2));
+		}
+		type = t;
+		return (list3(ASS,e1,e2));
+	case ADD+AS:
+	case SUB+AS:
+	case MUL+AS:
+	case DIV+AS:
+	case MOD+AS:
+	case RSHIFT+AS:
+	case LSHIFT+AS:
+	case BAND+AS:
+	case EOR+AS:
+	case BOR+AS:
 		op = sym-AS;
 		lcheck(e1);
-		t=type;
+		t = type;
 		getsym();
-		e2=rvalue(expr1());
-		if(!integral(type)) error(TYERR);
-		if((t==UNSIGNED||type==UNSIGNED)&&
-			(op==MUL||op==DIV||op==MOD||op==RSHIFT||op==LSHIFT))
-			op=op+US;
-		if(t==CHAR)
-		{	type= INT;
+		e2 = rvalue(expr1());
+		if(!integral(type))
+			error(TYERR);
+		if((t == UNSIGNED || type==UNSIGNED) &&
+			(op == MUL || op == DIV || op == MOD|| op == RSHIFT || op == LSHIFT))
+			op = op + US;
+		if(t == CHAR)
+		{	type = INT;
 			return(list4(CASSOP,e1,e2,op));
 		}
-		type=t;
-		if(integral(t)) return(list4(ASSOP,e1,e2,op));
-		if((op!=ADD&&op!=SUB)||car(t)!=POINTER) error(TYERR);
-		e2=binop(MUL,e2,list2(CONST,size(cadr(t))),INT,UNSIGNED);
-		type=t;
-		return list4(ASSOP,e1,e2,op);
+		type = t;
+		if(integral(t))
+			return(list4(ASSOP,e1,e2,op));
+		if ((op != ADD && op != SUB) || car(t) != POINTER)
+			error(TYERR);
+		e2 = binop(MUL, e2, list2(CONST,size(cadr(t))), INT, UNSIGNED);
+		type = t;
+		return list4(ASSOP, e1, e2, op);
 	default:
 		return(e1);
 	}
@@ -1311,20 +1336,25 @@ int expr1()
 // ----------------------------------------------------------------------------    
 int expr2()
 {
-    int e1,e2,e3,t;
-	e1=expr3();
-	if(sym==COND)
-	{	e1=rvalue(e1);
+    int e1, e2, e3, t;
+	e1 = expr3();
+	if (sym == COND)
+	{	
+		e1 = rvalue(e1);
 		getsym();
-		e2=rvalue(expr2());
-		t=type;
+		e2 = rvalue(expr2());
+		t = type;
 		checksym(COLON);
-		e3=rvalue(expr2());
-		if(car(e1)==CONST)
-			if(cadr(e1)) {type=t;return e2;}
-			else return e3;
-		if(type==INT||t!=INT&&type==UNSIGNED) type=t;
-		return(list4(COND,e1,e2,e3));
+		e3 = rvalue(expr2());
+		if (car(e1) == CONST)
+			if(cadr(e1)) {
+				type=t;
+				return e2;
+			} else
+				return e3;
+		if (type==INT || t!= INT && type == UNSIGNED)
+			type=t;
+		return (list4(COND, e1, e2, e3));
 	}
 	return(e1);
 }
@@ -1334,11 +1364,11 @@ int expr3()
 {
     int e;
 	e=expr4();
-	while(sym==LOR)
-	{	e=rvalue(e);
+	while(sym == LOR) {
+		e = rvalue(e);
 		getsym();
-		e=list3(LOR,e,rvalue(expr4()));
-		type= INT;
+		e = list3(LOR, e, rvalue(expr4()));
+		type = INT;
 	}
 	return(e);
 }
@@ -2720,8 +2750,8 @@ void lddu(int n)
 // ----------------------------------------------------------------------------    
 void std(int e)
 {
-    switch (car(e))
-	{case GVAR:
+    switch (car(e)) {
+	case GVAR:
 		stdy(cadr(e));
 		return;
 	case LVAR:
@@ -2801,8 +2831,8 @@ void leaxpcr(NMTBL *n)
 // ----------------------------------------------------------------------------    
 void ldx(int e)
 {	
-    switch (car(e))
-	{case GVAR: case RGVAR:
+    switch (car(e)) {
+	case GVAR: case RGVAR:
 		ldxy(cadr(e));
 		return;
 	case LVAR: case RLVAR:
@@ -2828,8 +2858,8 @@ void ldxu(int n)
 // ----------------------------------------------------------------------------    
 void stx(int e)
 {
-    switch (car(e))
-	{case GVAR:
+    switch (car(e)) {
+	case GVAR:
 		stxy(cadr(e));
 		return;
 	case LVAR:
@@ -2885,8 +2915,8 @@ void indexx(char *op, int n)
 // ----------------------------------------------------------------------------    
 void index_(char *op, int e)
 {
-    switch (car(e))
-	{case GVAR:
+    switch (car(e)) {
+	case GVAR:
 		indexy(op,cadr(e));
 		return;
 	case LVAR:
@@ -2912,8 +2942,8 @@ void indexu(char *op, int n)
 // ----------------------------------------------------------------------------    
 void indir(char *op, int e)
 {
-    switch (car(e))
-	{case RGVAR:
+    switch (car(e)) {
+	case RGVAR:
 		indiry(op,cadr(e));
 		return;
 	case RLVAR:
@@ -2939,7 +2969,8 @@ void indiru(char *op, int n)
 // ----------------------------------------------------------------------------    
 void sextend(int byte)
 {
-    if (byte) sex();
+    if (byte)
+		sex();
 }
 
 // ----------------------------------------------------------------------------    
@@ -2980,17 +3011,19 @@ int getsym()
     NMTBL *nptr0,*nptr1;
     int i;
     char c;
-	if (alpha(skipspc()))
-	{	i = hash = 0;
-		while (alpha(ch) || digit(ch))
-		{	if (i <= 7) hash=7*(hash+(name[i++]=ch));
+	if (alpha(skipspc())) {
+		i = hash = 0;
+		while (alpha(ch) || digit(ch)) {
+			if (i <= 7) 
+				hash = 7*(hash+(name[i++] = ch));
 			getch();
 		}
 		name[i] = '\0';
 		nptr0 = gsearch();
-		if (nptr0->sc == RESERVE) return sym = nptr0->dsp;
-		if (nptr0->sc == MACRO && !mflag)
-		{	mflag++;
+		if (nptr0->sc == RESERVE)
+			return sym = nptr0->dsp;
+		if (nptr0->sc == MACRO && !mflag) {
+			mflag++;
 			chsave = ch;
 			chptrsave = chptr;
 			chptr = (char *)nptr0->dsp;
@@ -3003,16 +3036,21 @@ int getsym()
 		    mode==GTDECL || mode==TOP)
 			return sym;
 		nptr1=lsearch();
-		if (mode==STAT)
-			if (nptr1->sc == EMPTY) return sym;
-			else { nptr=nptr1; return sym;}
+		if (mode==STAT) {
+			if (nptr1->sc == EMPTY) {
+				return sym;
+			} else {
+				nptr=nptr1;
+				return sym;
+			}
+		}
 		nptr=nptr1;
 		return sym;
 	}
-	else if (digit(ch))
-	{	symval=0;
-		if (ch == '0')
-		{	if (getch() == 'x' || ch == 'X')
+	else if (digit(ch)) {
+		symval=0;
+		if (ch == '0') {
+			if (getch() == 'x' || ch == 'X')
 				while(1)
 					if(digit(getch()))
 						symval=symval*16+ch-'0';
