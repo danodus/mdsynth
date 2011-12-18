@@ -1,65 +1,10 @@
--- $Id: System09_Digilent_3S500E.vhd,v 1.3.2.1 2008/04/08 14:59:48 davidgb Exp $
---===========================================================================
---
---          System09 - SoC for the Digilent Spartan 3E Starter board
---
---===========================================================================
---
--- File name      : System09_Digilent_3S500E.vhd
---
--- Entity name    : my_system09
---
--- Purpose        : Top level file for 6809 compatible system on a chip
---                  Designed with Xilinx XC3S500E Spartan 3E FPGA.
---                  Implemented With Digilent Xilinx Starter FPGA board,
---
--- Dependencies   : ieee.Std_Logic_1164
---                  ieee.std_logic_unsigned
---                  ieee.std_logic_arith
---                  ieee.numeric_std
---
--- Uses           : clock_div  (../vhdl/clock_div.vhd)      System clock divider
---                  flasher    (../vhdl/flasher.vhd)        LED flasher
---                  ram_32k    (../Spartan3/ram32k_b16.vhd) 32K block RAM
---                  cpu09      (../vhdl/cpu09.vhd)          CPU core
---                  mon_rom    (../spartan3/sys09bug_3se_rom2k_b16.vhd) Monitor ROM
---                  acia6850   (../vhdl/acia6850.vhd)       ACIA
---                  ACIA_Clock (../vhdl/ACIA_Clock.vhd)     ACIA Baud Clock Divider
---                  keyboard   (../vhdl/keyboard.vhd)       PS/2 Keyboard Interface
---                  vdu8       (../vhdl/vdu8.vhd)           80 x 25 Video Display
---                  timer      (../vhdl/timer.vhd)          Timer component
---                  pia_timer  (../vhdl/pia_timer.vhd)      PIA interrupt Timer cmponent
---                  trap	    (../vhdl/trap.vhd)           Hardware Breakpoint Bus Trap
---                  vdu8       (../vhdl/vdu8.vhd)           VDU
+-- MDSynth Top Level
 -- 
--- Author         : John E. Kent      
---                  dilbert57@opencores.org      
---	Memory Map     :
---
--- $0000 - $7FFF System Block RAM
--- $E000 - ACIA (SWTPc)
--- $E010 - Reserved for SWTPc FD-01 FD1771 FDC
--- $E020 - Keyboard
--- $E030 - VDU
--- $E040 - Reserved for SWTPc MP-T (was Compact Flash)
--- $E050 - Timer
--- $E060 - Bus Trap (Hardware Breakpoint Interrupt Logic)
--- $E070 - PIA Single Step Timer (was Reserved for Trace Buffer)
--- $E080 - DAC left
--- $E090 - DAC right
--- $E0A0 - reserved for SPP Printer Port
--- $E0B0 - Reserved
--- $E0C0 - Reserved
--- $E100 - $E13F Reserved IDE / Compact Flash Card
--- $E140 - $E17F Reserved for Ethernet MAC (XESS)
--- $E180 - $E1BF Reserved for Expansion Slot 0 (XESS)
--- $E1C0 - $E1FF Reserved for Expansion Slot 1 (XESS)
--- $E200 - $EFFF Dual Port RAM interface
--- $F000 - $F7FF Reserved SWTPc DMAF-2
--- $F800 - $FFFF Sys09bug ROM (Read only)
--- $FFF0 - $FFFF Reserved for DAT - Dynamic Address Translation (Write Only)
+-- Authors        : John E. Kent (dilbert57@opencores.org)
+--                  Daniel Cliche (dcliche@meldora.com)
 --
 --  Copyright (C) 2003 - 2010 John Kent
+--  Copyright (C) 2011 Meldora Inc.
 --
 --  This program is free software: you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -74,74 +19,32 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
---===========================================================================
+-- Memory Map :
 --
---                              Revision History:
---
---===========================================================================
--- Version 0.1 - 20 March 2003
--- Version 0.2 - 30 March 2003
--- Version 0.3 - 29 April 2003
--- Version 0.4 - 29 June 2003
---
--- Version 0.5 - 19 July 2003
--- prints out "Hello World"
---
--- Version 0.6 - 5 September 2003
--- Runs SBUG
---
--- Version 1.0- 6 Sep 2003 - John Kent
--- Inverted CLK_50MHZ
--- Initial release to Open Cores
---
--- Version 1.1 - 17 Jan 2004 - John Kent
--- Updated miniUart.
---
--- Version 1.2 - 25 Jan 2004 - John Kent
--- removed signals "test_alu" and "test_cc" 
--- Trap hardware re-instated.
---
--- Version 1.3 - 11 Feb 2004 - John Kent
--- Designed forked off to produce System09_VDU
--- Added VDU component
---	VDU runs at 25MHz and divides the clock by 2 for the CPU
--- UART Runs at 57.6 Kbps
---
--- Version 2.0 - 2 September 2004 - John Kent
--- ported to Digilent Xilinx Spartan3 starter board
---	removed Compaact Flash and Trap Logic.
--- Replaced SBUG with KBug9s
---
--- Version 3.0 - 22 April 2006 - John Kent
--- Port to Digilent Spartan 3E Starter board
--- Removed keyboard, vdu, timer, and trap logic
--- added PIA with counters attached.
--- Uses 32Kbytes of internal Block RAM
---
--- Version 4.0 - 8th April 2007 - John kent
--- Added VDU and PS/2 keyboard
--- Updated miniUART to ACIA6850
--- Reduce monitor ROM to 2KB
--- Re-assigned I/O port assignments so it is possible to run KBUG9
--- $E000 - ACIA
+-- $0000 - $7FFF System Block RAM
+-- $E000 - ACIA (SWTPc)
+-- $E010 - MIDI ACIA
 -- $E020 - Keyboard
 -- $E030 - VDU
--- $E040 - Compact Flash (not implemented)
+-- $E040 - Reserved for SWTPc MP-T (was Compact Flash)
 -- $E050 - Timer
--- $E060 - Bus trap
--- $E070 - Parallel I/O
---
--- Version 4.1 - July / september 2010
--- Updated VDU interface
--- and possible other changes.
---
--- Version 4.2 - 14th September 2010
--- Replaced ACIA_6850 with acia6850
--- Cleaned up decoding
--- Added Flasher component
--- Added Clock Divider component
---
---===========================================================================--
+-- $E060 - Bus Trap (Hardware Breakpoint Interrupt Logic)
+-- $E070 - PIA Single Step Timer (was Reserved for Trace Buffer)
+-- $E080 - Sound left
+-- $E090 - Sound right
+-- $E0A0 - reserved for SPP Printer Port
+-- $E0B0 - Reserved
+-- $E0C0 - Reserved
+-- $E100 - $E13F Reserved IDE / Compact Flash Card
+-- $E140 - $E17F Reserved for Ethernet MAC (XESS)
+-- $E180 - $E1BF Reserved for Expansion Slot 0 (XESS)
+-- $E1C0 - $E1FF Reserved for Expansion Slot 1 (XESS)
+-- $E200 - $EFFF Dual Port RAM interface
+-- $F000 - $F7FF Reserved SWTPc DMAF-2
+-- $F800 - $FFFF Sys09bug ROM (Read only)
+-- $FFF0 - $FFFF Reserved for DAT - Dynamic Address Translation (Write Only)
+
+
 library ieee;
    use ieee.std_logic_1164.all;
    use IEEE.STD_LOGIC_ARITH.ALL;
@@ -167,7 +70,11 @@ entity mdsynth is
 	 -- Uart Interface
 	 RS232_DCE_RXD : in  std_logic;
     RS232_DCE_TXD : out std_logic;
-	 
+    
+    -- MIDI Interface
+    MIDI_RS232_DCE_RXD : in  std_logic;
+    MIDI_RS232_DCE_TXD : out std_logic;
+    	 
 	 -- LEDS & Switches
 	 LED           : out std_logic_vector(7 downto 0);
 	 
@@ -191,6 +98,8 @@ architecture my_computer of mdsynth is
   constant CPU_CLK_FREQ  : integer := 25000000;  -- CPU Clock
   constant BAUD_RATE     : integer := 57600;	  -- Baud Rate
   constant ACIA_CLK_FREQ : integer := BAUD_RATE * 16;
+  constant MIDI_BAUD_RATE : integer := 31250;	  -- MIDI Baud Rate
+  constant MIDI_ACIA_CLK_FREQ : integer := MIDI_BAUD_RATE * 16;
 
   -----------------------------------------------------------------------------
   -- Signals
@@ -208,6 +117,12 @@ architecture my_computer of mdsynth is
   signal uart_cs        : Std_Logic;
   signal uart_irq       : Std_Logic;
   signal uart_clk       : Std_Logic;
+
+  -- MIDI UART Interface signals
+  signal midi_uart_data_out  : Std_Logic_Vector(7 downto 0);  
+  signal midi_uart_cs        : Std_Logic;
+  signal midi_uart_irq       : Std_Logic;
+  signal midi_uart_clk       : Std_Logic;
 
   -- timer
   signal timer_data_out : std_logic_vector(7 downto 0);
@@ -643,6 +558,30 @@ my_ACIA  : acia6850 port map (
 
 ----------------------------------------
 --
+-- MIDI ACIA/UART Serial interface
+--
+----------------------------------------
+my_MIDI_ACIA  : acia6850 port map (
+	 clk	     => cpu_clk,
+	 rst       => cpu_rst,
+    cs        => midi_uart_cs,
+    addr      => cpu_addr(0),
+	 rw        => cpu_rw,
+	 data_in   => cpu_data_out,
+	 data_out  => midi_uart_data_out,
+    irq       => midi_uart_irq,
+	 RxC       => midi_uart_clk,
+	 TxC       => midi_uart_clk,
+	 RxD       => MIDI_RS232_DCE_RXD,
+	 TxD       => MIDI_RS232_DCE_TXD,
+	 DCD_n     => '0',
+	 CTS_n     => '0',
+	 RTS_n     => open
+	 );
+
+
+----------------------------------------
+--
 -- ACIA Clock
 --
 ----------------------------------------
@@ -656,6 +595,20 @@ my_ACIA_Clock : ACIA_Clock
     acia_clk   => uart_clk
   ); 
 
+----------------------------------------
+--
+-- MIDI ACIA Clock
+--
+----------------------------------------
+my_MIDI_ACIA_Clock : ACIA_Clock
+  generic map(
+    SYS_CLK_FREQ  => SYS_CLK_FREQ,
+	 ACIA_CLK_FREQ => MIDI_ACIA_CLK_FREQ
+  ) 
+  port map(
+    clk        => sys_clk,
+    acia_clk   => midi_uart_clk
+  ); 
 
 
 ----------------------------------------
@@ -803,6 +756,7 @@ begin
 	rom_cs   <= '0';
 	ram_cs   <= '0';
 	uart_cs  <= '0';
+	midi_uart_cs <= '0';
 	timer_cs <= '0';
 	trap_cs  <= '0';
 	pia_cs   <= '0';
@@ -832,10 +786,11 @@ begin
 			  uart_cs     <= cpu_vma;
 
 			--
-			-- WD1771 FDC sites at $E010-$E01F
+			-- MIDI UART / ACIA $E010-$E01F
 			--
 			when "0001" => -- $E010
-           cpu_data_in <= (others => '0');
+           cpu_data_in <= midi_uart_data_out;
+           midi_uart_cs <= cpu_vma;
 
          --
          -- Keyboard port $E020 - $E02F
@@ -917,12 +872,12 @@ end process;
 -- as well as LED signals
 --
 assign_signals : process( vga_clk, BTN_SOUTH, 
-                      pia_irq_a, pia_irq_b, uart_irq, trap_irq, timer_irq, kbd_irq
+                      pia_irq_a, pia_irq_b, uart_irq, midi_uart_irq, trap_irq, timer_irq, kbd_irq
 							 )
 begin
     cpu_clk  <= vga_clk;
  	 cpu_rst  <= BTN_SOUTH; -- CPU reset is active high
-    cpu_irq  <= uart_irq or kbd_irq;
+    cpu_irq  <= uart_irq or midi_uart_irq or kbd_irq;
 	 cpu_nmi  <= pia_irq_a or trap_irq;
 	 cpu_firq <= pia_irq_b or timer_irq;
 	 cpu_halt <= '0';

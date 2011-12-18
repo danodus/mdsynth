@@ -26,7 +26,8 @@
 char curx;
 char cury;
 
-#define ACIA	0xE000
+#define ACIA		0xE000
+#define MIDI_ACIA	0xE010
 #define KBD		0xE020
 #define VDU		0xE030
 
@@ -38,6 +39,13 @@ char c;
 	*(VDU + 2) = curx;
 	*(VDU) = c;
 	curx++;
+	if (curx > 80) {
+		curx = 0;
+		cury++;
+	}
+	if (cury > 24)
+		cury = 0;
+	*(VDU + 3) = cury;
 	*(VDU + 2) = curx;
 }
 
@@ -152,6 +160,38 @@ unsigned sgetch()
 	
 	/* Return the character value */
 	c = *(ACIA + 1);
+	return c & 0xFF;
+}
+
+/* --------------- MIDI Support -------------------*/
+
+/* Initialize the MIDI port */
+void minit()
+{
+	/* 31250-N-8-1 */
+	*(MIDI_ACIA) = 0x55;
+}
+
+/* Check if a character from the MIDI port is available */
+int mcheckch()
+{
+	/* Check if the ACIA is ready */
+	if (*(MIDI_ACIA) & 0x1)
+		return -1;
+		
+	return 0;
+}
+
+/* Get a character from the MIDI port */
+unsigned mgetch()
+{
+	unsigned c;
+	
+	/* Wait until the the ACIA is ready */
+	while (!(*(MIDI_ACIA) & 0x1));
+	
+	/* Return the character value */
+	c = *(MIDI_ACIA + 1);
 	return c & 0xFF;
 }
 

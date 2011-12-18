@@ -68,8 +68,41 @@ unsigned pitch;
 	unsigned phd;
 	
 	if (pitch) {
+		/*
 		octave = pitch / 12;
 		note = pitch % 12;
+		*/
+
+		if (pitch >= 12 && pitch < 24) {
+			octave = 1;
+			note = pitch - 12;
+		} else if (pitch >= 24 && pitch < 36) {
+			octave = 2;
+			note = pitch - 24;
+		} else  if (pitch >= 36 && pitch < 48) {
+			octave = 3;
+			note = pitch - 36;
+		} else  if (pitch >= 48 && pitch < 60) {
+			octave = 4;
+			note = pitch - 48;
+		} else  if (pitch >= 60 && pitch < 72) {
+			octave = 5;
+			note = pitch - 60;
+		} else  if (pitch >= 72 && pitch < 84) {
+			octave = 6;
+			note = pitch - 72;
+		} else  if (pitch >= 84 && pitch < 96) {
+			octave = 7;
+			note = pitch - 84;
+		} else  if (pitch >= 96 && pitch < 108) {
+			octave = 8;
+			note = pitch - 96;
+		} else {
+			/* Turn off the oscillators */
+			sndl[0] = 0;
+			sndr[0] = 0;
+			return;
+		}
 		
 		phd = octave << 12;
 		phd |= phds[note];	
@@ -192,21 +225,30 @@ char **argv;
 	
 	note = -1;
 	octave = 5;
+
+	/* We initialize the MIDI port */
+	minit();
+
+	/* Main loop */
 	while (1) {
 	
-		/* First, we check if we have an incoming MIDI note from the serial port */
-		if (scheckch()) {
-			c = sgetch();
+		/* First, we check if we have an incoming MIDI note from the MIDI port */
+		if (mcheckch()) {
+			c = mgetch();
 			if (c == 0x90) {
-				c = sgetch();
+				c = mgetch();
+				pitch = c;
+
 				if (psti < PSTACK_SIZE - 1) {
 					psti++;
 					pitch = c;
 					pstack[psti] = pitch;
 				}
-				c = sgetch();
+
+				c = mgetch();
 			} else if (c == 0x80) {
-				c = sgetch();
+				c = mgetch();
+
 				for (i = 1; i < psti; i++)
 					if (pstack[i] == c) {
 						for (; i < psti; i++)
@@ -216,26 +258,31 @@ char **argv;
 				if (psti > 0)
 					psti--;
 				pitch = pstack[psti];
-				c = sgetch();
+				c = mgetch();
 			} else if (c == 0xB0) {
-				c = sgetch();
+				c = mgetch();
 				if (c == 0x17) {
-					c = sgetch();
+					c = mgetch();
 					waveform = c >> 4;
 				} else if (c == 0x18) {
-					c = sgetch();
+					c = mgetch();
 					octcarr = c >> 4;
 				} else if (c == 0x19) {
-					c = sgetch();
+					c = mgetch();
 					gainmsg = c >> 1;
 				} else if (c == 0x1A) {
-					c = sgetch();
+					c = mgetch();
 					gainmod = c >> 1;
 				}				
 				
+			} else {
+				/* Unknown */
+				moveto(0, 22);
+				printh8(c);
 			}
 			
 			/* We print the pitch stack */
+
 			moveto(0, 23);
 			for (i = 0; i < PSTACK_SIZE; i++) {
 				if (i <= psti) {
@@ -246,6 +293,7 @@ char **argv;
 			}
 			
 			prtstatus();			
+
 			play(pitch);
 		}
 	

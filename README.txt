@@ -73,41 +73,52 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 4. Connect a PS/2 keyboard to the synthesizer;
 5. Connect speakers to the synthesizer;
 6. Connect a serial cable to the synthesizer;
-7. Start a serial terminal at 57600-N-8-1;
-8. Program the FPGA by creating a projet with the files under the "rtl" folder;
+7. Program the FPGA by creating a projet with the files under the "rtl" folder;
+8. Start a serial terminal at 57600-N-8-1;
 9. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
 10. Upload the text file "src/synth/synth.s19" using your serial terminal;
 11. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
 12. Type "1000" (this is the starting address of the synthesizer project);
 13. Type "g". You will see the user interface on the monitor of your synthesizer system;
 14. Follow the on-screen instructions in order to play and change parameters;
-15. Optional: Quit your serial terminal and start MidiSerial in order to play with your MIDI keyboard (see 2.3);
-16. Press the South button in order to go back to the SYS09BUG prompt.
+15. Press the South button in order to go back to the SYS09BUG prompt.
 
-Note: The steps 9 to 13 can be performed automatically with 'make deploy' from the "src/synth" directory. You will need to install 'pyserial' (http://pyserial.sourceforge.net).
+Note: The steps 8 to 13 can be performed automatically with 'make deploy' from the "src/synth" directory. You will need to install 'pyserial' (http://pyserial.sourceforge.net).
  
 
-2.2. Audio Outputs
-==================
+2.2. Audio Outputs and MIDI I/O
+===============================
 
 2.2.1. Spartan-3A
 =================
-
-There are two audio outputs:
 	- Standard audio output connector of the board;
 	- Auxiliary audio ouput on J18, pins AA21 and AB21 being left and right channels respectively.
+	- MIDI Input on J18, pin AA19
+	- MIDI Output on J18, pin AB19
 
 2.2.2. Spartan-3E
 =================
 	- Main audio output on J1, pins B4 and A4 being left and right audio channels respectively;
 	- Auxiliary audio output on J2, pins A6 and B6 being left and right audio channels respectively.
+	- MIDI Input on J2, pin E7
+	- MIDI Output on J2, pin F7
 	
 You will need a RC filter at the output in order to see the waveform with an oscilloscope. Refer to the Xilinx application note 154 for more details about the DAC.
 
-2.3. MIDI Input from Serial Port
-================================
+2.3. MIDI Interface
+===================
 
-The synthesizer is able to receive the MIDI note on/note off events from the serial port at 57600-N-8-1. A tool named MidiSerial allowing such serial interface is available here: http://blipbox.org/blog/projects/midiserial/.
+The synthesizer is able to receive the MIDI note on/note off events from a MIDI device. Here's the schematic of a MIDI IN interface:
+
+                                        +--6N138--+
+MIDI IN [4] ---- R220 -----------------[2]       [8]--------------- VCC 3.3V
+                          |             |         |           |
+                        1N4148          |         |         R220
+                          |             |         |           |
+MIDI IN [5] ---------------------------[3]       [6]--------------- FPGA MIDI INPUT
+                                        |         |
+                                        |        [5]--- GND
+                                        +---------+
 
 ============================================================
 3. Test benches
@@ -230,5 +241,4 @@ The following will produce the tables for a 8-bit quarter cycle (copy and paste 
 ============================================================
 
 - On the Spartan-3A Starter Kit with 3-bit for RGB components, only the MSB bit is drived therefore the video brightness is lower than the maximum;
-- There is still an issue regarding the processing of MIDI events from the serial port: some MIDI events are lost due to the fact that no buffering is currently done with the incoming serial data.
 
