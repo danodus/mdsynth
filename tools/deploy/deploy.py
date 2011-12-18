@@ -10,9 +10,11 @@ if (len(sys.argv) <= 1):
 
 
 ser = serial.Serial('/dev/ttyUSB0', 57600)
+ser.stopbits=2
 
 f = open(sys.argv[1], 'r')
 ser.write('l');
+time.sleep(0.5);
 ser.write(f.read());
 ser.write('\n');
 time.sleep(0.5);

@@ -39,7 +39,7 @@ All the source files of the toolset are provided. The following is provided:
 
 You will find Makefiles for Linux. I personally use the great CentOS-6 distribution.
 
-The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-1 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
+The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-2 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
 The chain is the following:
 	"C" -- [ C compiler ] --> "ASM" -- [ 6809 assembler ] --> "S19" -- [ Serial upload with SYS09BUG ROM ] --> FPGA Block RAM Memory
@@ -74,7 +74,7 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 5. Connect speakers to the synthesizer;
 6. Connect a serial cable to the synthesizer;
 7. Program the FPGA by creating a projet with the files under the "rtl" folder;
-8. Start a serial terminal at 57600-N-8-1;
+8. Start a serial terminal at 57600-N-8-2;
 9. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
 10. Upload the text file "src/synth/synth.s19" using your serial terminal;
 11. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
