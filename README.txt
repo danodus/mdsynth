@@ -212,7 +212,7 @@ We want the gain*sine result using lookup tables as shown here:
 	
 The following will produce the tables for a 8-bit quarter cycle (copy and paste in GNU Octave):
 	f1 = 64;
-	logsine_size = 64;
+	logsine_size = 65;
 	loggain_size = 64;
 	exptable_size = (f1/32)*(256 + 256);
 	wave_max = 127;
