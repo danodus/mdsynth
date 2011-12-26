@@ -42,7 +42,6 @@ char **argv;
 
 	/* Main loop */
 	while (1) {
-		/* We check if we have an incoming MIDI note from the MIDI port */
 		c = mgetch();
 		if (c != 0x90 && c != 0x80)
 			prints("**ERROR:");

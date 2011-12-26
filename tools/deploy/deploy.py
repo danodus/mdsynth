@@ -21,6 +21,7 @@ time.sleep(0.5);
 ser.write(chr(16));
 time.sleep(0.1);
 ser.write("1000");
-ser.write("g");
+# Uncomment the following line in order to start the application automatically
+#ser.write("g");
 ser.close()
 

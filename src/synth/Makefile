@@ -13,7 +13,7 @@ synth.asm: ../common/c.asm c.out
 	cat c.out >> $@
 
 c.out: synth.c
-	${CC} $<
+	${CC} -s $<
 
 deploy:
 	python ../../tools/deploy/deploy.py synth.s19

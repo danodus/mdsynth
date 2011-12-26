@@ -31,6 +31,8 @@ char cury;
 #define KBD		0xE020
 #define VDU		0xE030
 
+#define IRQ		0x7FC8
+
 /* Print a single character */
 void printc(c)
 char c;
@@ -165,20 +167,19 @@ unsigned sgetch()
 
 /* --------------- MIDI Support -------------------*/
 
-/* Initialize the MIDI port */
-void minit()
-{
-	/* 31250-N-8-1 */
-	*(MIDI_ACIA) = 0x55;
-}
+#define MBUF_SIZE	16	/* MIDI buffer size */
+
+char mbuf[MBUF_SIZE];	/* MIDI buffer */
+unsigned mbufwi;	/* MIDI buffer read index */
+unsigned mbufri;	/* MIDI buffer write index */
+unsigned mbufc;		/* Number of characters in the MIDI buffer */
 
 /* Check if a character from the MIDI port is available */
 int mcheckch()
 {
-	/* Check if the ACIA is ready */
-	if (*(MIDI_ACIA) & 0x1)
+	if (mbufc > 0)
 		return -1;
-		
+
 	return 0;
 }
 
@@ -187,11 +188,67 @@ unsigned mgetch()
 {
 	unsigned c;
 	
-	/* Wait until the the ACIA is ready */
-	while (!(*(MIDI_ACIA) & 0x1));
-	
-	/* Return the character value */
-	c = *(MIDI_ACIA + 1);
+	while (mbufc == 0);
+
+	c = mbuf[mbufri];
+	mbufri++;
+	if (mbufri >= MBUF_SIZE)
+		mbufri = 0;
+	mbufc--;
+			
 	return c & 0xFF;
+}
+
+/* MIDI interrupt handler */
+void mirqh()
+{
+	unsigned c;
+
+	if (*(MIDI_ACIA) & 0x80) { 
+		c = *(MIDI_ACIA + 1);
+		if (mbufc < MBUF_SIZE) {
+			mbuf[mbufwi] = c;
+			mbufwi++;
+			if (mbufwi >= MBUF_SIZE)
+				mbufwi = 0;
+			mbufc++;
+		}
+	}
+}
+
+#asm
+MACIA	EQU	$E010
+IRQ	EQU	$7FC8
+
+IRQH	LBSR	mirqh
+	RTI
+
+* Initialize the MIDI port with interrupts
+
+_minit
+
+* We set the interrupt handler
+	LDX	#IRQ
+	LDD	#IRQH
+	STD	,X
+
+* We configure the MIDI ACIA
+	LDX	#MACIA
+	LDA	#$D5
+	STA	,X
+
+* We enable the interrupts
+	ANDCC	#$EF
+
+	RTS
+#endasm
+
+void minit()
+{
+	mbufwi = 0;
+	mbufri = 0;
+	mbufc = 0;
+	
+	_minit();
 }
 
