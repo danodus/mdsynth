@@ -75,13 +75,22 @@ signal phase_modulated  : unsigned(7 downto 0);
 signal sine_message : integer range -128 to 127 := 0;
 signal sine_modulated : integer range -128 to 127 := 0;
 
+type state_type is (
+    sinewave_message_state,
+    sinewave_modulated_state);
+
+signal state : state_type := sinewave_message_state;
+
+signal sine_gain : unsigned(5 downto 0);
+signal sine_phase : unsigned(7 downto 0);
+signal sine_data : integer range -128 to 127;
+
 begin
 
     nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave_carrier, phase => phase_carrier);
     nco_message0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave_message, phase => phase_message);
 
-    sinewave_message0 : sinewave port map (clk => clk, gain => gain_message, phase => phase_message, data_out => sine_message);
-    sinewave_modulated0 : sinewave port map (clk => clk, gain => gain_modulated, phase => phase_modulated, data_out => sine_modulated);
+    sinewave0 : sinewave port map (clk => clk, gain => sine_gain, phase => sine_phase, data_out => sine_data);
 
     dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
 
@@ -89,29 +98,49 @@ begin
 	process (clk)
 	begin
 	    if (rising_edge(clk)) then
-			counter <= counter + 1;
-			phase_modulated <= phase_carrier + sine_message;
 
-            case waveform is
-                when "001" =>
-                    -- Square wave
-                    if (phase_message(7) = '1') then
-                        dac_in(7 downto 0) <= (others => '1');
-                    else
-                        dac_in(7 downto 0) <= (others => '0');
-                    end if;
-                when "010" =>
-                    -- Sawtooth wave
-                    dac_in <= std_logic_vector(phase_message);
-                when "011" =>
-                    -- Sine wave
-                    dac_in <= std_logic_vector(to_unsigned(128 + sine_message, 8));
-                when "100" =>
-                    -- PM
-                    dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
-                when others =>
-                    dac_in(7 downto 0) <= (others => '0');
-            end case;
+            counter <= counter + 1;
+            phase_modulated <= phase_carrier + sine_message;
+
+            case state is
+	            when sinewave_message_state =>
+	                -- We calculate the message waveform
+	                sine_phase <= phase_message;
+	                sine_gain <= gain_message;
+	                sine_message <= sine_data;
+	                state <= sinewave_modulated_state;
+	            when sinewave_modulated_state =>
+	                -- We calculate the modulated waveform
+	                sine_phase <= phase_modulated;
+	                sine_gain <= gain_modulated;
+	                sine_modulated <= sine_data;
+	                state <= sinewave_message_state;
+	        end case;
+	        
+	        -- We update the DAC
+	        
+	        case waveform is
+	            when "001" =>
+	                -- Square wave
+	                if (phase_message(7) = '1') then
+	                    dac_in(7 downto 0) <= (others => '1');
+	                else
+	                    dac_in(7 downto 0) <= (others => '0');
+	                end if;
+	            when "010" =>
+	                -- Sawtooth wave
+	                dac_in <= std_logic_vector(phase_message);
+	            when "011" =>
+	                -- Sine wave
+	                dac_in <= std_logic_vector(to_unsigned(128 + sine_message, 8));
+	            when "100" =>
+	                -- PM
+	                dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
+	            when others =>
+	                dac_in(7 downto 0) <= (others => '0');
+	        end case;	                
+	        
+
 		end if;
 		
 	end process;
