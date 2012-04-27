@@ -3,7 +3,8 @@
 *
 *	   12-Dec-81  M.Ohta,H.Tezuka
 *
-
+	
+	OPT	l
 	ORG	$100
 
 _00001	PSHS	D,X,Y		multiply
@@ -220,6 +221,31 @@ printc
 	LDB	,X
 	INC	,X
 	SEX
+	LDB	0,Y
+	SEX
+	SUBD	#80
+	LBLE	_2
+	CLRA
+	CLRB
+	STB	0,Y
+	LEAX	1,Y
+	LDB	,X
+	INC	,X
+	SEX
+_2
+	LDB	1,Y
+	SEX
+	SUBD	#24
+	LBLE	_3
+	CLRA
+	CLRB
+	STB	1,Y
+_3
+	LDD	#57395
+	TFR	D,X
+	LDB	1,Y
+	SEX
+	STB	0,X
 	LDD	#57394
 	TFR	D,X
 	LDB	0,Y
@@ -234,10 +260,10 @@ prints
 	LDB	1,Y
 	SEX
 	STB	0,X
-_3
+_5
 	LDB	[4,U]
 	SEX
-	LBEQ	_2
+	LBEQ	_4
 	LDD	#57394
 	TFR	D,X
 	LDB	0,Y
@@ -258,8 +284,8 @@ _3
 	ADDD	#1
 	STD	4,U
 	SUBD	#1
-	LBRA	_3
-_2
+	LBRA	_5
+_4
 	LDD	#57394
 	TFR	D,X
 	LDB	0,Y
@@ -293,11 +319,11 @@ clearscr
 	CLRA
 	CLRB
 	STB	-2,U
-_5
+_7
 	LDB	-2,U
 	SEX
 	SUBD	#25
-	LBGE	_4
+	LBGE	_6
 	LDD	#57395
 	TFR	D,X
 	LDB	-2,U
@@ -306,11 +332,11 @@ _5
 	CLRA
 	CLRB
 	STB	-1,U
-_8
+_10
 	LDB	-1,U
 	SEX
 	SUBD	#80
-	LBGE	_7
+	LBGE	_9
 	LDD	#57394
 	TFR	D,X
 	LDB	-1,U
@@ -320,20 +346,20 @@ _8
 	TFR	D,X
 	LDD	#32
 	STB	0,X
-_9
+_11
 	LEAX	-1,U
 	LDB	,X
 	INC	,X
 	SEX
-	LBRA	_8
-_7
-_6
+	LBRA	_10
+_9
+_8
 	LEAX	-2,U
 	LDB	,X
 	INC	,X
 	SEX
-	LBRA	_5
-_4
+	LBRA	_7
+_6
 	PULS	D,U,PC
 printh4
 	PSHS	U
@@ -344,21 +370,21 @@ printh4
 	STD	4,U
 	LDD	4,U
 	SUBD	#9
-	LBLS	_10
+	LBLS	_12
 	LDD	4,U
 	SUBD	#10
 	ADDD	#65
 	PSHS	D
 	LBSR	printc
 	LEAS	2,S
-	LBRA	_11
-_10
+	LBRA	_13
+_12
 	LDD	4,U
 	ADDD	#48
 	PSHS	D
 	LBSR	printc
 	LEAS	2,S
-_11
+_13
 	PULS	U,PC
 printh8
 	PSHS	U
@@ -406,10 +432,10 @@ checkch
 	ANDA	#0
 	ANDB	#1
 	SUBD	#0
-	LBEQ	_12
+	LBEQ	_14
 	LDD	#-1
 	PULS	U,PC
-_12
+_14
 	CLRA
 	CLRB
 	PULS	U,PC
@@ -417,7 +443,7 @@ getch
 	PSHS	U
 	LEAU	,S
 	LEAS	-2,S
-_14
+_16
 	LDD	#57376
 	TFR	D,X
 	LDB	0,X
@@ -425,8 +451,8 @@ _14
 	ANDA	#0
 	ANDB	#1
 	SUBD	#0
-	LBEQ	_14
-_13
+	LBEQ	_16
+_15
 	LDD	#57377
 	TFR	D,X
 	LDB	0,X
@@ -446,10 +472,10 @@ scheckch
 	ANDA	#0
 	ANDB	#1
 	SUBD	#0
-	LBEQ	_15
+	LBEQ	_17
 	LDD	#-1
 	PULS	U,PC
-_15
+_17
 	CLRA
 	CLRB
 	PULS	U,PC
@@ -457,7 +483,7 @@ sgetch
 	PSHS	U
 	LEAU	,S
 	LEAS	-2,S
-_17
+_19
 	LDD	#57344
 	TFR	D,X
 	LDB	0,X
@@ -465,8 +491,8 @@ _17
 	ANDA	#0
 	ANDB	#1
 	SUBD	#0
-	LBEQ	_17
-_16
+	LBEQ	_19
+_18
 	LDD	#57345
 	TFR	D,X
 	LDB	0,X
@@ -476,6 +502,136 @@ _16
 	ANDA	#0
 	ANDB	#255
 	PULS	X,U,PC
+mbuf	EQU	2
+mbufwi	EQU	18
+mbufri	EQU	20
+mbufc	EQU	22
+mcheckch
+	PSHS	U
+	LEAU	,S
+	LDD	22,Y
+	SUBD	#0
+	LBLS	_20
+	LDD	#-1
+	PULS	U,PC
+_20
+	CLRA
+	CLRB
+	PULS	U,PC
+mgetch
+	PSHS	U
+	LEAU	,S
+	LEAS	-2,S
+_22
+	LDD	22,Y
+	SUBD	#0
+	LBEQ	_22
+_21
+	LDD	20,Y
+	LEAX	2,Y
+	LDB	D,X
+	SEX
+	STD	-2,U
+	LDD	20,Y
+	ADDD	#1
+	STD	20,Y
+	SUBD	#1
+	LDD	20,Y
+	SUBD	#16
+	LBLO	_23
+	CLRA
+	CLRB
+	STD	20,Y
+_23
+	LDD	22,Y
+	ADDD	#-1
+	STD	22,Y
+	SUBD	#-1
+	LDD	-2,U
+	ANDA	#0
+	ANDB	#255
+	PULS	X,U,PC
+mirqh
+	PSHS	U
+	LEAU	,S
+	LEAS	-2,S
+	LDD	#57360
+	TFR	D,X
+	LDB	0,X
+	SEX
+	ANDA	#0
+	ANDB	#128
+	SUBD	#0
+	LBEQ	_24
+	LDD	#57361
+	TFR	D,X
+	LDB	0,X
+	SEX
+	STD	-2,U
+	LDD	22,Y
+	SUBD	#16
+	LBHS	_25
+	LDD	18,Y
+	LEAX	2,Y
+	LEAX	D,X
+	LDD	-2,U
+	STB	0,X
+	LDD	18,Y
+	ADDD	#1
+	STD	18,Y
+	SUBD	#1
+	LDD	18,Y
+	SUBD	#16
+	LBLO	_26
+	CLRA
+	CLRB
+	STD	18,Y
+_26
+	LDD	22,Y
+	ADDD	#1
+	STD	22,Y
+	SUBD	#1
+_25
+_24
+	PULS	D,U,PC
+MACIA	EQU	$E010
+IRQ	EQU	$7FC8
+
+IRQH	LBSR	mirqh
+	RTI
+
+* Initialize the MIDI port with interrupts
+
+_minit
+
+* We set the interrupt handler
+	LDX	#IRQ
+	LDD	#IRQH
+	STD	,X
+
+* We configure the MIDI ACIA
+	LDX	#MACIA
+	LDA	#$D5
+	STA	,X
+
+* We enable the interrupts
+	ANDCC	#$EF
+
+	RTS
+minit
+	PSHS	U
+	LEAU	,S
+	CLRA
+	CLRB
+	STD	18,Y
+	CLRA
+	CLRB
+	STD	20,Y
+	CLRA
+	CLRB
+	STD	22,Y
+	LBSR	_minit
+	PULS	U,PC
 main
 	PSHS	U
 	LEAU	,S
@@ -487,10 +643,10 @@ main
 	CLRB
 	STB	1,Y
 	LEAX	2,PC
-	BRA	_18
+	BRA	_27
 	FCB	72,101,108,108,111,32,87,111
 	FCB	114,108,100,33,0
-_18
+_27
 	PSHS	X
 	LBSR	prints
 	LEAS	2,S
@@ -499,5 +655,5 @@ _18
 	PULS	U,PC
 _1	RTS
 _INITIALIZE	EQU	_1
-_GLOBALS	EQU	2
+_GLOBALS	EQU	24
 	END

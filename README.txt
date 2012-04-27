@@ -4,7 +4,7 @@ FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter K
 Author: Daniel Cliche (dcliche@meldora.com)
 Copyright (c) 2011, Meldora Inc. All rights reserved.
 
-License: New BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
+License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
 Languages: VHDL, 6809 assembly, C
 
 ============================================================
