@@ -26,12 +26,14 @@ use IEEE.NUMERIC_STD.ALL;
 entity channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
+           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: DAC-direct
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
            phase_delta:           in unsigned(11 downto 0);
            octave_message:        in unsigned(3 downto 0);
            octave_carrier:        in unsigned(3 downto 0);
+           reset_phase:           in std_logic;
+           dac_direct_value:      in std_logic_vector(7 downto 0);
            output:   out std_logic);
 end channel;
 
@@ -52,13 +54,13 @@ component sinewave is
 end component;
 
 component nco is
-    port ( clk:     in std_logic;
-           phase_delta:  in unsigned(11 downto 0);
-           octave:  in unsigned(3 downto 0);
-           phase:   out unsigned(7 downto 0));
+    port ( clk:         in std_logic;
+           reset_phase: in std_logic;
+           ena:         in std_logic;
+           phase_delta: in unsigned(11 downto 0);
+           octave:      in unsigned(3 downto 0);
+           phase:       out unsigned(7 downto 0));
 end component;
-
-signal counter : unsigned(15 downto 0) := (others => '0');
 
 signal dac_in : std_logic_vector(7 downto 0);
 
@@ -79,10 +81,13 @@ signal sine_gain : unsigned(5 downto 0);
 signal sine_phase : unsigned(7 downto 0);
 signal sine_data : integer range -128 to 127;
 
+signal ena_nco_carrier : std_logic;
+signal ena_nco_message : std_logic;
+
 begin
 
-    nco_carrier0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave_carrier, phase => phase_carrier);
-    nco_message0 : nco port map (clk => clk, phase_delta => phase_delta, octave => octave_message, phase => phase_message);
+    nco_carrier0 : nco port map (clk => clk, reset_phase => reset_phase, ena => ena_nco_carrier, phase_delta => phase_delta, octave => octave_carrier, phase => phase_carrier);
+    nco_message0 : nco port map (clk => clk, reset_phase => reset_phase, ena => ena_nco_message, phase_delta => phase_delta, octave => octave_message, phase => phase_message);
 
     sinewave0 : sinewave port map (clk => clk, gain => sine_gain, phase => sine_phase, data_out => sine_data);
 
@@ -92,20 +97,23 @@ begin
 	process (clk)
 	begin
 	    if (rising_edge(clk)) then
-
-            counter <= counter + 1;
+	    
             phase_modulated <= phase_carrier + sine_message;
 
             case state is
 	            when sinewave_message_state =>
 	                -- We calculate the message waveform
+	                ena_nco_message <= '1';
+	                ena_nco_carrier <= '0';
 	                sine_phase <= phase_message;
 	                sine_gain <= gain_message;
 	                sine_message <= sine_data;
 	                state <= sinewave_modulated_state;
 	            when sinewave_modulated_state =>
 	                -- We calculate the modulated waveform
-	                sine_phase <= phase_modulated;
+	                ena_nco_message <= '0';
+	                ena_nco_carrier <= '1';
+   	                sine_phase <= phase_modulated;
 	                sine_gain <= gain_modulated;
 	                sine_modulated <= sine_data;
 	                state <= sinewave_message_state;
@@ -131,7 +139,7 @@ begin
 	                -- PM
 	                dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
 	            when others =>
-	                dac_in(7 downto 0) <= (others => '0');
+	                dac_in <= dac_direct_value;
 	        end case;	                
 	        
 

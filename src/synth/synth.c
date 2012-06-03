@@ -38,12 +38,19 @@ char octcarr;		/* carrier octave */
 unsigned gainmsg;	/* message gain */
 unsigned gainmod;	/* modulated gain */
 
+unsigned envgain;	/* envelope gain */
+int	isnoteon;
+
 /* Phase deltas */
 unsigned phds[12];
 
+/* Pitch stack */
+char pstack[PSTACK_SIZE];
+int psti;
+
 /*
-    pitch 69 (A4) will give the following: octave=5, note=9 
-    The desired frequencies for octave 5 are the following:
+    pitch 69 (A4) will give the following: octave=6, note=9 
+    The desired frequencies for octave 6 are the following:
         note     freq (Hz)
         0        261.63    (C4)
         1        277.18
@@ -70,71 +77,99 @@ unsigned pitch;
 	unsigned note;
 	unsigned phd;
 	
-	if (pitch) {
-		/*
-		octave = pitch / 12;
-		note = pitch % 12;
-		*/
+	/*
+	octave = pitch / 12;
+	note = pitch % 12;
+	*/
 
-		if (pitch >= 12 && pitch < 24) {
-			octave = 1;
-			note = pitch - 12;
-		} else if (pitch >= 24 && pitch < 36) {
-			octave = 2;
-			note = pitch - 24;
-		} else  if (pitch >= 36 && pitch < 48) {
-			octave = 3;
-			note = pitch - 36;
-		} else  if (pitch >= 48 && pitch < 60) {
-			octave = 4;
-			note = pitch - 48;
-		} else  if (pitch >= 60 && pitch < 72) {
-			octave = 5;
-			note = pitch - 60;
-		} else  if (pitch >= 72 && pitch < 84) {
-			octave = 6;
-			note = pitch - 72;
-		} else  if (pitch >= 84 && pitch < 96) {
-			octave = 7;
-			note = pitch - 84;
-		} else  if (pitch >= 96 && pitch < 108) {
-			octave = 8;
-			note = pitch - 96;
-		} else {
-			/* Turn off the oscillators */
-			sndl[0] = 0;
-			sndr[0] = 0;
-			return;
-		}
-		
-		phd = octave << 12;
-		phd |= phds[note];	
-
-		sndl[1] = phd >> 8;
-		sndl[2] = phd;
-		sndl[3] = octcarr + octave;
-		
-		sndl[4] = gainmsg;
-		sndl[5] = gainmod;
-		
-		sndl[0] = waveform;
-		
-		sndr[1] = phd >> 8;
-		sndr[2] = phd;
-		sndr[3] = octcarr + octave;
-		
-		sndr[4] = gainmsg;
-		sndr[5] = gainmod;
-		
-		sndr[0] = waveform;
+	if (pitch >= 12 && pitch < 24) {
+		octave = 2;
+		note = pitch - 12;
+	} else if (pitch >= 24 && pitch < 36) {
+		octave = 3;
+		note = pitch - 24;
+	} else  if (pitch >= 36 && pitch < 48) {
+		octave = 4;
+		note = pitch - 36;
+	} else  if (pitch >= 48 && pitch < 60) {
+		octave = 5;
+		note = pitch - 48;
+	} else  if (pitch >= 60 && pitch < 72) {
+		octave = 6;
+		note = pitch - 60;
+	} else  if (pitch >= 72 && pitch < 84) {
+		octave = 7;
+		note = pitch - 72;
+	} else  if (pitch >= 84 && pitch < 96) {
+		octave = 8;
+		note = pitch - 84;
+	} else  if (pitch >= 96 && pitch < 108) {
+		octave = 9;
+		note = pitch - 96;
 	} else {
 		/* Turn off the oscillators */
 		sndl[0] = 0;
 		sndr[0] = 0;
+		return;
 	}
+	
+	phd = octave << 12;
+	phd |= phds[note];	
+
+	sndl[1] = phd >> 8;
+	sndl[2] = phd;
+	sndl[3] = octcarr + octave;
+	
+	sndl[4] = gainmsg;
+	/*sndl[5] = gainmod;*/
+	
+	sndr[1] = phd >> 8;
+	sndr[2] = phd;
+	sndr[3] = octcarr + octave;
+	
+	sndr[4] = gainmsg;
+	/*sndr[5] = gainmod;*/
+	
+	sndl[0] = waveform;
+	sndr[0] = waveform;
 }
 
-void prtstatus()
+void noteon(pitch)
+unsigned pitch;
+{
+	/* Envelope only on PM */
+	if (waveform == 4 && !isnoteon) {
+		envgain = 0;
+	}
+	isnoteon = -1;
+	play(pitch);
+}
+
+void noteoff()
+{
+	/* Envelope only on PM */
+	if (waveform < 4) {
+		play(0);
+	}
+	isnoteon = 0;
+}
+
+void updenv() {
+	if (isnoteon) {
+		envgain += 1;
+		if (envgain > gainmod)
+			envgain = gainmod;
+	} else {
+		if (envgain > 0) {
+			envgain -= 1;
+		}
+	}
+
+	sndl[5] = envgain;
+	sndr[5] = envgain;
+}
+
+void prtstatu()
 {
 	moveto(16, 12);
 	printh4(octave);
@@ -146,16 +181,29 @@ void prtstatus()
 	printh8(gainmod);
 }
 
+void prtstack()
+{
+	int i;
+	moveto(0, 23);
+	for (i = 0; i < PSTACK_SIZE; i++) {
+		if (i <= psti) {
+			printh8(pstack[i]);
+		} else {
+			prints("  ");
+		}
+	}
+}
+
 /* Main */
 int main(argc, argv)
 int argc;
 char **argv;
 {
-	char pstack[PSTACK_SIZE];
-	int psti;
-	
+	int wait;
+
 	unsigned c;
 	char note;
+	char lstpitch;
 	char pitch;
 	int i;
 	int newpitch;
@@ -177,10 +225,13 @@ char **argv;
 	phds[11] = 1326;
 
 	octcarr = 0;
-	waveform = 1;
+	waveform = 4;
 	
 	gainmsg = 63;
 	gainmod = 63;
+
+	envgain = 0;
+	isnoteon = 0;
 	
 	clearscr();
 
@@ -228,6 +279,7 @@ char **argv;
 	
 	note = -1;
 	octave = 5;
+	lstpitch = 0;
 
 	/* We initialize the MIDI port */
 	minit();
@@ -249,6 +301,10 @@ char **argv;
 				}
 
 				c = mgetch();
+				if (pitch != lstpitch) {
+					noteon(pitch);
+					lstpitch = pitch;
+				}
 			} else if (c == 0x80) {
 				c = mgetch();
 
@@ -262,6 +318,14 @@ char **argv;
 					psti--;
 				pitch = pstack[psti];
 				c = mgetch();
+				if (pitch > 0) {
+					if (pitch != lstpitch) {
+						noteon(pitch);
+					}
+				} else {
+					noteoff();
+				}
+				lstpitch = pitch;
 			} else if (c == 0xB0) {
 				c = mgetch();
 				if (c == 0x17) {
@@ -284,20 +348,9 @@ char **argv;
 				printh8(c);
 			}
 			
-			/* We print the pitch stack */
-
-			moveto(0, 23);
-			for (i = 0; i < PSTACK_SIZE; i++) {
-				if (i <= psti) {
-					printh8(pstack[i]);
-				} else {
-					prints("  ");
-				}
-			}
-			
-			prtstatus();			
-
-			play(pitch);
+			/* We print the pitch stack and status */
+			prtstack();
+			prtstatu();			
 		}
 	
 		/* We check if we have an incoming key */
@@ -448,20 +501,31 @@ char **argv;
 				case ' ':
 					note = -1; /* quiet */
 					newpitch = 1;
+					psti = 0;
+					prtstack();
 			} /* switch */
 			
 			if (newpitch) {
 				if (note >= 0) {
 					pitch = 12 * octave + note;
+					noteon(pitch);
 				} else {
 					pitch = 0;
+					noteoff();
 				}
 			}
 			
-			prtstatus();
-			play(pitch);
+			prtstatu();
+			/*play(pitch);*/
 			
 		} /* if a key is available */
+
+		/* we update the envelope */
+		updenv();
+
+		wait = 100;
+		while (wait > 0)
+			wait--;		
 
 	} /* while 1 */
 	

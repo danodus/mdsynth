@@ -2,7 +2,7 @@ MDSynth
 FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
 Author: Daniel Cliche (dcliche@meldora.com)
-Copyright (c) 2011, Meldora Inc. All rights reserved.
+Copyright (c) 2012, Meldora Inc. All rights reserved.
 
 License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
 Languages: VHDL, 6809 assembly, C
@@ -11,7 +11,7 @@ Languages: VHDL, 6809 assembly, C
 1. Overview
 ============================================================
 
-The sound chip includes a sigma-delta DAC and two numerically-controlled oscillators. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
+The sound chip includes a delta-sigma DAC and two numerically-controlled oscillators. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
 Four types of waveform are available:
 	- Square (fixed gain)
 	- Sawtooth (fixed gain)
@@ -55,12 +55,13 @@ Two sound chips are available at the following base addresses:
 - 0xE080	Left Audio
 - 0xE090	Right Audio
 
-Base + 0: Waveform (0x00: None, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+Base + 0: Waveform (0x00: DAC Direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
 Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 2: Phase Delta LSB (8-bit)
 Base + 3: Carrier Octave (4-bit)
 Base + 4: Message Gain (6-bit, 63=1.0, sine and phase modulation only)
 Base + 5: Modulated Gain (6-bit, 63=1.0, phase modulation only)
+Base + 6: DAC direct value (8-bit, DAC direct only)
 
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
 
@@ -163,8 +164,8 @@ The pitch is MIDI compatible. The value is between 0 and 127, 69 being A4 at 440
 
 I am using an numerically-controlled oscillator (NCO) in order to produce a phase value used as an index of the sine table.
 
-pitch 69 (A4) will give the following: octave=5, note=9 
-The desired frequencies for octave 5 are the following:
+pitch 69 (A4) will require the following: octave=6, note=9 
+The desired frequencies for octave 6 are the following:
         note     freq (Hz)
         0        261.63    (C4)
         1        277.18
@@ -239,6 +240,4 @@ The following will produce the tables for a 8-bit quarter cycle (copy and paste 
 ============================================================
 5. Known Issues
 ============================================================
-
-- On the Spartan-3A Starter Kit with 3-bit for RGB components, only the MSB bit is drived therefore the video brightness is lower than the maximum;
 

@@ -52,7 +52,10 @@ char    *str;
                         because a single command line source file
                         (which is what N_files counts) can have multiple
                         include source files. */
- printf("%s\n",str);
+
+ printf("%s:%d: error: %s\n",Argv[Cfn], Line_num, str);
+ 
+ exit(1);
 }
 /*
  *      warn --- trivial error in a line

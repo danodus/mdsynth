@@ -68,6 +68,9 @@
 --                   Base + 3 Cusror Vertical Position (0 to 24)
 --                   Base + 4 Vertical Scroll Offset (0 to 24)
 --                            Scrolls the display up by the specified number of character rows
+--                   Base + 5 Cursor Attribute
+--                             B7 downto B1 - N/A
+--                             B0 - 0 => Invisible / 1 => Visible
 --
 --  Video Timing :
 --
@@ -217,6 +220,7 @@ Architecture RTL of vdu8 is
   signal reg_hcursor   : std_logic_vector(6 downto 0);   -- 80 columns
   signal reg_vcursor   : std_logic_vector(4 downto 0);   -- 25 rows
   signal reg_voffset   : std_logic_vector(4 downto 0);   -- 25 rows
+  signal reg_cursor_visible: std_logic;
   --
   -- Video Shift register
   --
@@ -330,6 +334,7 @@ attr_buff_ram : ram_2k port map(
     if vdu_rst = '1' then
       reg_character <= "00000000";
       reg_colour    <= "00000111";
+      reg_cursor_visible <= '1';
       reg_hcursor   <= "0000000";
       reg_vcursor   <= "00000";
       reg_voffset   <= "00000";
@@ -347,8 +352,10 @@ attr_buff_ram : ram_2k port map(
             reg_hcursor   <= vdu_data_in(6 downto 0);
           when "011" =>
             reg_vcursor   <= vdu_data_in(4 downto 0);
-          when others =>
+          when "100" =>
             reg_voffset   <= vdu_data_in(4 downto 0);
+          when others =>
+            reg_cursor_visible    <= vdu_data_in(0);
         end case;
       else
 
@@ -377,8 +384,10 @@ attr_buff_ram : ram_2k port map(
         vdu_data_out <= "0" & reg_hcursor;
       when "011" =>
         vdu_data_out <= "000" & reg_vcursor;
-      when others =>
+      when "100" =>
         vdu_data_out <= "000" & reg_voffset;
+      when others =>
+        vdu_data_out <= "0000000" & reg_cursor_visible;
     end case;
   end process;
 
@@ -481,7 +490,7 @@ attr_buff_ram : ram_2k port map(
         end if;
         video_on2     <= video_on1;
         video_on      <= video_on2;
-        cursor_on     <= (cursor_on1 or attr_data_out(3)) and blink_count(22);
+        cursor_on     <= (cursor_on1 or attr_data_out(3)) and blink_count(22) and reg_cursor_visible;
         vga_fg_colour <= attr_data_out(2 downto 0);
         vga_bg_colour <= attr_data_out(6 downto 4);
         if attr_data_out(7) = '0' then

@@ -61,11 +61,11 @@ entity mdsynth is
 	 PS2_DATA     : inout Std_Logic;
 
 	 -- CRTC output signals
-	 VGA_VSYNC     : out Std_Logic;
+	 VGA_VSYNC    : out Std_Logic;
     VGA_HSYNC     : out Std_Logic;
-    VGA_BLUE      : out std_logic;
-    VGA_GREEN     : out std_logic;
-    VGA_RED       : out std_logic;
+    VGA_B         : out std_logic_vector(3 downto 0);
+    VGA_G         : out std_logic_vector(3 downto 0);
+    VGA_R         : out std_logic_vector(3 downto 0);
 
 	 -- Uart Interface
 	 RS232_DCE_RXD : in  std_logic;
@@ -148,6 +148,10 @@ architecture my_computer of mdsynth is
   -- Video Display Unit
   signal vdu_cs         : std_logic;
   signal vdu_data_out   : std_logic_vector(7 downto 0);
+
+  signal vga_blue       : std_logic;
+  signal vga_green      : std_logic;
+  signal vga_red        : std_logic;
 
   -- Sound
   signal soundl_cs        : std_logic;
@@ -735,6 +739,13 @@ my_sound_right : sound port map (
     data_out   => soundr_data_out,
     audio_out    => audio_right 
 );
+
+vga_colors: process(vga_red, vga_green, vga_blue)
+begin
+    vga_r <= vga_red & vga_red & vga_red & vga_red;
+    vga_g <= vga_green & vga_green & vga_green & vga_green;
+    vga_b <= vga_blue & vga_blue & vga_blue & vga_blue;
+end process;
 
 ----------------------------------------------------------------------
 --
