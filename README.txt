@@ -2,7 +2,7 @@ MDSynth
 FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
 Author: Daniel Cliche (dcliche@meldora.com)
-Copyright (c) 2012, Meldora Inc. All rights reserved.
+Copyright (c) 2011-2012, Meldora Inc. All rights reserved.
 
 License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
 Languages: VHDL, 6809 assembly, C
@@ -37,8 +37,6 @@ All the source files of the toolset are provided. The following is provided:
 - A C compiler (tools/mc09);
 - S19 to VHDL (tools/s19tovhd) for producing the ROM file.
 
-You will find Makefiles for Linux. I personally use the great CentOS-6 distribution.
-
 The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-2 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
 The chain is the following:
@@ -68,7 +66,8 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 2.3. Installation
 =================
 
-1. Go to "src/tools" and execute "make". This command will produce the toolset binaries.
+1. Compile the tools located in "src/tools" using the Visual C++ 2008 Express project.
+
 2. Open a command prompt, go the the "src/synth" directory and execute "make". This command will produce the "synth.s19" file to upload.
 3. Connect a VGA monitor to the synthesizer (your Xilinx Spartan 3A-Starter Kit board);
 4. Connect a PS/2 keyboard to the synthesizer;
@@ -84,8 +83,6 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 14. Follow the on-screen instructions in order to play and change parameters;
 15. Press the South button in order to go back to the SYS09BUG prompt.
 
-Note: The steps 8 to 12 can be performed automatically with 'make deploy' from the "src/synth" directory. You will need to install 'pyserial' (http://pyserial.sourceforge.net).
- 
 
 2.2. Audio Outputs and MIDI I/O
 ===============================

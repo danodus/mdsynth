@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/io.h>
+/*#include <sys/io.h>*/
 #include <fcntl.h>
 
 #include "as.h"

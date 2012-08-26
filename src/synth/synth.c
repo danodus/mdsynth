@@ -1,7 +1,7 @@
 /*
 MDSynth
 
-Copyright (c) 2012, Meldora Inc.
+Copyright (c) 2011-2012, Meldora Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -239,7 +239,7 @@ char **argv;
 	prints("MDSynth");
 
 	moveto(0, 1);
-	prints("Copyright (c) 2012, Meldora Inc.");
+	prints("Copyright (c) 2011-2012, Meldora Inc.");
 	
 	moveto(10, 3);
 	prints(" W E   T Y U");

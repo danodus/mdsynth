@@ -1,6 +1,6 @@
 /*
 	Copyright (c) 1981, 1987, Masataka Ohta, Hiroshi Tezuka.
-    Copyright (c) 2011, Meldora Inc.
+    Copyright (c) 2011-2012, Meldora Inc.
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
@@ -184,7 +184,7 @@ void rexpr(int e1, int l1, char *s);
 void jcond(int l, char cond);
 void jmp(int l);
 int fwdlabel();
-int fwddef(int l);
+void fwddef(int l);
 int backdef();
 void gexpr(int e1);
 void string(int e1);
@@ -313,8 +313,6 @@ int main(int argc, char **argv)
 		}
     }
 
-	fclose(stdout);
-
     if (!chk)
 		if ((obuf = fopen(ccout,"w")) == NULL)
             error(FILERR);
@@ -342,7 +340,7 @@ int error(int n)
 		if(filep!=filestack)
 		{	lineno=filep->ln;
 			fclose(filep->fcb);
-			fprintf(stdout,"End of inclusion.\n");
+			printf("End of inclusion.\n");
 			--filep;
 			return 0;
 		}
@@ -352,10 +350,10 @@ int error(int n)
 			return 0;
 		}
 		else if(mode == TOP)
-		{	fprintf(stdout,"\nCompiled %u lines.\n",glineno-1);
-			if (!chk) fprintf(stdout,
+		{	printf("\nCompiled %u lines.\n",glineno-1);
+			if (!chk) printf(
 				"Total internal labels	: %u.\n",labelno-1);
-			fprintf(stdout,
+			printf(
 				"Total global variables : %u bytes.\n\n",gpc);
 			fprintf(obuf, "_%d\tRTS\n_INITIALIZE\tEQU\t_1\n",ilabel);
 			fprintf(obuf, "_GLOBALS\tEQU\t%u\n\tEND\n",gpc);
@@ -364,7 +362,7 @@ int error(int n)
 		}
 	}
 
-	fprintf(stdout,"%5d:%s.\n",lineno,
+	printf("%5d:%s.\n",lineno,
 		(n==FILERR) ? "Can't open specified file" :
 		(n==DCERR) ? "Declaration syntax" :
 		(n==STERR) ? "Statement syntax" :
@@ -396,14 +394,14 @@ void errmsg()
 	if (lineno == 0)
         return;
 
-    fprintf(stdout,"%s",linebuf);
+    printf("%s",linebuf);
 
     lim = (mflag ? chptrsave : chptr);
 
 	for (p = linebuf; p < lim;)
-		fprintf(stdout,(*p++ == '\t') ? "\t" : " ");
+		printf((*p++ == '\t') ? "\t" : " ");
 
-	fprintf (stdout,"^\n");
+	printf ("^\n");
 }
 
 // ----------------------------------------------------------------------------    
@@ -415,7 +413,7 @@ void checksym(int s)
         p = (s == RPAR) ? "')'" : (s==RBRA) ? "']'": (s==SM) ? "';'":
 		  (s==LPAR) ? "'('": (s==WHILE) ? "'while'":
 		  (s==COLON) ? "':'": "Identifier";
-		fprintf(stdout,"%d:%s expected.\n",lineno,p);
+		printf("%d:%s expected.\n",lineno,p);
 		errmsg();
 	}
 	else getsym();
@@ -468,7 +466,7 @@ void init()
 // ----------------------------------------------------------------------------    
 void newfile()
 {	lineno=0;
-	fprintf(stdout,"%s:\n",av[ac2]);
+	printf("%s:\n",av[ac2]);
 	if ( (filep->fcb = fopen(av[ac2++],"r")) == NULL )
 		error(FILERR);
 }
@@ -2030,7 +2028,7 @@ int fwdlabel()
 }
 
 // ----------------------------------------------------------------------------    
-fwddef(int l)
+void fwddef(int l)
 {	control=1;
 	fprintf(obuf, "_%d\n",l);
 }
@@ -3328,7 +3326,7 @@ void getl()
 			*(chptr = linebuf) = '\0';
 		}
 		else if (macroeq("include"))
-		{	fprintf(stdout,"%s",linebuf);
+		{	printf("%s",linebuf);
 			if(filep+1 >= filestack + FILES) error(FILERR);
 			if ( ((filep+1)->fcb=getfname()) == NULL) error(FILERR);
 			(filep+1)->ln=lineno;
