@@ -2,7 +2,7 @@ MDSynth
 FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
 Author: Daniel Cliche (dcliche@meldora.com)
-Copyright (c) 2011-2012, Meldora Inc. All rights reserved.
+Copyright (c) 2011-2016, Meldora Inc. All rights reserved.
 
 License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
 Languages: VHDL, 6809 assembly, C
@@ -37,7 +37,7 @@ All the source files of the toolset are provided. The following is provided:
 - A C compiler (tools/mc09);
 - S19 to VHDL (tools/s19tovhd) for producing the ROM file.
 
-The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-2 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
+The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-1 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
 The chain is the following:
 	"C" -- [ C compiler ] --> "ASM" -- [ 6809 assembler ] --> "S19" -- [ Serial upload with SYS09BUG ROM ] --> FPGA Block RAM Memory
@@ -109,9 +109,9 @@ You will need a RC filter at the output in order to see the waveform with an osc
 The synthesizer is able to receive the MIDI note on/note off events from a MIDI device. Here's the schematic of a MIDI IN interface:
 
                                         +--6N138--+
-MIDI IN [4] ---- R220 -----------------[2]       [8]--------------- VCC 3.3V
+MIDI IN [4] ----- 220 -----------------[2]       [8]--------------- VCC 3.3V
                           |             |         |           |
-                        1N4148          |         |         R220
+                        1N4148          |         |          220
                           |             |         |           |
 MIDI IN [5] ---------------------------[3]       [6]--------------- FPGA MIDI INPUT
                                         |         |

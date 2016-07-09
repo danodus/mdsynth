@@ -1,11 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mc09", "mc09\mc09.vcproj", "{B74889DF-B597-4A47-9D22-A4D36984588F}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mc09", "mc09\mc09.vcxproj", "{B74889DF-B597-4A47-9D22-A4D36984588F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "as09", "as09\as09.vcproj", "{66B63296-E192-45C2-AAD2-3C2CEC18F321}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "as09", "as09\as09.vcxproj", "{66B63296-E192-45C2-AAD2-3C2CEC18F321}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s19tovhd", "s19tovhd\s19tovhd.vcproj", "{82409338-502D-4556-9B27-99C8A81A00B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "s19tovhd", "s19tovhd\s19tovhd.vcxproj", "{82409338-502D-4556-9B27-99C8A81A00B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

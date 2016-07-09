@@ -105,7 +105,7 @@ typedef struct nametable {
 	int sc,ty,dsp;
 } NMTBL;
 
-NMTBL ntable[GSYMS+LSYMS], *nptr, *gnptr, *decl0(), *decl1(), *lsearch(), *gsearch();
+NMTBL ntable[GSYMS+LSYMS], *nptr, *gnptr, *decl0(), *decl1(), *losearch(), *gsearch();
 
 struct {
     int fd,ln;
@@ -258,7 +258,7 @@ int postequ(int s1, int s2);
 int alpha(char c);
 int digit(char c);
 NMTBL *gsearch();
-NMTBL *lsearch();
+NMTBL *losearch();
 int neqname(char *p);
 void copy(char *p);
 void getstring();
@@ -3033,7 +3033,7 @@ int getsym()
 		if (mode==GDECL || mode==GSDECL || mode==GUDECL ||
 		    mode==GTDECL || mode==TOP)
 			return sym;
-		nptr1=lsearch();
+		nptr1=losearch();
 		if (mode==STAT) {
 			if (nptr1->sc == EMPTY) {
 				return sym;
@@ -3173,7 +3173,7 @@ NMTBL *gsearch()
 }
 
 // ----------------------------------------------------------------------------    
-NMTBL *lsearch()
+NMTBL *losearch()
 {
     NMTBL *nptr,*iptr;
 	iptr=nptr= &ntable[hash%LSYMS+GSYMS];
