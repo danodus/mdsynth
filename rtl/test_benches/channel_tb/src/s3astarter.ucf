@@ -196,10 +196,10 @@ NET "AUD_R"         LOC = "V10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SL
 ## Accessory Headers (J18, J19, J20)
 ###############################################################################
 #
-NET "J18_IO<1>"     LOC = "AA21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
-NET "J18_IO<2>"     LOC = "AB21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
-NET "J18_IO<3>"     LOC = "AA19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
-NET "J18_IO<4>"     LOC = "AB19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<1>"     LOC = "AA21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<2>"     LOC = "AB21" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<3>"     LOC = "AA19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
+#NET "J18_IO<4>"     LOC = "AB19" | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
 #
 #NET "J19_IO<1>"     LOC = "Y18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;
 #NET "J19_IO<2>"     LOC = "W18"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW ;

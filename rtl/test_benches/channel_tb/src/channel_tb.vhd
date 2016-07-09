@@ -1,6 +1,6 @@
--- MDSynth Sound Chip
+-- MDSynth Sound Chip Test Bench
 --
--- Copyright (c) 2012, Meldora Inc.
+-- Copyright (c) 2012-2016, Meldora Inc.
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -40,13 +40,14 @@ architecture channel_tb_arch of channel_tb is
 component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in std_logic_vector(2 downto 0);    -- 0: None, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation)
+           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: DAC-direct
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
-           phase_delta_message:   in unsigned(11 downto 0);
+           phase_delta:           in unsigned(11 downto 0);
            octave_message:        in unsigned(3 downto 0);
-           phase_delta_carrier:   in unsigned(11 downto 0);
            octave_carrier:        in unsigned(3 downto 0);
+           reset_phase:           in std_logic;
+           dac_direct_value:      in std_logic_vector(7 downto 0);
            output:   out std_logic);
 end component;
 
@@ -63,18 +64,32 @@ signal counter: unsigned (31 downto 0) := to_unsigned(0, 32);
 signal waveform: std_logic_vector(2 downto 0) := "100";
 
 signal phase_delta_message: unsigned(11 downto 0);
-signal octave_message: unsigned(3 downto 0);
 signal phase_delta_carrier: unsigned(11 downto 0);
+signal octave_message: unsigned(3 downto 0);
 signal octave_carrier: unsigned(3 downto 0);
 
 signal gain_message: unsigned(5 downto 0) := to_unsigned(63, 6);
 signal gain_modulated: unsigned(5 downto 0) := to_unsigned(63, 6);
 
+signal reset_phase: std_logic := '0';
+signal dac_direct_value: std_logic_vector(7 downto 0) := "00000000";
+
 begin
 
     pitch_to_freq_carrier0: pitch_to_freq port map (pitch => pitch_message, phase_delta => phase_delta_message, octave => octave_message);
     pitch_to_freq_message0: pitch_to_freq port map (pitch => pitch_carrier, phase_delta => phase_delta_carrier, octave => octave_carrier);
-    channel0: channel port map (clk => clk_50mhz, reset => btn_south, waveform => waveform, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta_message => phase_delta_message, octave_message => octave_message, phase_delta_carrier => phase_delta_carrier, octave_carrier => octave_carrier, output => channel_out);
+    channel0: channel port map (
+        clk => clk_50mhz,
+        reset => btn_south,
+        waveform => waveform,
+        gain_message => gain_message,
+        gain_modulated => gain_modulated,
+        phase_delta => phase_delta_message,     -- Note: phase_delta_carrier is not used
+        octave_message => octave_message,
+        octave_carrier => octave_carrier,
+        reset_phase => reset_phase,
+        dac_direct_value => dac_direct_value,
+        output => channel_out);
 
     waveform <= sw(2 downto 0);
 
