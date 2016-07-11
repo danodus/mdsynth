@@ -26,6 +26,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity channel_tb is
    port ( clk_50mhz:   in std_logic; 
  		  btn_south:   in std_logic;
+ 		  btn_north:   in std_logic;
           sw:          in std_logic_vector(3 downto 0);
           aud_l:       out std_logic;
           aud_r:       out std_logic;
@@ -41,6 +42,7 @@ component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
            waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: DAC-direct
+           note_on:  in std_logic;
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
            phase_delta:           in unsigned(11 downto 0);
@@ -74,6 +76,8 @@ signal gain_modulated: unsigned(5 downto 0) := to_unsigned(63, 6);
 signal reset_phase: std_logic := '0';
 signal dac_direct_value: std_logic_vector(7 downto 0) := "00000000";
 
+signal note_on: std_logic := '0';
+
 begin
 
     pitch_to_freq_carrier0: pitch_to_freq port map (pitch => pitch_message, phase_delta => phase_delta_message, octave => octave_message);
@@ -82,6 +86,7 @@ begin
         clk => clk_50mhz,
         reset => btn_south,
         waveform => waveform,
+        note_on => note_on,
         gain_message => gain_message,
         gain_modulated => gain_modulated,
         phase_delta => phase_delta_message,     -- Note: phase_delta_carrier is not used
@@ -101,16 +106,20 @@ begin
 	process (clk_50mhz)
 	begin
 	    if (rising_edge(clk_50mhz)) then
-	        if (counter = 0) then
-	            counter <= to_unsigned(5000000, 32);
-	            pitch_message <= pitch_message + 1;
-	            if (pitch_message = 0) then
-        	        gain_message <= gain_message - 8;
-	                gain_modulated <= gain_modulated - 8;	        
-	            end if;
-	        else
-	            counter <= counter - 1;
-	        end if;
+	       note_on <= btn_north;
+	       
+--	        if (counter = 0) then
+	            --counter <= to_unsigned(5000000, 32);
+--	            counter <= to_unsigned(200, 32);
+--	            note_on <= not note_on;
+--	            pitch_message <= pitch_message + 1;
+--	            if (pitch_message = 0) then
+--        	        gain_message <= gain_message - 8;
+--	                gain_modulated <= gain_modulated - 8;	        
+--	            end if;
+--	        else
+--	            counter <= counter - 1;
+--	        end if;
 	    end if;
 	end process;
 	

@@ -255,42 +255,21 @@ _3
 prints
 	PSHS	U
 	LEAU	,S
-	LDD	#57395
-	TFR	D,X
-	LDB	1,Y
-	SEX
-	STB	0,X
 _5
 	LDB	[4,U]
 	SEX
 	LBEQ	_4
-	LDD	#57394
-	TFR	D,X
-	LDB	0,Y
-	SEX
-	STB	0,X
 	LDB	[4,U]
 	SEX
 	PSHS	D
-	LDD	#57392
-	TFR	D,X
-	PULS	D
-	STB	0,X
-	LEAX	0,Y
-	LDB	,X
-	INC	,X
-	SEX
+	LBSR	printc
+	LEAS	2,S
 	LDD	4,U
 	ADDD	#1
 	STD	4,U
 	SUBD	#1
 	LBRA	_5
 _4
-	LDD	#57394
-	TFR	D,X
-	LDB	0,Y
-	SEX
-	STB	0,X
 	PULS	U,PC
 moveto
 	PSHS	U
@@ -635,7 +614,7 @@ minit
 main
 	PSHS	U
 	LEAU	,S
-	LEAS	-2,S
+	LEAS	-8,S
 	LBSR	clearscr
 	CLRA
 	CLRB
@@ -661,47 +640,205 @@ _27
 	PSHS	D
 	LBSR	moveto
 	LEAS	4,S
+	CLRA
+	CLRB
+	STD	-4,U
 	LBSR	mgetch
 	STD	-2,U
 _29
-	LBSR	mgetch
-	STD	-2,U
-	LDD	-2,U
-	SUBD	#144
-	LBEQ	_30
 	LDD	-2,U
 	SUBD	#128
-	LBEQ	_30
+	LBHS	_30
+	LDD	-4,U
+	STD	-2,U
+_30
+	LDD	-2,U
+	ANDA	#0
+	ANDB	#240
+	STD	-2,U
+	LDD	-2,U
+	SUBD	#128
+	LBNE	_31
+	LBSR	mgetch
+	STD	-6,U
+	LBSR	mgetch
+	STD	-8,U
 	LEAX	2,PC
-	BRA	_31
-	FCB	42,42,69,82,82,79,82,58
-	FCB	0
-_31
+	BRA	_32
+	FCB	91,78,79,84,69,32,79,70
+	FCB	70,93,0
+_32
 	PSHS	X
 	LBSR	prints
 	LEAS	2,S
-_30
+	LBRA	_33
+_31
+	LDD	-2,U
+	SUBD	#144
+	LBNE	_34
+	LBSR	mgetch
+	STD	-6,U
+	LBSR	mgetch
+	STD	-8,U
+	LEAX	2,PC
+	BRA	_35
+	FCB	91,78,79,84,69,32,79,78
+	FCB	93,0
+_35
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_36
+_34
+	LDD	-2,U
+	SUBD	#160
+	LBNE	_37
+	LBSR	mgetch
+	STD	-6,U
+	LBSR	mgetch
+	STD	-8,U
+	LEAX	2,PC
+	BRA	_38
+	FCB	91,80,79,76,89,32,75,69
+	FCB	89,32,80,82,69,83,83,85
+	FCB	82,69,93,0
+_38
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_39
+_37
+	LDD	-2,U
+	SUBD	#176
+	LBNE	_40
+	LBSR	mgetch
+	STD	-6,U
+	LBSR	mgetch
+	STD	-8,U
+	LEAX	2,PC
+	BRA	_41
+	FCB	91,67,84,82,76,32,67,72
+	FCB	65,78,71,69,93,0
+_41
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_42
+_40
+	LDD	-2,U
+	SUBD	#192
+	LBNE	_43
+	LBSR	mgetch
+	STD	-6,U
+	LEAX	2,PC
+	BRA	_44
+	FCB	91,80,71,82,77,32,67,72
+	FCB	65,78,71,69,93,0
+_44
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_45
+_43
+	LDD	-2,U
+	SUBD	#208
+	LBNE	_46
+	LBSR	mgetch
+	STD	-6,U
+	LEAX	2,PC
+	BRA	_47
+	FCB	91,67,72,65,78,32,75,69
+	FCB	89,32,80,82,69,83,83,85
+	FCB	82,69,93,0
+_47
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_48
+_46
+	LDD	-2,U
+	SUBD	#224
+	LBNE	_49
+	LBSR	mgetch
+	STD	-6,U
+	LBSR	mgetch
+	STD	-8,U
+	LEAX	2,PC
+	BRA	_50
+	FCB	91,80,73,84,67,72,32,66
+	FCB	69,78,68,93,0
+_50
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_51
+_49
+	LDD	-2,U
+	SUBD	#240
+	LBNE	_52
+	LEAX	2,PC
+	BRA	_53
+	FCB	46,0
+_53
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_54
+_52
+	LEAX	2,PC
+	BRA	_55
+	FCB	91,42,42,42,32,69,82,82
+	FCB	79,82,58,32,0
+_55
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
 	LDD	-2,U
 	PSHS	D
 	LBSR	printh8
 	LEAS	2,S
+_57
 	LBSR	mgetch
 	STD	-2,U
 	LDD	-2,U
-	PSHS	D
-	LBSR	printh8
-	LEAS	2,S
-	LBSR	mgetch
-	STD	-2,U
+	SUBD	#128
+	LBHS	_58
 	LDD	-2,U
 	PSHS	D
 	LBSR	printh8
 	LEAS	2,S
+	LBRA	_59
+_58
+	LBRA	_56
+_59
+	LBRA	_57
+_56
+	LEAX	2,PC
+	BRA	_60
+	FCB	32,42,42,42,93,0
+_60
+	PSHS	X
+	LBSR	prints
+	LEAS	2,S
+	LBRA	_29
+_54
+_51
+_48
+_45
+_42
+_39
+_36
+_33
+	LDD	-2,U
+	STD	-4,U
+	LBSR	mgetch
+	STD	-2,U
 	LBRA	_29
 _28
 	CLRA
 	CLRB
-	PULS	X,U,PC
+	LEAS	,U
+	PULS	U,PC
 _1	RTS
 _INITIALIZE	EQU	_1
 _GLOBALS	EQU	24

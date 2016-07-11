@@ -25,7 +25,7 @@ int main(argc, argv)
 int argc;
 char **argv;
 {
-	unsigned c;
+	unsigned m, lastm, p1, p2;
 	
 	clearscr();
 
@@ -38,18 +38,68 @@ char **argv;
 
 	moveto(0, 1);
 
-	c = mgetch();
+	lastm = 0;
+
+	m = mgetch();
 
 	/* Main loop */
 	while (1) {
-		c = mgetch();
-		if (c != 0x90 && c != 0x80)
-			prints("**ERROR:");
-		printh8(c);
-		c = mgetch();
-		printh8(c);
-		c = mgetch();
-		printh8(c);
+		if (m < 0x80) {
+			m = lastm;
+		}
+
+		m = m & 0xF0;
+
+		if (m == 0x80) {
+			p1 = mgetch();
+			p2 = mgetch();
+			prints("[NOTE OFF]");
+		} else if (m == 0x90) {
+			p1 = mgetch();
+			p2 = mgetch();
+			prints("[NOTE ON]");
+		} else if (m == 0xA0) {
+				/* Polyphonic key pressure */
+			p1 = mgetch();
+			p2 = mgetch();
+			prints("[POLY KEY PRESSURE]");
+		} else if (m == 0xB0) {
+			/* Controller change */
+			p1 = mgetch();
+			p2 = mgetch();
+			prints("[CTRL CHANGE]");
+		} else if (m == 0xC0) {
+			/* Program change */
+			p1 = mgetch();
+			prints("[PGRM CHANGE]");
+		} else if (m == 0xD0) {
+			/* Channel key pressure */
+			p1 = mgetch();
+			prints("[CHAN KEY PRESSURE]");
+		} else if (m == 0xE0) {
+			/* Pitch bend */
+			p1 = mgetch();
+			p2 = mgetch();
+			prints("[PITCH BEND]");
+		} else if (m == 0xF0) {
+			prints(".");
+		} else {
+			prints("[*** ERROR: ");
+			printh8(m);
+			/* Synchronize */
+			while(1) {
+				m = mgetch();
+				if (m < 0x80) {
+					printh8(m);
+				} else {
+					break;
+				}
+			}
+			prints(" ***]");
+			continue;
+		}
+		lastm = m;
+		m = mgetch();
 	} /* while 1 */
 	
 

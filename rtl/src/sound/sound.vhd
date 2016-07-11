@@ -19,7 +19,8 @@
 -- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 -- USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
--- Base + 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+-- Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+--           bit 7: Note ON/OFF (0: OFF, 1: ON)
 -- Base + 1: Pitch Hi (see below)
 -- Base + 2: Pitch Low (see below)
 -- Base + 3: Carrier Octave (4-bit, PM only)
@@ -58,6 +59,7 @@ component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
            waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: Phase Modulation
+           note_on:  in std_logic;
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
            phase_delta:           in unsigned(11 downto 0);
@@ -80,12 +82,13 @@ signal gain_message: unsigned(5 downto 0) := to_unsigned(63, 6);
 signal gain_modulated: unsigned(5 downto 0) := to_unsigned(63, 6);
 
 signal reset_phase: std_logic := '0';
+signal note_on: std_logic := '0';
 
 signal dac_direct_value: std_logic_vector(7 downto 0) := (others => '0');
 
 begin
 
-    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta => phase_delta, octave_message => octave_message, octave_carrier => octave_carrier, reset_phase => reset_phase, dac_direct_value => dac_direct_value, output => audio_out);
+    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, note_on => note_on, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta => phase_delta, octave_message => octave_message, octave_carrier => octave_carrier, reset_phase => reset_phase, dac_direct_value => dac_direct_value, output => audio_out);
 
     process(clk)
     begin
@@ -94,10 +97,14 @@ begin
                 pitch <= to_unsigned(0, 16);
                 waveform <= (others=>'0');
                 reset_phase <= '1';
+                note_on <= '0';
             elsif cs = '1' and rw = '0' then
                 case addr is
                     when "000" => waveform <= data_in(2 downto 0);
-                                  reset_phase <= '1';
+                                  note_on <= data_in(7);
+                                  if (data_in(7) = '1') then
+                                    reset_phase <= '1';
+                                  end if;
                     when "001" => pitch(15 downto 8) <= unsigned(data_in);
                                   reset_phase <= '1';
                     when "010" => pitch(7 downto 0) <= unsigned(data_in);

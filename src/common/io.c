@@ -55,16 +55,10 @@ char c;
 void prints(s)
 char *s;
 {
-	*(VDU + 3) = cury;
-	
 	while (*s) {
-		*(VDU + 2) = curx;
-		*VDU = *s;
-		curx++;
+		printc(*s);
 		s++;
 	}
-	
-	*(VDU + 2) = curx;
 }
 
 /* Move the cursor to a new position */

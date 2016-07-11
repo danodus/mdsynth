@@ -1,6 +1,6 @@
 -- MDSynth Sound Chip
 --
--- Copyright (c) 2012, Meldora Inc.
+-- Copyright (c) 2012-2016, Meldora Inc.
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -27,6 +27,7 @@ entity channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
            waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: DAC-direct
+           note_on:  in std_logic;
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
            phase_delta:           in unsigned(11 downto 0);
@@ -62,6 +63,13 @@ component nco is
            phase:       out unsigned(7 downto 0));
 end component;
 
+component envelope is
+port (  clk:		in std_logic;
+        reset:	    in std_logic;
+        note_on:    in std_logic;
+        gain:       out unsigned(5 downto 0));
+end component;
+
 signal dac_in : std_logic_vector(7 downto 0);
 
 signal phase_carrier : unsigned(7 downto 0);
@@ -84,6 +92,9 @@ signal sine_data : integer range -128 to 127;
 signal ena_nco_carrier : std_logic;
 signal ena_nco_message : std_logic;
 
+signal envelope_reset : std_logic := '1';
+signal envelope_gain : unsigned(5 downto 0);
+
 begin
 
     nco_carrier0 : nco port map (clk => clk, reset_phase => reset_phase, ena => ena_nco_carrier, phase_delta => phase_delta, octave => octave_carrier, phase => phase_carrier);
@@ -93,11 +104,18 @@ begin
 
     dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
 
+    envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, gain => envelope_gain);
 	
-	process (clk)
+	process (clk, reset)
 	begin
-	    if (rising_edge(clk)) then
-	    
+        if (reset = '1') then
+            dac_in <= "00000000";
+            sine_gain <= to_unsigned(0, 6);
+            sine_phase <= to_unsigned(0, 8);
+            envelope_reset <= '1';
+	    elsif (rising_edge(clk)) then
+
+            envelope_reset <= '0';	    
             phase_modulated <= phase_carrier + sine_message;
 
             case state is
@@ -114,7 +132,7 @@ begin
 	                ena_nco_message <= '0';
 	                ena_nco_carrier <= '1';
    	                sine_phase <= phase_modulated;
-	                sine_gain <= gain_modulated;
+	                sine_gain <= envelope_gain; --gain_modulated;
 	                sine_modulated <= sine_data;
 	                state <= sinewave_message_state;
 	        end case;

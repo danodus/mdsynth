@@ -262,7 +262,7 @@ NET "AUD_R"         LOC = "V10"  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SL
 ###############################################################################
 #
 #NET "BTN_EAST"      LOC = "T16"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
-#NET "BTN_NORTH"     LOC = "T14"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
+NET "BTN_NORTH"     LOC = "T14"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
 NET "BTN_SOUTH"     LOC = "T15"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
 #NET "BTN_WEST"      LOC = "U15"  | IOSTANDARD = LVCMOS33 | PULLDOWN ;
 #

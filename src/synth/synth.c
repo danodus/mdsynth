@@ -1,7 +1,7 @@
 /*
 MDSynth
 
-Copyright (c) 2011-2012, Meldora Inc.
+Copyright (c) 2011-2016, Meldora Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -38,7 +38,6 @@ char octcarr;		/* carrier octave */
 unsigned gainmsg;	/* message gain */
 unsigned gainmod;	/* modulated gain */
 
-unsigned envgain;	/* envelope gain */
 int	isnoteon;
 
 /* Phase deltas */
@@ -107,9 +106,9 @@ unsigned pitch;
 		octave = 9;
 		note = pitch - 96;
 	} else {
-		/* Turn off the oscillators */
-		sndl[0] = 0;
-		sndr[0] = 0;
+		/* Note OFF */
+		sndl[0] = 0x7f & waveform;
+		sndr[0] = 0x7f & waveform;
 		return;
 	}
 	
@@ -121,52 +120,35 @@ unsigned pitch;
 	sndl[3] = octcarr + octave;
 	
 	sndl[4] = gainmsg;
-	/*sndl[5] = gainmod;*/
+	sndl[5] = gainmod;
 	
 	sndr[1] = phd >> 8;
 	sndr[2] = phd;
 	sndr[3] = octcarr + octave;
 	
 	sndr[4] = gainmsg;
-	/*sndr[5] = gainmod;*/
+	sndr[5] = gainmod;
 	
-	sndl[0] = waveform;
-	sndr[0] = waveform;
+	/* Note OFF */
+	sndl[0] = 0x7f & waveform;
+	sndr[0] = 0x7f & waveform;
+
+	/* Note ON */
+	sndl[0] = 0x80 | waveform;
+	sndr[0] = 0x80 | waveform;
 }
 
 void noteon(pitch)
 unsigned pitch;
 {
-	/* Envelope only on PM */
-	if (waveform == 4 && !isnoteon) {
-		envgain = 0;
-	}
 	isnoteon = -1;
 	play(pitch);
 }
 
 void noteoff()
 {
-	/* Envelope only on PM */
-	if (waveform < 4) {
-		play(0);
-	}
+	play(0);
 	isnoteon = 0;
-}
-
-void updenv() {
-	if (isnoteon) {
-		envgain += 1;
-		if (envgain > gainmod)
-			envgain = gainmod;
-	} else {
-		if (envgain > 0) {
-			envgain -= 1;
-		}
-	}
-
-	sndl[5] = envgain;
-	sndr[5] = envgain;
 }
 
 void prtstatu()
@@ -201,7 +183,7 @@ char **argv;
 {
 	int wait;
 
-	unsigned c;
+	unsigned c, m, lastm, p1, p2, chan;
 	char note;
 	char lstpitch;
 	char pitch;
@@ -230,7 +212,6 @@ char **argv;
 	gainmsg = 63;
 	gainmod = 63;
 
-	envgain = 0;
 	isnoteon = 0;
 	
 	clearscr();
@@ -239,7 +220,7 @@ char **argv;
 	prints("MDSynth");
 
 	moveto(0, 1);
-	prints("Copyright (c) 2011-2012, Meldora Inc.");
+	prints("Copyright (c) 2011-2016, Meldora Inc.");
 	
 	moveto(10, 3);
 	prints(" W E   T Y U");
@@ -284,68 +265,80 @@ char **argv;
 	/* We initialize the MIDI port */
 	minit();
 
+	lastm = 0;
+
 	/* Main loop */
 	while (1) {
 	
 		/* First, we check if we have an incoming MIDI note from the MIDI port */
 		if (mcheckch()) {
-			c = mgetch();
-			if (c == 0x90) {
-				c = mgetch();
-				pitch = c;
+			m = mgetch();
+			if ((m & 0xF0) == 0xF0)
+				continue;
+			if (m < 0x80) {
+				p1 = m;
+				m = lastm;
+			} else {
+				lastm = m;
+				p1 = mgetch();
+			}
+			chan = m & 0x0F;
+			m = m & 0xF0;
+			if (m == 0x90) {
+				pitch = p1;
+				p2 = mgetch();
 
-				if (psti < PSTACK_SIZE - 1) {
-					psti++;
-					pitch = c;
-					pstack[psti] = pitch;
+				if (chan == 0) {
+					if (psti < PSTACK_SIZE - 1) {
+						psti++;
+						pstack[psti] = pitch;
+
+						if (pitch != lstpitch) {
+							noteon(pitch);
+							lstpitch = pitch;
+						}
+					}
 				}
+			} else if (m == 0x80) {
+				p2 = mgetch();
+				if (chan == 0) {
+					for (i = 1; i < psti; i++)
+						if (pstack[i] == p1) {
+							for (; i < psti; i++)
+								pstack[i] = pstack[i + 1];
+							break;
+						}
+					if (psti > 0)
+						psti--;
+					pitch = pstack[psti];
 
-				c = mgetch();
-				if (pitch != lstpitch) {
-					noteon(pitch);
+					if (pitch > 0) {
+						if (pitch != lstpitch) {
+							noteon(pitch);
+						}
+					} else {
+						noteoff();
+					}
 					lstpitch = pitch;
 				}
-			} else if (c == 0x80) {
-				c = mgetch();
-
-				for (i = 1; i < psti; i++)
-					if (pstack[i] == c) {
-						for (; i < psti; i++)
-							pstack[i] = pstack[i + 1];
-						break;
-					}
-				if (psti > 0)
-					psti--;
-				pitch = pstack[psti];
-				c = mgetch();
-				if (pitch > 0) {
-					if (pitch != lstpitch) {
-						noteon(pitch);
-					}
-				} else {
-					noteoff();
-				}
-				lstpitch = pitch;
-			} else if (c == 0xB0) {
-				c = mgetch();
-				if (c == 0x17) {
-					c = mgetch();
-					waveform = c >> 4;
-				} else if (c == 0x18) {
-					c = mgetch();
-					octcarr = c >> 4;
-				} else if (c == 0x19) {
-					c = mgetch();
-					gainmsg = c >> 1;
-				} else if (c == 0x1A) {
-					c = mgetch();
-					gainmod = c >> 1;
-				}				
-				
-			} else {
-				/* Unknown */
+			} else if (m == 0xA0) {
+				/* Polyphonic key pressure */
+				p2 = mgetch();
+			} else if (m == 0xB0) {
+				/* Controller change */
+				p2 = mgetch();
+			} else if (m == 0xC0) {
+				/* Program change */
+			} else if (m == 0xD0) {
+				/* Channel key pressure */
+			} else if (m == 0xE0) {
+				/* Pitch bend */
+				p2 = mgetch();
+			}
+			else {
+				/* Unknown message */
 				moveto(0, 22);
-				printh8(c);
+				printh8(m);
 			}
 			
 			/* We print the pitch stack and status */
@@ -499,11 +492,11 @@ char **argv;
 				break;
 				
 				case ' ':
-					note = -1; /* quiet */
+					note = -1;
 					newpitch = 1;
 					psti = 0;
 					prtstack();
-			} /* switch */
+			}
 			
 			if (newpitch) {
 				if (note >= 0) {
@@ -516,16 +509,8 @@ char **argv;
 			}
 			
 			prtstatu();
-			/*play(pitch);*/
 			
 		} /* if a key is available */
-
-		/* we update the envelope */
-		updenv();
-
-		wait = 100;
-		while (wait > 0)
-			wait--;		
 
 	} /* while 1 */
 	
