@@ -43,7 +43,7 @@ type phase_type is (
     release_phase);
 
 signal current_phase: phase_type := wait_phase;
-signal current_gain: unsigned(25 downto 0);
+signal current_gain: unsigned(24 downto 0);
 
 begin
 
@@ -51,9 +51,9 @@ process (clk, reset)
 begin
     if (reset = '1') then
         current_phase <= wait_phase;
-        current_gain <= to_unsigned(0, 26);
+        current_gain <= to_unsigned(0, 25);
     elsif (rising_edge(clk)) then
-        gain <= current_gain(25 downto 20);
+        gain <= current_gain(24 downto 19);
         case current_phase is
             when wait_phase =>
                 if (note_on = '1') then
@@ -61,7 +61,7 @@ begin
                 end if;
             when attack_phase =>
                 if (note_on = '1') then
-                    if (current_gain = to_unsigned(67108863, 26)) then
+                    if (current_gain = to_unsigned(33554431, 25)) then
                         
                         current_phase <= sustain_phase;
                     else
@@ -78,10 +78,10 @@ begin
             when release_phase =>
                 -- release
                 if (note_on = '1') then
-                    current_gain <= to_unsigned(0, 26);
+                    current_gain <= to_unsigned(0, 25);
                     current_phase <= attack_phase;
                 else
-                    if (current_gain = to_unsigned(0, 26)) then
+                    if (current_gain = to_unsigned(0, 25)) then
                         current_phase <= wait_phase;
                     else
                         current_gain <= current_gain - 1;

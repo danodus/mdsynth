@@ -251,7 +251,7 @@ char **argv;
 	moveto(0, 17);
 	prints("Phase Modulation:");
 	moveto(10, 18);
-	prints("y(t) = modulated_gain * sin(m(t) + 2*pi*(octave+octave_carr)*freq*t)");
+	prints("y(t) = modulated_gain * sin(pi*m(t) + 2*pi*(octave+octave_carr)*freq*t)");
 	moveto(10, 19);
 	prints("where m(t) = message_gain * sin(2*pi*octave*freq*t)");
 	

@@ -53,7 +53,9 @@ Two sound chips are available at the following base addresses:
 - 0xE080	Left Audio
 - 0xE090	Right Audio
 
-Base + 0: Waveform (0x00: DAC Direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+Base + 0: 
+	 bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+	 bit 7: Note ON/OFF (0: OFF, 1: ON)
 Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 2: Phase Delta LSB (8-bit)
 Base + 3: Carrier Octave (4-bit)
@@ -66,7 +68,7 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 2.3. Installation
 =================
 
-1. Compile the tools located in "src/tools" using the Visual C++ 2008 Express project.
+1. Compile the tools located in "src/tools" using the Visual C++ 2015 project.
 
 2. Open a command prompt, go the the "src/synth" directory and execute "make". This command will produce the "synth.s19" file to upload.
 3. Connect a VGA monitor to the synthesizer (your Xilinx Spartan 3A-Starter Kit board);
@@ -145,7 +147,9 @@ SW0	SW1	SW2	Waveform
 0	1	0	Square (message only)
 1	0	0	Sawtooth (message only)
 1	1	0	Sine (message only)
-0	0	1	Frequency Modulation (implemented as phase modulation for simplicity)
+0	0	1	Phase Modulation
+
+In phase modulation mode, press the north button for Note ON (Note: button not debounced).
 
 Pitch
 -----
@@ -186,7 +190,7 @@ The frequency given to NCO is the following:
 4.2 Phase Modulation
 ====================
 
-The formula is the following: y(t) = modulated_gain * sin(m(t) + 2*pi*octave_carrier*freq*t)
+The formula is the following: y(t) = modulated_gain * sin(pi*m(t) + 2*pi*octave_carrier*freq*t)
 where m(t) = message_gain * sin(2*pi*octave_message*freq*t)
 
 4.3 Monophonic Pitch Stack
@@ -235,6 +239,8 @@ The following will produce the tables for a 8-bit quarter cycle (copy and paste 
 	csvwrite("exptable.csv", exptable);
 
 ============================================================
-5. Known Issues
+5. Limitations and Known Issues
 ============================================================
 
+- Envelope rate are fixed for now;
+- Gain for modulated signal is not used.

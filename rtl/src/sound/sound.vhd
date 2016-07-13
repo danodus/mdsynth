@@ -67,7 +67,8 @@ component channel is
            octave_carrier:        in unsigned(3 downto 0);
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:   out std_logic);
+           output:                out std_logic;
+           dac_output:            out std_logic_vector(7 downto 0));
 end component;
 
 signal waveform : std_logic_vector(2 downto 0);

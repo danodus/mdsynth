@@ -31,7 +31,8 @@ entity channel_tb is
           aud_l:       out std_logic;
           aud_r:       out std_logic;
           aux_aud_l:   out std_logic;
-          aux_aud_r:   out std_logic
+          aux_aud_r:   out std_logic;
+          dac_output: out std_logic_vector(7 downto 0)
           );
  
 end entity channel_tb;
@@ -50,7 +51,8 @@ component channel is
            octave_carrier:        in unsigned(3 downto 0);
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:   out std_logic);
+           output:                out std_logic;
+           dac_output:            out std_logic_vector(7 downto 0));
 end component;
 
 component pitch_to_freq is
@@ -61,7 +63,7 @@ end component;
 
 signal channel_out: std_logic;
 signal pitch_message: unsigned (6 downto 0) := to_unsigned(69, 7);
-signal pitch_carrier: unsigned (6 downto 0) := to_unsigned(10, 7);
+signal pitch_carrier: unsigned (6 downto 0) := to_unsigned(69, 7);
 signal counter: unsigned (31 downto 0) := to_unsigned(0, 32);
 signal waveform: std_logic_vector(2 downto 0) := "100";
 
@@ -94,7 +96,8 @@ begin
         octave_carrier => octave_carrier,
         reset_phase => reset_phase,
         dac_direct_value => dac_direct_value,
-        output => channel_out);
+        output => channel_out,
+        dac_output => dac_output);
 
     waveform <= sw(2 downto 0);
 
@@ -103,9 +106,12 @@ begin
 	aux_aud_l <= channel_out;
 	aux_aud_r <= channel_out;
 	
-	process (clk_50mhz)
+	process (clk_50mhz, btn_south)
 	begin
-	    if (rising_edge(clk_50mhz)) then
+	    if (btn_south = '1') then
+	       reset_phase <= '1';
+	    elsif (rising_edge(clk_50mhz)) then
+	       reset_phase <= '0';
 	       note_on <= btn_north;
 	       
 --	        if (counter = 0) then

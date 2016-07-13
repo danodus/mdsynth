@@ -35,7 +35,8 @@ entity channel is
            octave_carrier:        in unsigned(3 downto 0);
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:   out std_logic);
+           output:                out std_logic;
+           dac_output:            out std_logic_vector(7 downto 0));
 end channel;
 
 architecture channel_arch of channel is
@@ -74,7 +75,7 @@ signal dac_in : std_logic_vector(7 downto 0);
 
 signal phase_carrier : unsigned(7 downto 0);
 signal phase_message : unsigned(7 downto 0);
-signal phase_modulated  : unsigned(7 downto 0);
+signal phase_modulated  : unsigned(8 downto 0);
 
 signal sine_message : integer range -128 to 127 := 0;
 signal sine_modulated : integer range -128 to 127 := 0;
@@ -116,8 +117,8 @@ begin
 	    elsif (rising_edge(clk)) then
 
             envelope_reset <= '0';	    
-            phase_modulated <= phase_carrier + sine_message;
-
+            phase_modulated <= to_unsigned(to_integer(phase_carrier) + sine_message, 9);
+            dac_output <= dac_in;
             case state is
 	            when sinewave_message_state =>
 	                -- We calculate the message waveform
@@ -131,8 +132,9 @@ begin
 	                -- We calculate the modulated waveform
 	                ena_nco_message <= '0';
 	                ena_nco_carrier <= '1';
-   	                sine_phase <= phase_modulated;
-	                sine_gain <= envelope_gain; --gain_modulated;
+   	                sine_phase <= phase_modulated(7 downto 0);
+	                --sine_gain <= gain_modulated;
+	                sine_gain <= envelope_gain;
 	                sine_modulated <= sine_data;
 	                state <= sinewave_message_state;
 	        end case;
