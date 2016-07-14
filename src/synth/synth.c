@@ -40,6 +40,8 @@ unsigned gainmsg;	/* message gain */
 unsigned gainmod;	/* modulated gain */
 unsigned wavmsg;	/* message waveform */
 unsigned wavmod; 	/* modulated waveform */
+unsigned attrate;	/* attack rate */
+unsigned relrate;	/* release rate */
 
 int	isnoteon;
 
@@ -82,6 +84,8 @@ void sndupdt()
 
 	sndl[5] = gainmod | (wavmod << 6);
 	sndr[5] = gainmod | (wavmod << 6);
+
+	sndl[7] = (relrate << 4) | attrate; 
 }
 
 void play(pitch)
@@ -180,6 +184,10 @@ void prtstatu()
 	printh8(wavmsg);			
 	moveto(32, 15);
 	printh8(wavmod);
+	moveto(32, 16);
+	printh8(attrate);
+	moveto(36, 16);
+	printh8(relrate);
 }
 
 void prtstack()
@@ -232,6 +240,8 @@ char **argv;
 	gainmod = 63;
 	wavmsg = 0;
 	wavmod = 0;
+	attrate = 15;
+	relrate = 15;
 
 	isnoteon = 0;
 	
@@ -246,19 +256,21 @@ char **argv;
 	moveto(10, 3);
 	prints(" W E   T Y U");
 	moveto(10, 4);
-	prints("A S D F G H J");
+	prints("A S D F G H J      Spacebar: Note OFF");
 	moveto(10, 5);
-	prints("Z, X: Octave +/-");
+	prints("z, Z: Octave +/-");
 	moveto(10, 6);
-	prints("C, V: Relative Octave Carrier +/- (PM only)");
+	prints("x, X: Relative Octave Carrier +/- (PM only)");
 	moveto(10, 7);
-	prints("B, N: Message Gain +/- (Sine and PM only)");
+	prints("c, C: Message Gain +/- (Sine and PM only)");
 	moveto(10, 8);
-	prints("M, ',': Modulation Gain +/- (PM only)");
+	prints("v, V: Modulation Gain +/- (PM only)");
 	moveto(10, 9);
-	prints("1, 2, 3, 4: Square/Saw/Sine/PM, 5, 6: Message/modulated waveform");
+	prints("b, B: Attack Rate +/- (PM only)");
 	moveto(10, 10);
-	prints("Spacebar: Quiet");
+	prints("n, N: Release Rate +/- (PM only)");
+	moveto(10, 11);
+	prints("1, 2, 3, 4: Square/Saw/Sine/PM, 5, 6: Message/modulated waveform");
 	
 	moveto(0, 12);
 	prints("Octave:");
@@ -268,6 +280,8 @@ char **argv;
 	prints("Message Gain, Waveform:");
 	moveto(0, 15);
 	prints("Modulated Gain, Waveform:");
+	moveto(0, 16);
+	prints("Attack/Release Rate:");
 
 	moveto(0, 17);
 	prints("Phase Modulation:");
@@ -444,7 +458,6 @@ char **argv;
 				newpitch = 1;
 				break;
 				
-				case 'z':
 				case 'Z':
 				if (octave > 0) {
 					octave--;
@@ -452,8 +465,7 @@ char **argv;
 				}
 				break;
 				
-				case 'x':
-				case 'X':
+				case 'z':
 				if (octave < 9) {
 					octave++;
 					newpitch = 1;
@@ -480,40 +492,54 @@ char **argv;
 				newpitch = 1;
 				break;
 
-				case 'c':
-				case 'C':
+				case 'X':
 				if (octcarr > -8)
 					octcarr--;
 				break;
 				
-				case 'v':
-				case 'V':
+				case 'x':
 				if (octcarr < 7)
 					octcarr++;
 				break;
 								
-				case 'b':
-				case 'B':
+				case 'C':
 				if (gainmsg > 0)
 					gainmsg--;
 				break;
 				
-				case 'n':
-				case 'N':
+				case 'c':
 				if (gainmsg < 63)
 					gainmsg++;
 				break;
 				
-				case 'm':
-				case 'M':
+				case 'V':
 				if (gainmod > 0)
 					gainmod--;
 				break;
 				
-				case ',':
-				case '<':
+				case 'v':
 				if (gainmod < 63)
 					gainmod++;
+				break;
+
+				case 'B':
+				if (attrate > 0)
+					attrate--;
+				break;
+
+				case 'b':
+				if (attrate < 15)
+					attrate++;
+				break;
+
+				case 'N':
+				if (relrate > 0)
+					relrate--;
+				break;
+
+				case 'n':
+				if (relrate < 15)
+					relrate++;
 				break;
 
 				case '5':

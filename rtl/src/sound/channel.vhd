@@ -35,6 +35,8 @@ entity channel is
            octave_carrier:        in unsigned(3 downto 0);
            waveform_message:      in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
            waveform_modulated:    in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
+           attack_rate:           in unsigned(3 downto 0);
+           release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
            output:                out std_logic;
@@ -71,6 +73,8 @@ component envelope is
 port (  clk:		in std_logic;
         reset:	    in std_logic;
         note_on:    in std_logic;
+        attack_rate:    in unsigned(3 downto 0);
+        release_rate:   in unsigned(3 downto 0);        
         gain:       out unsigned(5 downto 0));
 end component;
 
@@ -109,7 +113,7 @@ begin
 
     dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
 
-    envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, gain => envelope_gain);
+    envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, attack_rate => attack_rate, release_rate => release_rate, gain => envelope_gain);
 	
 	process (clk, reset)
 	begin

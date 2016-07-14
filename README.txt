@@ -67,6 +67,9 @@ Base + 5: bits 5 downto 0: Modulated Gain (6-bit, PM only)
 
 Base + 5: Modulated Gain (6-bit, 63=1.0, phase modulation only)
 Base + 6: DAC direct value (8-bit, DAC direct only)
+Base + 7: bits 3 downto 0: Attack Rate (0xF: fastest)
+          bits 7 downto 4: Release Rate (0xF: fastest)
+
 
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
 
@@ -247,5 +250,5 @@ The following will produce the tables for a 8-bit quarter cycle (copy and paste 
 5. Limitations and Known Issues
 ============================================================
 
-- Envelope rates are fixed for now;
-- Gain for modulated signal is not used.
+- Decay and sustain level not yet implemented for the envelope;
+- Gain for modulated signal is currently not used in phase modulation.

@@ -29,6 +29,8 @@
 -- Base + 5: bits 5 downto 0: Modulated Gain (6-bit, PM only)
 --           bits 7 downto 6: Waveform Modulated (0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0))
 -- Base + 6: DAC value (8-bit, DAC-direct only)
+-- Base + 7: bits 3 downto 0: Attack Rate (0xF: fastest)
+--           bits 7 downto 4: Release Rate (0xF: fastest)
 --
 -- The pitch is a 16-bit value with the following format: 
 --     bits 15 downto 12: octave    (A4 is octave 5)
@@ -69,6 +71,8 @@ component channel is
            octave_carrier:        in unsigned(3 downto 0);
            waveform_message:      in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
            waveform_modulated:    in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
+           attack_rate:           in unsigned(3 downto 0);
+           release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
            output:                out std_logic;
@@ -93,9 +97,12 @@ signal note_on: std_logic := '0';
 
 signal dac_direct_value: std_logic_vector(7 downto 0) := (others => '0');
 
+signal attack_rate: unsigned(3 downto 0) := to_unsigned(0, 4);
+signal release_rate: unsigned(3 downto 0) := to_unsigned(0, 4);           
+
 begin
 
-    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, note_on => note_on, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta => phase_delta, octave_message => octave_message, octave_carrier => octave_carrier, waveform_message => waveform_message, waveform_modulated => waveform_modulated, reset_phase => reset_phase, dac_direct_value => dac_direct_value, output => audio_out);
+    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, note_on => note_on, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta => phase_delta, octave_message => octave_message, octave_carrier => octave_carrier, waveform_message => waveform_message, waveform_modulated => waveform_modulated, attack_rate => attack_rate, release_rate => release_rate, reset_phase => reset_phase, dac_direct_value => dac_direct_value, output => audio_out);
 
     process(clk)
     begin
@@ -123,6 +130,8 @@ begin
                     when "101" => gain_modulated(5 downto 0) <= unsigned(data_in(5 downto 0));
                                   waveform_modulated <= data_in(7 downto 6);
                     when "110" => dac_direct_value <= data_in;
+                    when "111" => attack_rate <= unsigned(data_in(3 downto 0));
+                                  release_rate <= unsigned(data_in(7 downto 4));
                     when others => waveform <= (others => '0');
                 end case;
             else

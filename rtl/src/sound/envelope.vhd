@@ -31,6 +31,8 @@ entity envelope is
     port (  clk:		in std_logic;
             reset:	    in std_logic;
             note_on:    in std_logic;
+            attack_rate:    in unsigned(3 downto 0);
+            release_rate:   in unsigned(3 downto 0);
             gain:       out unsigned(5 downto 0));
 end envelope;
 
@@ -43,7 +45,7 @@ type phase_type is (
     release_phase);
 
 signal current_phase: phase_type := wait_phase;
-signal current_gain: unsigned(24 downto 0);
+signal current_gain: unsigned(25 downto 0); -- current_gain(25) is carry
 
 begin
 
@@ -51,7 +53,7 @@ process (clk, reset)
 begin
     if (reset = '1') then
         current_phase <= wait_phase;
-        current_gain <= to_unsigned(0, 25);
+        current_gain <= to_unsigned(0, 26);
     elsif (rising_edge(clk)) then
         gain <= current_gain(24 downto 19);
         case current_phase is
@@ -61,11 +63,11 @@ begin
                 end if;
             when attack_phase =>
                 if (note_on = '1') then
-                    if (current_gain = to_unsigned(33554431, 25)) then
-                        
+                    if (current_gain(25) = '1') then
+                        current_gain <= to_unsigned(33554431, 26);
                         current_phase <= sustain_phase;
                     else
-                        current_gain <= current_gain + 1;
+                        current_gain <= current_gain + attack_rate;
                     end if;
                 else
                     current_phase <= release_phase;
@@ -78,13 +80,16 @@ begin
             when release_phase =>
                 -- release
                 if (note_on = '1') then
-                    current_gain <= to_unsigned(0, 25);
+                    -- We have a note on during release phase
+                    -- Start a new attack phase
+                    current_gain <= to_unsigned(0, 26);
                     current_phase <= attack_phase;
                 else
-                    if (current_gain = to_unsigned(0, 25)) then
+                    if (current_gain(25) = '1') then
+                        current_gain <= to_unsigned(0, 26);
                         current_phase <= wait_phase;
                     else
-                        current_gain <= current_gain - 1;
+                        current_gain <= current_gain - release_rate;
                     end if;
                 end if;
         end case;

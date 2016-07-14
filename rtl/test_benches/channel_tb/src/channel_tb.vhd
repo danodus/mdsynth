@@ -49,6 +49,10 @@ component channel is
            phase_delta:           in unsigned(11 downto 0);
            octave_message:        in unsigned(3 downto 0);
            octave_carrier:        in unsigned(3 downto 0);
+           waveform_message:      in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
+           waveform_modulated:    in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
+           attack_rate:           in unsigned(3 downto 0);
+           release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
            output:                out std_logic;
@@ -80,6 +84,12 @@ signal dac_direct_value: std_logic_vector(7 downto 0) := "00000000";
 
 signal note_on: std_logic := '0';
 
+signal waveform_message: std_logic_vector(1 downto 0) := "00";
+signal waveform_modulated: std_logic_vector(1 downto 0) := "00";
+
+signal attack_rate: unsigned(3 downto 0) := to_unsigned(15, 4);
+signal release_rate: unsigned(3 downto 0) := to_unsigned(15, 4);
+
 begin
 
     pitch_to_freq_carrier0: pitch_to_freq port map (pitch => pitch_message, phase_delta => phase_delta_message, octave => octave_message);
@@ -94,6 +104,10 @@ begin
         phase_delta => phase_delta_message,     -- Note: phase_delta_carrier is not used
         octave_message => octave_message,
         octave_carrier => octave_carrier,
+        waveform_message => waveform_message,
+        waveform_modulated => waveform_modulated,
+        attack_rate => attack_rate,
+        release_rate => release_rate,
         reset_phase => reset_phase,
         dac_direct_value => dac_direct_value,
         output => channel_out,
