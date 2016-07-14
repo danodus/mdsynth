@@ -36,6 +36,7 @@ All the source files of the toolset are provided. The following is provided:
 - A 6809 assembler (tools/as09);
 - A C compiler (tools/mc09);
 - S19 to VHDL (tools/s19tovhd) for producing the ROM file.
+- A text to binary converter (tools/txt2bin) for converting the text file containing 8-bit values from the simulator output to raw 8-bit data for inspection in Audacity. 
 
 The S19 file is to be uploaded to the board using a serial terminal at 57600-N-8-1 (see the installation section). The ROM contains the SYS09BUG utility available under "src/sys09bug" which perform the download of the file over the serial port.
 
@@ -53,13 +54,17 @@ Two sound chips are available at the following base addresses:
 - 0xE080	Left Audio
 - 0xE090	Right Audio
 
-Base + 0: 
-	 bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
-	 bit 7: Note ON/OFF (0: OFF, 1: ON)
+Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+	      bit 7: Note ON/OFF (0: OFF, 1: ON)
 Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 2: Phase Delta LSB (8-bit)
 Base + 3: Carrier Octave (4-bit)
 Base + 4: Message Gain (6-bit, 63=1.0, sine and phase modulation only)
+Base + 4: bits 5 downto 0: Message Gain (6-bit, sine and PM only)
+          bits 7 downto 6: Waveform Message (0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0))
+Base + 5: bits 5 downto 0: Modulated Gain (6-bit, PM only)
+          bits 7 downto 6: Waveform Modulated (0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0))
+
 Base + 5: Modulated Gain (6-bit, 63=1.0, phase modulation only)
 Base + 6: DAC direct value (8-bit, DAC direct only)
 
@@ -242,5 +247,5 @@ The following will produce the tables for a 8-bit quarter cycle (copy and paste 
 5. Limitations and Known Issues
 ============================================================
 
-- Envelope rate are fixed for now;
+- Envelope rates are fixed for now;
 - Gain for modulated signal is not used.

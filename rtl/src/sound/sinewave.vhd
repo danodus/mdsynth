@@ -28,6 +28,7 @@ entity sinewave is
 	port (  clk:      in std_logic;
 	        gain:     in unsigned(5 downto 0);
 	        phase:    in unsigned(7 downto 0);
+            waveform: in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
 			data_out: out integer range -128 to 127);
 end sinewave;
 
@@ -48,11 +49,27 @@ begin
             if (phase <= 64) then
                 data_out <= exp_table(log_gain(to_integer(gain)) + log_sine(to_integer(phase)));
             elsif (phase > 64 and phase <= 128) then
-                data_out <= exp_table(log_gain(to_integer(gain)) + log_sine(64 - (to_integer(phase) - 64))); 
+                if (waveform = "00" or waveform = "01" or waveform = "10") then
+                    data_out <= exp_table(log_gain(to_integer(gain)) + log_sine(64 - (to_integer(phase) - 64)));
+                else
+                    data_out <= 0;
+                end if;
             elsif (phase > 128 and phase <= 192) then
-                data_out <= -exp_table(log_gain(to_integer(gain)) + log_sine(to_integer(phase) - 128));
+                if (waveform = "00") then
+                    data_out <= -exp_table(log_gain(to_integer(gain)) + log_sine(to_integer(phase) - 128));
+                elsif (waveform = "10" or waveform = "11") then
+                    data_out <= exp_table(log_gain(to_integer(gain)) + log_sine(to_integer(phase) - 128));
+                else
+                    data_out <= 0;
+                end if;
             else -- phase > 192 and phase < 256
-                data_out <= -exp_table(log_gain(to_integer(gain)) + log_sine(64 - (to_integer(phase) - 192)));
+                if (waveform = "00") then
+                    data_out <= -exp_table(log_gain(to_integer(gain)) + log_sine(64 - (to_integer(phase) - 192)));
+                elsif (waveform = "10") then
+                    data_out <= exp_table(log_gain(to_integer(gain)) + log_sine(64 - (to_integer(phase) - 192)));
+                else
+                    data_out <= 0;
+                end if;
             end if;
         end if;
 	end process;

@@ -33,10 +33,13 @@ char *sndl;
 char *sndr;
 
 unsigned waveform;
-char octave;		/* main octave */
+char octave;		/* keyboard main octave */
+char oct;		/* sound chip octave */
 char octcarr;		/* carrier octave */
 unsigned gainmsg;	/* message gain */
 unsigned gainmod;	/* modulated gain */
+unsigned wavmsg;	/* message waveform */
+unsigned wavmod; 	/* modulated waveform */
 
 int	isnoteon;
 
@@ -69,65 +72,77 @@ int psti;
 		phase_delta = freq * 2^32 / (50E6 * 2^octave)
 */
 
+void sndupdt()
+{
+	sndl[3] = octcarr + oct;
+	sndr[3] = octcarr + oct;
+
+	sndl[4] = gainmsg | (wavmsg << 6);
+	sndr[4] = gainmsg | (wavmsg << 6);
+
+	sndl[5] = gainmod | (wavmod << 6);
+	sndr[5] = gainmod | (wavmod << 6);
+}
+
 void play(pitch)
 unsigned pitch;
 {
-	unsigned octave;
 	unsigned note;
 	unsigned phd;
-	
+	unsigned o;
+
 	/*
 	octave = pitch / 12;
 	note = pitch % 12;
 	*/
 
 	if (pitch >= 12 && pitch < 24) {
-		octave = 2;
+		oct = 2;
 		note = pitch - 12;
 	} else if (pitch >= 24 && pitch < 36) {
-		octave = 3;
+		oct = 3;
 		note = pitch - 24;
 	} else  if (pitch >= 36 && pitch < 48) {
-		octave = 4;
+		oct = 4;
 		note = pitch - 36;
 	} else  if (pitch >= 48 && pitch < 60) {
-		octave = 5;
+		oct = 5;
 		note = pitch - 48;
 	} else  if (pitch >= 60 && pitch < 72) {
-		octave = 6;
+		oct = 6;
 		note = pitch - 60;
 	} else  if (pitch >= 72 && pitch < 84) {
-		octave = 7;
+		oct = 7;
 		note = pitch - 72;
 	} else  if (pitch >= 84 && pitch < 96) {
-		octave = 8;
+		oct = 8;
 		note = pitch - 84;
 	} else  if (pitch >= 96 && pitch < 108) {
-		octave = 9;
+		oct = 9;
 		note = pitch - 96;
 	} else {
 		/* Note OFF */
-		sndl[0] = 0x7f & waveform;
-		sndr[0] = 0x7f & waveform;
+		if (waveform == 4) {
+			sndl[0] = 0x7f & waveform;
+			sndr[0] = 0x7f & waveform;
+		} else {
+			sndl[0] = 0;
+			sndr[0] = 0;
+		}
 		return;
 	}
 	
-	phd = octave << 12;
+	o = oct;
+	phd = o << 12;
 	phd |= phds[note];	
 
 	sndl[1] = phd >> 8;
 	sndl[2] = phd;
-	sndl[3] = octcarr + octave;
-	
-	sndl[4] = gainmsg;
-	sndl[5] = gainmod;
-	
+		
 	sndr[1] = phd >> 8;
 	sndr[2] = phd;
-	sndr[3] = octcarr + octave;
 	
-	sndr[4] = gainmsg;
-	sndr[5] = gainmod;
+	sndupdt();
 	
 	/* Note OFF */
 	sndl[0] = 0x7f & waveform;
@@ -157,10 +172,14 @@ void prtstatu()
 	printh4(octave);
 	moveto(16, 13);
 	printh4(octcarr);
-	moveto(16, 14);
+	moveto(26, 14);
 	printh8(gainmsg);			
-	moveto(16, 15);
+	moveto(26, 15);
 	printh8(gainmod);
+	moveto(32, 14);
+	printh8(wavmsg);			
+	moveto(32, 15);
+	printh8(wavmod);
 }
 
 void prtstack()
@@ -211,6 +230,8 @@ char **argv;
 	
 	gainmsg = 63;
 	gainmod = 63;
+	wavmsg = 0;
+	wavmod = 0;
 
 	isnoteon = 0;
 	
@@ -235,7 +256,7 @@ char **argv;
 	moveto(10, 8);
 	prints("M, ',': Modulation Gain +/- (PM only)");
 	moveto(10, 9);
-	prints("1, 2, 3, 4: Square/Saw/Sine/PM");
+	prints("1, 2, 3, 4: Square/Saw/Sine/PM, 5, 6: Message/modulated waveform");
 	moveto(10, 10);
 	prints("Spacebar: Quiet");
 	
@@ -244,15 +265,15 @@ char **argv;
 	moveto(0, 13);
 	prints("Octave Carrier:");	
 	moveto(0, 14);
-	prints("Message Gain:");
+	prints("Message Gain, Waveform:");
 	moveto(0, 15);
-	prints("Modulated Gain:");
+	prints("Modulated Gain, Waveform:");
 
 	moveto(0, 17);
 	prints("Phase Modulation:");
-	moveto(10, 18);
+	moveto(4, 18);
 	prints("y(t) = modulated_gain * sin(pi*m(t) + 2*pi*(octave+octave_carr)*freq*t)");
-	moveto(10, 19);
+	moveto(4, 19);
 	prints("where m(t) = message_gain * sin(2*pi*octave*freq*t)");
 	
 	pstack[0] = 0;
@@ -441,18 +462,22 @@ char **argv;
 				
 				case '1':
 				waveform = 1;
+				newpitch = 1;
 				break;
 				
 				case '2':
 				waveform = 2;
+				newpitch = 1;
 				break;
 				
 				case '3':
 				waveform = 3;
+				newpitch = 1;
 				break;
 				
 				case '4':
 				waveform = 4;
+				newpitch = 1;
 				break;
 
 				case 'c':
@@ -490,6 +515,14 @@ char **argv;
 				if (gainmod < 63)
 					gainmod++;
 				break;
+
+				case '5':
+				wavmsg = (wavmsg + 1) % 4;
+				break;
+				
+				case '6':
+				wavmod = (wavmod + 1) % 4;
+				break;
 				
 				case ' ':
 					note = -1;
@@ -506,6 +539,8 @@ char **argv;
 					pitch = 0;
 					noteoff();
 				}
+			} else {
+				sndupdt();
 			}
 			
 			prtstatu();
