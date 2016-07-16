@@ -23,14 +23,15 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../common/io.c"
 
-/* Sound chip */
-#define SNDL	0xE080
-#define SNDR	0xE090
+/* Sound chip with 4 voices */
+#define SND0		0xE080
+#define SND1		0xE090
+#define SND2		0xE0A0
+#define SND3		0xE0B0
 
 #define PSTACK_SIZE	16
 
-char *sndl;
-char *sndr;
+char *snd;
 
 unsigned waveform;
 char octave;		/* keyboard main octave */
@@ -76,16 +77,10 @@ int psti;
 
 void sndupdt()
 {
-	sndl[3] = octcarr + oct;
-	sndr[3] = octcarr + oct;
-
-	sndl[4] = gainmsg | (wavmsg << 6);
-	sndr[4] = gainmsg | (wavmsg << 6);
-
-	sndl[5] = gainmod | (wavmod << 6);
-	sndr[5] = gainmod | (wavmod << 6);
-
-	sndl[7] = (relrate << 4) | attrate; 
+	snd[3] = octcarr + oct;
+	snd[4] = gainmsg | (wavmsg << 6);
+	snd[5] = gainmod | (wavmod << 6);
+	snd[7] = (relrate << 4) | attrate; 
 }
 
 void play(pitch)
@@ -127,11 +122,9 @@ unsigned pitch;
 	} else {
 		/* Note OFF */
 		if (waveform == 4) {
-			sndl[0] = 0x7f & waveform;
-			sndr[0] = 0x7f & waveform;
+			snd[0] = 0x7f & waveform;
 		} else {
-			sndl[0] = 0;
-			sndr[0] = 0;
+			snd[0] = 0;
 		}
 		return;
 	}
@@ -140,21 +133,13 @@ unsigned pitch;
 	phd = o << 12;
 	phd |= phds[note];	
 
-	sndl[1] = phd >> 8;
-	sndl[2] = phd;
+	snd[1] = phd >> 8;
+	snd[2] = phd;
 		
-	sndr[1] = phd >> 8;
-	sndr[2] = phd;
-	
 	sndupdt();
 	
-	/* Note OFF */
-	sndl[0] = 0x7f & waveform;
-	sndr[0] = 0x7f & waveform;
-
 	/* Note ON */
-	sndl[0] = 0x80 | waveform;
-	sndr[0] = 0x80 | waveform;
+	snd[0] = 0x80 | waveform;
 }
 
 void noteon(pitch)
@@ -168,6 +153,26 @@ void noteoff()
 {
 	play(0);
 	isnoteon = 0;
+}
+
+void sweep()
+{
+	unsigned phd;
+	unsigned t;
+	unsigned c;
+
+	snd[0] = 0x80 | waveform;
+
+	for (phd = 0; phd < 4096; ++phd) {
+		c = phd;
+		c |= 6 << 12;
+
+		snd[1] = c >> 8;
+		snd[2] = c;
+			
+		for (t = 0; t < 1024; ++t);
+
+	}
 }
 
 void prtstatu()
@@ -208,8 +213,6 @@ int main(argc, argv)
 int argc;
 char **argv;
 {
-	int wait;
-
 	unsigned c, m, lastm, p1, p2, chan;
 	char note;
 	char lstpitch;
@@ -217,8 +220,7 @@ char **argv;
 	int i;
 	int newpitch;
 
-	sndl = SNDL;
-	sndr = SNDR;
+	snd = SND0;
 
 	phds[0] = 702;
 	phds[1] = 744;
@@ -492,6 +494,22 @@ char **argv;
 				newpitch = 1;
 				break;
 
+				case '7':
+				snd = SND0;
+				break;
+
+				case '8':
+				snd = SND1;
+				break;
+
+				case '9':
+				snd = SND2;
+				break;
+
+				case '0':
+				snd = SND3;
+				break;
+
 				case 'X':
 				if (octcarr > -8)
 					octcarr--;
@@ -548,6 +566,10 @@ char **argv;
 				
 				case '6':
 				wavmod = (wavmod + 1) % 4;
+				break;
+
+				case '/':
+				sweep();
 				break;
 				
 				case ' ':

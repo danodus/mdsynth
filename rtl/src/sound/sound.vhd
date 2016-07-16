@@ -49,7 +49,7 @@ entity sound is
 	clk_50     : in  std_logic;
     rst        : in  std_logic;
     cs         : in  std_logic;
-    addr       : in  std_logic_vector(2 downto 0);
+    addr       : in  std_logic_vector(5 downto 0);
     rw         : in  std_logic;
     data_in    : in  std_logic_vector(7 downto 0);
 	data_out   : out std_logic_vector(7 downto 0);
@@ -58,6 +58,8 @@ entity sound is
 end;
 
 architecture sound_arch of sound is
+
+constant nb_voices : integer := 4;
 
 component channel is
     port ( clk:      in std_logic;
@@ -75,70 +77,129 @@ component channel is
            release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:                out std_logic;
-           dac_output:            out std_logic_vector(7 downto 0));
+           output:                out std_logic_vector(7 downto 0));
 end component;
 
-signal waveform : std_logic_vector(2 downto 0);
+component dac is
+	port (  clk:        in std_logic;
+            dac_in:     in std_logic_vector(11 downto 0);
+            reset:      in std_logic;
+            dac_out:    out std_logic);
+end component;
 
-signal pitch: unsigned(15 downto 0);
+type voices_waveform_type is array (0 to nb_voices) of std_logic_vector(2 downto 0);
+signal voices_waveform : voices_waveform_type;
 
-signal phase_delta: unsigned(11 downto 0);
-signal octave_message: unsigned(3 downto 0);
-signal octave_carrier: unsigned(3 downto 0);
+type voices_pitch_type is array (0 to nb_voices) of unsigned(15 downto 0);
+signal voices_pitch: voices_pitch_type;
 
-signal gain_message: unsigned(5 downto 0) := to_unsigned(63, 6);
-signal gain_modulated: unsigned(5 downto 0) := to_unsigned(63, 6);
-signal waveform_message: std_logic_vector(1 downto 0) := "00";
-signal waveform_modulated: std_logic_vector(1 downto 0) := "00";
+type voices_phase_delta_type is array (0 to nb_voices) of unsigned(11 downto 0);
+signal voices_phase_delta: voices_phase_delta_type;
 
-signal reset_phase: std_logic := '0';
-signal note_on: std_logic := '0';
+type voices_octave_type is array (0 to nb_voices) of unsigned(3 downto 0);
+signal voices_octave_message: voices_octave_type;
+signal voices_octave_carrier: voices_octave_type;
 
-signal dac_direct_value: std_logic_vector(7 downto 0) := (others => '0');
+type voices_gain_type is array (0 to nb_voices) of unsigned(5 downto 0);
+signal voices_gain_message: voices_gain_type := (others => to_unsigned(63, 6));
+signal voices_gain_modulated: voices_gain_type  := (others => to_unsigned(63, 6));
 
-signal attack_rate: unsigned(3 downto 0) := to_unsigned(0, 4);
-signal release_rate: unsigned(3 downto 0) := to_unsigned(0, 4);           
+type voices_op_waveform_type is array (0 to nb_voices) of std_logic_vector(1 downto 0);
+signal voices_waveform_message: voices_op_waveform_type := (others => "00");
+signal voices_waveform_modulated: voices_op_waveform_type := (others => "00");
+
+signal voices_reset_phase: std_logic_vector(0 to nb_voices) := (others => '0');
+
+type voices_note_on_type is array (0 to nb_voices) of std_logic;
+signal voices_note_on: voices_note_on_type := (others => '0');
+
+type voices_dac_direct_value_type is array (0 to nb_voices) of std_logic_vector(7 downto 0);
+signal voices_dac_direct_value: voices_dac_direct_value_type := (others => (others => '0'));
+
+type voices_rate_type is array (0 to nb_voices) of unsigned(3 downto 0);
+signal voices_attack_rate: voices_rate_type := (others => to_unsigned(0, 4));
+signal voices_release_rate: voices_rate_type := (others => to_unsigned(0, 4));
+
+signal dac_in: std_logic_vector(11 downto 0);
+
+type voices_output_type is array (0 to nb_voices) of std_logic_vector(11 downto 0);
+signal voices_output: voices_output_type := (others => (others =>'0'));
 
 begin
 
-    channel0 : channel port map (clk => clk_50, reset => rst, waveform => waveform, note_on => note_on, gain_message => gain_message, gain_modulated => gain_modulated, phase_delta => phase_delta, octave_message => octave_message, octave_carrier => octave_carrier, waveform_message => waveform_message, waveform_modulated => waveform_modulated, attack_rate => attack_rate, release_rate => release_rate, reset_phase => reset_phase, dac_direct_value => dac_direct_value, output => audio_out);
+    dac0 : dac port map (clk => clk_50, dac_in => dac_in, reset => rst, dac_out => audio_out);
+
+    channels : for i in 0 to 3 generate
+        channelx : channel port map(
+            clk => clk_50,
+            reset => rst,
+            waveform => voices_waveform(i),
+            note_on => voices_note_on(i),
+            gain_message => voices_gain_message(i),
+            gain_modulated => voices_gain_modulated(i),
+            phase_delta => voices_phase_delta(i),
+            octave_message => voices_octave_message(i),
+            octave_carrier => voices_octave_carrier(i),
+            waveform_message => voices_waveform_message(i),
+            waveform_modulated => voices_waveform_modulated(i),
+            attack_rate => voices_attack_rate(i),
+            release_rate => voices_release_rate(i),
+            reset_phase => voices_reset_phase(i),
+            dac_direct_value => voices_dac_direct_value(i),
+            output => voices_output(i)(7 downto 0)); 
+    end generate channels;
+
+    process(clk_50)
+    begin
+        if clk_50'event and clk_50 = '1' then
+            dac_in <= std_logic_vector(unsigned(voices_output(0)) + unsigned(voices_output(1)) + unsigned(voices_output(2)) + unsigned(voices_output(3)));
+        end if;
+    end process;
 
     process(clk)
     begin
         if clk'event and clk = '0' then
             if rst = '1' then
-                pitch <= to_unsigned(0, 16);
-                waveform <= (others=>'0');
-                reset_phase <= '1';
-                note_on <= '0';
-            elsif cs = '1' and rw = '0' then
-                case addr is
-                    when "000" => waveform <= data_in(2 downto 0);
-                                  note_on <= data_in(7);
-                                  if (data_in(7) = '1') then
-                                    reset_phase <= '1';
-                                  end if;
-                    when "001" => pitch(15 downto 8) <= unsigned(data_in);
-                                  reset_phase <= '1';
-                    when "010" => pitch(7 downto 0) <= unsigned(data_in);
-                                  reset_phase <= '1';
-                    when "011" => octave_carrier(3 downto 0) <= unsigned(data_in(3 downto 0));
-                                  reset_phase <= '1';
-                    when "100" => gain_message(5 downto 0) <= unsigned(data_in(5 downto 0));
-                                  waveform_message <= data_in(7 downto 6);
-                    when "101" => gain_modulated(5 downto 0) <= unsigned(data_in(5 downto 0));
-                                  waveform_modulated <= data_in(7 downto 6);
-                    when "110" => dac_direct_value <= data_in;
-                    when "111" => attack_rate <= unsigned(data_in(3 downto 0));
-                                  release_rate <= unsigned(data_in(7 downto 4));
-                    when others => waveform <= (others => '0');
-                end case;
+                voices_pitch <= (others => to_unsigned(0, 16));
+                voices_waveform <= (others => (others=>'0'));
+                voices_reset_phase <= (others=>'1');
+                voices_note_on <= (others=>'0');
+            elsif cs = '1' then
+                if rw = '0' then
+                    -- write data
+                    case addr(3 downto 0) is
+                        when "0000" => voices_waveform(to_integer(unsigned(addr(5 downto 4)))) <= data_in(2 downto 0);
+                                      voices_note_on(to_integer(unsigned(addr(5 downto 4)))) <= data_in(7);
+                                      if (data_in(7) = '1') then
+                                        voices_reset_phase(to_integer(unsigned(addr(5 downto 4)))) <= '1';
+                                      end if;
+                        when "0001" => voices_pitch(to_integer(unsigned(addr(5 downto 4))))(15 downto 8) <= unsigned(data_in);
+                        when "0010" => voices_pitch(to_integer(unsigned(addr(5 downto 4))))(7 downto 0) <= unsigned(data_in);
+                        when "0011" => voices_octave_carrier(to_integer(unsigned(addr(5 downto 4))))(3 downto 0) <= unsigned(data_in(3 downto 0));
+                        when "0100" => voices_gain_message(to_integer(unsigned(addr(5 downto 4))))(5 downto 0) <= unsigned(data_in(5 downto 0));
+                                       voices_waveform_message(to_integer(unsigned(addr(5 downto 4)))) <= data_in(7 downto 6);
+                        when "0101" => voices_gain_modulated(to_integer(unsigned(addr(5 downto 4))))(5 downto 0) <= unsigned(data_in(5 downto 0));
+                                       voices_waveform_modulated(to_integer(unsigned(addr(5 downto 4)))) <= data_in(7 downto 6);
+                        when "0110" => voices_dac_direct_value(to_integer(unsigned(addr(5 downto 4)))) <= data_in;
+                        when "0111" => voices_attack_rate(to_integer(unsigned(addr(5 downto 4)))) <= unsigned(data_in(3 downto 0));
+                                       voices_release_rate(to_integer(unsigned(addr(5 downto 4)))) <= unsigned(data_in(7 downto 4));
+                        when others =>
+                    end case;
+                else
+                    -- read data (not implemented)
+                    data_out <= (others=>'0');
+                end if;
             else
-                reset_phase <= '0';
+                voices_reset_phase <= (others=>'0');
             end if;
-            phase_delta <= pitch(11 downto 0);
-            octave_message <= pitch(15 downto 12);
+            voices_phase_delta(0) <= voices_pitch(0)(11 downto 0);
+            voices_phase_delta(1) <= voices_pitch(1)(11 downto 0);
+            voices_phase_delta(2) <= voices_pitch(2)(11 downto 0);
+            voices_phase_delta(3) <= voices_pitch(3)(11 downto 0);
+            voices_octave_message(0) <= voices_pitch(0)(15 downto 12);
+            voices_octave_message(1) <= voices_pitch(1)(15 downto 12);
+            voices_octave_message(2) <= voices_pitch(2)(15 downto 12);
+            voices_octave_message(3) <= voices_pitch(3)(15 downto 12);
         end if;
     end process;
 

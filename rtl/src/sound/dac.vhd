@@ -19,36 +19,41 @@
 -- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 -- USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+-- 12-bits DAC
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL; 
 
 
 entity dac is
+    generic(
+        MSBI  : integer := 11
+    );
 	port (  clk:        in std_logic;
-            dac_in:     in std_logic_vector(7 downto 0);
+            dac_in:     in std_logic_vector(MSBI downto 0);
             reset:      in std_logic;
             dac_out:    out std_logic);
 end entity dac;
 
 architecture dac_arch of dac is
-signal delta_adder : std_logic_vector(9 downto 0);
-signal sigma_adder : std_logic_vector(9 downto 0);
-signal sigma_latch : std_logic_vector(9 downto 0);
-signal delta_b : std_logic_vector(9 downto 0);
+signal delta_adder : std_logic_vector(MSBI+2 downto 0);
+signal sigma_adder : std_logic_vector(MSBI+2 downto 0);
+signal sigma_latch : std_logic_vector(MSBI+2 downto 0);
+signal delta_b : std_logic_vector(MSBI+2 downto 0);
 begin
-	delta_b(9 downto 8) <= sigma_latch(9) & sigma_latch(9);
-	delta_b(7 downto 0) <= (others => '0');
+	delta_b(MSBI+2 downto MSBI+1) <= sigma_latch(MSBI+2) & sigma_latch(MSBI+2);
+	delta_b(MSBI downto 0) <= (others => '0');
 	delta_adder <= std_logic_vector(unsigned(dac_in) + unsigned(delta_b));
 	sigma_adder <= std_logic_vector(unsigned(delta_adder) + unsigned(sigma_latch));
 	process (clk, reset)
 	begin
 		if (reset = '1') then
-			sigma_latch <= ('1', others => '0');
+			sigma_latch <= ('0', '1', others => '0');
 			dac_out <= '0';
 		elsif (rising_edge(clk)) then
 			sigma_latch <= sigma_adder;
-			dac_out <= sigma_latch(9);
+			dac_out <= sigma_latch(MSBI+2);
 		end if;
 	end process;
 end architecture dac_arch;

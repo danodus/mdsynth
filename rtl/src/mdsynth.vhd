@@ -30,10 +30,10 @@
 -- $E050 - Timer
 -- $E060 - Bus Trap (Hardware Breakpoint Interrupt Logic)
 -- $E070 - PIA Single Step Timer (was Reserved for Trace Buffer)
--- $E080 - Sound left
--- $E090 - Sound right
--- $E0A0 - reserved for SPP Printer Port
--- $E0B0 - Reserved
+-- $E080 - Sound Voice 0
+-- $E090 - Sound Voice 1
+-- $E0A0 - Sound Voice 2
+-- $E0B0 - Sound Voice 3
 -- $E0C0 - Reserved
 -- $E100 - $E13F Reserved IDE / Compact Flash Card
 -- $E140 - $E17F Reserved for Ethernet MAC (XESS)
@@ -154,11 +154,9 @@ architecture my_computer of mdsynth is
   signal vga_red        : std_logic;
 
   -- Sound
-  signal soundl_cs        : std_logic;
-  signal soundr_cs        : std_logic;
-  signal soundl_data_out   : std_logic_vector(7 downto 0);
-  signal soundr_data_out   : std_logic_vector(7 downto 0);
-
+  signal sound_cs        : std_logic;
+  signal sound_data_out   : std_logic_vector(7 downto 0);
+  
   -- RAM
   signal ram_cs         : std_logic; -- memory chip select
   signal ram_data_out   : std_logic_vector(7 downto 0);
@@ -444,7 +442,7 @@ component sound is
 	clk_50     : in  std_logic;
     rst        : in  std_logic;
     cs         : in  std_logic;
-    addr       : in  std_logic_vector(2 downto 0);
+    addr       : in  std_logic_vector(5 downto 0);
     rw         : in  std_logic;
     data_in    : in  std_logic_vector(7 downto 0);
 	data_out   : out std_logic_vector(7 downto 0);
@@ -716,28 +714,16 @@ my_trap : trap port map (
 --
 ----------------------------------------
 
-my_sound_left : sound port map (
+my_sound : sound port map (
     clk       => cpu_clk,
     clk_50    => sys_clk,
     rst     => cpu_rst,
-    cs      => soundl_cs,
-    addr    => cpu_addr(2 downto 0),
+    cs      => sound_cs,
+    addr    => cpu_addr(5 downto 0),
     rw        => cpu_rw,
     data_in    => cpu_data_out,
-    data_out   => soundl_data_out,
+    data_out   => sound_data_out,
     audio_out    => audio_left 
-);
-
-my_sound_right : sound port map (
-    clk       => cpu_clk,
-    clk_50    => sys_clk,
-    rst     => cpu_rst,
-    cs      => soundr_cs,
-    addr    => cpu_addr(2 downto 0),
-    rw        => cpu_rw,
-    data_in    => cpu_data_out,
-    data_out   => soundr_data_out,
-    audio_out    => audio_right 
 );
 
 vga_colors: process(vga_red, vga_green, vga_blue)
@@ -773,8 +759,7 @@ begin
 	pia_cs   <= '0';
 	kbd_cs   <= '0';
 	vdu_cs   <= '0';
-	soundl_cs  <= '0';
-	soundr_cs  <= '0';
+	sound_cs  <= '0';
 
       case cpu_addr(15 downto 12) is
 	   --
@@ -845,20 +830,30 @@ begin
 			  pia_cs      <= cpu_vma;
 			  
             --
-            -- Sound Left $E080 - $E08F 
-            -- Sound Right $E090 - $E09F 
+            -- Sound $E080 - $E09F 
 			--
-		    
 			  
 			when "1000" => -- $E080
-			    cpu_data_in <= soundl_data_out;
-			    soundl_cs    <= cpu_vma;
-			    
+			    -- voice 0
+    			cpu_data_in <= sound_data_out;
+                sound_cs    <= cpu_vma;
+                
 			when "1001" => -- $E090
-			    cpu_data_in <= soundr_data_out;
-			    soundr_cs    <= cpu_vma;
+			    -- voice 1
+			    cpu_data_in <= sound_data_out;
+			    sound_cs    <= cpu_vma;
+
+            when "1010" => -- $E0A0
+                -- voice 2
+                cpu_data_in <= sound_data_out;
+                sound_cs <= cpu_vma;
+            
+            when "1011" => -- $E0B0
+                -- voice 3
+                cpu_data_in <= sound_data_out;
+                sound_cs <= cpu_vma;
 			  
-			when others => -- $E0A0 to $E7FF
+			when others => -- $E0D0 to $E7FF
            cpu_data_in <= (others => '0');
 		   end case;
 
@@ -902,9 +897,9 @@ end process;
 process(audio_left, audio_right)
 begin
     aud_l <= audio_left;
-    aud_r <= audio_right;
+    aud_r <= audio_left;
    	aux_aud_l <= audio_left;
-	aux_aud_r <= audio_right;
+	aux_aud_r <= audio_left;
 end process;
 
 end my_computer; --===================== End of architecture =======================--

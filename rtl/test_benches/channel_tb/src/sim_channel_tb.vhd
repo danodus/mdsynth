@@ -21,7 +21,7 @@ architecture sim_channel_tb_arch of sim_channel_tb is
           aud_r:       out std_logic;
           aux_aud_l:   out std_logic;
           aux_aud_r:   out std_logic;
-          dac_output:  out std_logic_vector(7 downto 0)
+          output:      out std_logic_vector(7 downto 0)
           );
     end component;
     
@@ -35,7 +35,7 @@ architecture sim_channel_tb_arch of sim_channel_tb is
     signal aud_r : std_logic;
     signal aux_aud_l : std_logic;
     signal aux_aud_r : std_logic;
-    signal dac_output : std_logic_vector(7 downto 0);
+    signal output : std_logic_vector(7 downto 0);
     
     file l_file: TEXT open write_mode is log_file;
 
@@ -50,7 +50,7 @@ begin
         aud_r => aud_r,
         aux_aud_l => aux_aud_l,
         aux_aud_r => aux_aud_r,
-        dac_output => dac_output
+        output => output
         );
         
      clk <= not clk after clk_half_period;
@@ -77,7 +77,7 @@ begin
         
         while true loop
             if (my_counter mod (50000000 / 44100) = 0) then
-                write(my_line, to_integer(unsigned(dac_output)));
+                write(my_line, to_integer(unsigned(output)));
                 writeline(l_file, my_line);
             end if;
             my_counter := my_counter + 1;

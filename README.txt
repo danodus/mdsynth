@@ -50,9 +50,11 @@ If you plan to use this tiny C compiler, please read the README file located the
 2.2. Sound Chip Addresses
 =========================
 	
-Two sound chips are available at the following base addresses:
-- 0xE080	Left Audio
-- 0xE090	Right Audio
+Two sound chip voices are available at the following base addresses:
+- 0xE080	Voice 0
+- 0xE090	Voice 1
+- 0xE0A0	Voice 2
+- 0xE0B0	Voice 3
 
 Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
 	      bit 7: Note ON/OFF (0: OFF, 1: ON)
@@ -69,7 +71,7 @@ Base + 5: Modulated Gain (6-bit, 63=1.0, phase modulation only)
 Base + 6: DAC direct value (8-bit, DAC direct only)
 Base + 7: bits 3 downto 0: Attack Rate (0xF: fastest)
           bits 7 downto 4: Release Rate (0xF: fastest)
-
+Base + 8 .. Base + 15: Reserved
 
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
 

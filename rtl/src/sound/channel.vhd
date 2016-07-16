@@ -39,18 +39,10 @@ entity channel is
            release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:                out std_logic;
-           dac_output:            out std_logic_vector(7 downto 0));
+           output:                out std_logic_vector(7 downto 0));
 end channel;
 
 architecture channel_arch of channel is
-
-component dac is
-	port (	clk:		in std_logic;
-			dac_in:	    in std_logic_vector(7 downto 0);
-			reset:	    in std_logic;
-			dac_out:	out std_logic);
-end component;
 
 component sinewave is
 	port (    clk:          in std_logic;
@@ -111,8 +103,6 @@ begin
 
     sinewave0 : sinewave port map (clk => clk, gain => sine_gain, phase => sine_phase, waveform => sine_waveform, data_out => sine_data);
 
-    dac0 : dac port map (clk => clk, dac_in => dac_in, reset => reset, dac_out => output);
-
     envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, attack_rate => attack_rate, release_rate => release_rate, gain => envelope_gain);
 	
 	process (clk, reset)
@@ -127,7 +117,7 @@ begin
 
             envelope_reset <= '0';	    
             phase_modulated <= to_unsigned(to_integer(phase_carrier) + sine_message, 9);
-            dac_output <= dac_in;
+            output <= dac_in;
             case state is
 	            when sinewave_message_state =>
 	                -- We calculate the message waveform

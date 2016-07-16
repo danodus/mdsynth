@@ -32,7 +32,7 @@ entity channel_tb is
           aud_r:       out std_logic;
           aux_aud_l:   out std_logic;
           aux_aud_r:   out std_logic;
-          dac_output: out std_logic_vector(7 downto 0)
+          output:      out std_logic_vector(7 downto 0)
           );
  
 end entity channel_tb;
@@ -55,8 +55,7 @@ component channel is
            release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:                out std_logic;
-           dac_output:            out std_logic_vector(7 downto 0));
+           output:                out std_logic_vector(7 downto 0));
 end component;
 
 component pitch_to_freq is
@@ -110,8 +109,7 @@ begin
         release_rate => release_rate,
         reset_phase => reset_phase,
         dac_direct_value => dac_direct_value,
-        output => channel_out,
-        dac_output => dac_output);
+        output => output);
 
     waveform <= sw(2 downto 0);
 
