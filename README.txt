@@ -24,7 +24,7 @@ In phase modulation, the gains for both oscillators are applied without multipli
 2. Complete synthesizer as a 6809-based system
 ============================================================
 
-Adaptation of the excellent System09 project by John E. Kent (dilbert57@opencores.org)
+Adaptation of the excellent System09 project by John E. Kent
 http://members.optushome.com.au/jekent/system09/
 
 
