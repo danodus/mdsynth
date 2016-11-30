@@ -1,7 +1,7 @@
 MDSynth
 FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
-Author: Daniel Cliche (dcliche@meldora.com)
+Author: Daniel Cliche
 Copyright (c) 2011-2016, Meldora Inc. All rights reserved.
 
 License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
