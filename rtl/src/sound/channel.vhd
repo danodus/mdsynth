@@ -39,7 +39,8 @@ entity channel is
            release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:                out std_logic_vector(7 downto 0));
+           output:                out std_logic_vector(7 downto 0);
+           envelope_phase:        out std_logic_vector(1 downto 0));
 end channel;
 
 architecture channel_arch of channel is
@@ -67,7 +68,8 @@ port (  clk:		in std_logic;
         note_on:    in std_logic;
         attack_rate:    in unsigned(3 downto 0);
         release_rate:   in unsigned(3 downto 0);        
-        gain:       out unsigned(5 downto 0));
+        gain:       out unsigned(5 downto 0);
+        phase:      out std_logic_vector(1 downto 0));
 end component;
 
 signal dac_in : std_logic_vector(7 downto 0);
@@ -103,7 +105,7 @@ begin
 
     sinewave0 : sinewave port map (clk => clk, gain => sine_gain, phase => sine_phase, waveform => sine_waveform, data_out => sine_data);
 
-    envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, attack_rate => attack_rate, release_rate => release_rate, gain => envelope_gain);
+    envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, attack_rate => attack_rate, release_rate => release_rate, gain => envelope_gain, phase => envelope_phase);
 	
 	process (clk, reset)
 	begin

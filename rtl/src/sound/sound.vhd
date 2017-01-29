@@ -19,6 +19,8 @@
 -- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 -- USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
+-- Write:
+--
 -- Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
 --           bit 7: Note ON/OFF (0: OFF, 1: ON)
 -- Base + 1: Pitch Hi (see below)
@@ -31,6 +33,11 @@
 -- Base + 6: DAC value (8-bit, DAC-direct only)
 -- Base + 7: bits 3 downto 0: Attack Rate (0xF: fastest)
 --           bits 7 downto 4: Release Rate (0xF: fastest)
+--
+-- Read:
+
+-- Base + 0: bits 1 downto 0: Envelope Phase (0x0: Idle, 0x1: Attack, 0x2: Sustain, 0x3: Release)
+
 --
 -- The pitch is a 16-bit value with the following format: 
 --     bits 15 downto 12: octave    (A4 is octave 5)
@@ -77,12 +84,13 @@ component channel is
            release_rate:          in unsigned(3 downto 0);           
            reset_phase:           in std_logic;
            dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:                out std_logic_vector(7 downto 0));
+           output:                out std_logic_vector(7 downto 0);
+           envelope_phase:        out std_logic_vector(1 downto 0));
 end component;
 
 component dac is
 	port (  clk:        in std_logic;
-            dac_in:     in std_logic_vector(11 downto 0);
+            dac_in:     in std_logic_vector(9 downto 0);
             reset:      in std_logic;
             dac_out:    out std_logic);
 end component;
@@ -120,10 +128,13 @@ type voices_rate_type is array (0 to nb_voices) of unsigned(3 downto 0);
 signal voices_attack_rate: voices_rate_type := (others => to_unsigned(0, 4));
 signal voices_release_rate: voices_rate_type := (others => to_unsigned(0, 4));
 
-signal dac_in: std_logic_vector(11 downto 0);
+signal dac_in: std_logic_vector(9 downto 0);
 
-type voices_output_type is array (0 to nb_voices) of std_logic_vector(11 downto 0);
+type voices_output_type is array (0 to nb_voices) of std_logic_vector(9 downto 0);
 signal voices_output: voices_output_type := (others => (others =>'0'));
+
+type voices_envelope_phase_type is array (0 to nb_voices) of std_logic_vector(1 downto 0);
+signal voices_envelope_phase: voices_envelope_phase_type := (others => (others =>'0'));
 
 begin
 
@@ -146,7 +157,9 @@ begin
             release_rate => voices_release_rate(i),
             reset_phase => voices_reset_phase(i),
             dac_direct_value => voices_dac_direct_value(i),
-            output => voices_output(i)(7 downto 0)); 
+            output => voices_output(i)(7 downto 0),
+            envelope_phase => voices_envelope_phase(i));
+             
     end generate channels;
 
     process(clk_50)
@@ -185,13 +198,12 @@ begin
                                        voices_release_rate(to_integer(unsigned(addr(5 downto 4)))) <= unsigned(data_in(7 downto 4));
                         when others =>
                     end case;
-                else
-                    -- read data (not implemented)
-                    data_out <= (others=>'0');
                 end if;
             else
                 voices_reset_phase <= (others=>'0');
             end if;
+
+
             voices_phase_delta(0) <= voices_pitch(0)(11 downto 0);
             voices_phase_delta(1) <= voices_pitch(1)(11 downto 0);
             voices_phase_delta(2) <= voices_pitch(2)(11 downto 0);
@@ -201,6 +213,17 @@ begin
             voices_octave_message(2) <= voices_pitch(2)(15 downto 12);
             voices_octave_message(3) <= voices_pitch(3)(15 downto 12);
         end if;
+    end process;
+    
+    process(addr, voices_envelope_phase)
+    begin
+        case addr(3 downto 0) is
+            when "0000" =>
+                data_out(1 downto 0) <= voices_envelope_phase(to_integer(unsigned(addr(5 downto 4))));
+                data_out(7 downto 2) <= (others=>'0');
+            when others =>
+                data_out <= (others=>'0');
+        end case;
     end process;
 
 end sound_arch;

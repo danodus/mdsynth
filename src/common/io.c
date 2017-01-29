@@ -72,6 +72,16 @@ char b;
 	*(VDU + 3) = cury;
 }
 
+void hidecsr()
+{
+	*(VDU + 5) = 0;
+}
+
+void showcsr()
+{
+	*(VDU + 5) = 1;
+}
+
 /* Clear the screen */
 void clearscr()
 {

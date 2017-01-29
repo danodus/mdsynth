@@ -19,7 +19,7 @@
 -- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 -- USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
--- 12-bits DAC
+-- 10-bits DAC
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -28,7 +28,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity dac is
     generic(
-        MSBI  : integer := 11
+        MSBI  : integer := 9
     );
 	port (  clk:        in std_logic;
             dac_in:     in std_logic_vector(MSBI downto 0);
@@ -49,7 +49,7 @@ begin
 	process (clk, reset)
 	begin
 		if (reset = '1') then
-			sigma_latch <= ('0', '1', others => '0');
+			sigma_latch <= ('1', others => '0');
 			dac_out <= '0';
 		elsif (rising_edge(clk)) then
 			sigma_latch <= sigma_adder;

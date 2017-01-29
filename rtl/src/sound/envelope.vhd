@@ -33,7 +33,8 @@ entity envelope is
             note_on:    in std_logic;
             attack_rate:    in unsigned(3 downto 0);
             release_rate:   in unsigned(3 downto 0);
-            gain:       out unsigned(5 downto 0));
+            gain:       out unsigned(5 downto 0);
+            phase:      out std_logic_vector(1 downto 0));
 end envelope;
 
 architecture envelope_arch of envelope is
@@ -58,10 +59,12 @@ begin
         gain <= current_gain(24 downto 19);
         case current_phase is
             when wait_phase =>
+                phase <= "00";
                 if (note_on = '1') then
                     current_phase <= attack_phase;
                 end if;
             when attack_phase =>
+                phase <= "01";
                 if (note_on = '1') then
                     if (current_gain(25) = '1') then
                         current_gain <= to_unsigned(33554431, 26);
@@ -74,10 +77,12 @@ begin
                 end if;
                 
             when sustain_phase =>
+                phase <= "10";
                 if (note_on = '0') then
                     current_phase <= release_phase;
                 end if;
             when release_phase =>
+                phase <= "11";
                 -- release
                 if (note_on = '1') then
                     -- We have a note on during release phase

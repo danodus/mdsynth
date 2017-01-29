@@ -39,25 +39,6 @@ end entity channel_tb;
 
 architecture channel_tb_arch of channel_tb is
 
-component channel is
-    port ( clk:      in std_logic;
-           reset:    in std_logic;
-           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: DAC-direct
-           note_on:  in std_logic;
-           gain_message:          in unsigned(5 downto 0);
-           gain_modulated:        in unsigned(5 downto 0);
-           phase_delta:           in unsigned(11 downto 0);
-           octave_message:        in unsigned(3 downto 0);
-           octave_carrier:        in unsigned(3 downto 0);
-           waveform_message:      in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
-           waveform_modulated:    in std_logic_vector(1 downto 0);  -- 0: Full sine (++--), 1: Half sine (++00), 3: Full sine positive (++++), 4: Quarter sine positive (+0+0)
-           attack_rate:           in unsigned(3 downto 0);
-           release_rate:          in unsigned(3 downto 0);           
-           reset_phase:           in std_logic;
-           dac_direct_value:      in std_logic_vector(7 downto 0);
-           output:                out std_logic_vector(7 downto 0));
-end component;
-
 component pitch_to_freq is
     port ( pitch:         in unsigned(6 downto 0);      -- 60 = C4
            phase_delta:   out unsigned(11 downto 0);
@@ -93,7 +74,7 @@ begin
 
     pitch_to_freq_carrier0: pitch_to_freq port map (pitch => pitch_message, phase_delta => phase_delta_message, octave => octave_message);
     pitch_to_freq_message0: pitch_to_freq port map (pitch => pitch_carrier, phase_delta => phase_delta_carrier, octave => octave_carrier);
-    channel0: channel port map (
+    channel0: entity work.channel port map (
         clk => clk_50mhz,
         reset => btn_south,
         waveform => waveform,

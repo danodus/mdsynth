@@ -2,7 +2,7 @@ MDSynth
 FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
 Author: Daniel Cliche
-Copyright (c) 2011-2016, Meldora Inc. All rights reserved.
+Copyright (c) 2011-2017, Meldora Inc. All rights reserved.
 
 License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
 Languages: VHDL, 6809 assembly, C
@@ -11,7 +11,7 @@ Languages: VHDL, 6809 assembly, C
 1. Overview
 ============================================================
 
-The sound chip includes a delta-sigma DAC and two numerically-controlled oscillators. It integrates a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
+The sound chip includes a delta-sigma DAC and two numerically-controlled oscillators. It has been integrated in a 6809-based system with keyboard support and video display output. The conversion from MIDI pitch to phase delta per clock with octave value is done by the 6809-based system for flexibility.
 Four types of waveform are available:
 	- Square (fixed gain)
 	- Sawtooth (fixed gain)
@@ -50,11 +50,13 @@ If you plan to use this tiny C compiler, please read the README file located the
 2.2. Sound Chip Addresses
 =========================
 	
-Two sound chip voices are available at the following base addresses:
-- 0xE080	Voice 0
-- 0xE090	Voice 1
-- 0xE0A0	Voice 2
-- 0xE0B0	Voice 3
+Four sound chip channels are available at the following base addresses:
+- 0xE080	Channel 0
+- 0xE090	Channel 1
+- 0xE0A0	Channel 2
+- 0xE0B0	Channel 3
+
+Write:
 
 Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
 	      bit 7: Note ON/OFF (0: OFF, 1: ON)
@@ -73,6 +75,10 @@ Base + 7: bits 3 downto 0: Attack Rate (0xF: fastest)
           bits 7 downto 4: Release Rate (0xF: fastest)
 Base + 8 .. Base + 15: Reserved
 
+Read:
+
+Base + 0: bits 1 downto 0: Envelope Phase (0x0: Idle, 0x1: Attack, 0x2: Sustain, 0x3: Release)
+
 Refer to section 4.1 for more details about the 12-bit phase delta value to provide to the NCO along with the 4-bit octave value.
 
 2.3. Installation
@@ -86,9 +92,9 @@ Refer to section 4.1 for more details about the 12-bit phase delta value to prov
 5. Connect speakers to the synthesizer;
 6. Connect a serial cable to the synthesizer;
 7. Program the FPGA by creating a projet with the files under the "rtl" folder;
-8. Start a serial terminal at 57600-N-8-2;
+8. Start a serial terminal at 57600-N-8-1;
 9. On the serial terminal or on the synthesizer itself at the SYS09BUG prompt, type "l";
-10. Upload the text file "src/synth/synth.s19" using your serial terminal;
+10. Upload the text file "src/synth/synth.s19" or "src/synthpoly/synth.s19" for the monophonic or polyphonic synthesizer respectively using your serial terminal;
 11. At the SYS09BUG prompt, type "CTRL-P" to set the program counter;
 12. Type "1000" (this is the starting address of the synthesizer project);
 13. Type "g". You will see the user interface on the monitor of your synthesizer system;
