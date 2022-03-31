@@ -1,6 +1,6 @@
 -- MDSynth Sound Chip Test Bench
 --
--- Copyright (c) 2012-2016, Meldora Inc.
+-- Copyright (c) 2012-2022, Daniel Cliche
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -31,10 +31,8 @@ entity channel_tb is
           aud_l:       out std_logic;
           aud_r:       out std_logic;
           aux_aud_l:   out std_logic;
-          aux_aud_r:   out std_logic;
-          output:      out std_logic_vector(7 downto 0)
+          aux_aud_r:   out std_logic
           );
- 
 end entity channel_tb;
 
 architecture channel_tb_arch of channel_tb is
@@ -44,6 +42,16 @@ component pitch_to_freq is
            phase_delta:   out unsigned(11 downto 0);
            octave:        out unsigned(3 downto 0));
 end component;
+
+component dac is
+    generic(
+        MSBI  : integer := 9
+    );
+	port (  clk:        in std_logic;
+            dac_in:     in std_logic_vector(MSBI downto 0);
+            reset:      in std_logic;
+            dac_out:    out std_logic);
+end component dac;
 
 signal channel_out: std_logic;
 signal pitch_message: unsigned (6 downto 0) := to_unsigned(69, 7);
@@ -67,8 +75,10 @@ signal note_on: std_logic := '0';
 signal waveform_message: std_logic_vector(1 downto 0) := "00";
 signal waveform_modulated: std_logic_vector(1 downto 0) := "00";
 
-signal attack_rate: unsigned(3 downto 0) := to_unsigned(15, 4);
-signal release_rate: unsigned(3 downto 0) := to_unsigned(15, 4);
+signal attack_rate: unsigned(3 downto 0) := to_unsigned(10, 4);
+signal release_rate: unsigned(3 downto 0) := to_unsigned(5, 4);
+
+signal dac_in: std_logic_vector(7 downto 0);
 
 begin
 
@@ -90,10 +100,15 @@ begin
         release_rate => release_rate,
         reset_phase => reset_phase,
         dac_direct_value => dac_direct_value,
-        output => output);
+        output => dac_in);
+        
+    dac0 : dac
+        generic map (MSBI => 7) 
+        port map (clk => clk_50mhz, dac_in => dac_in, reset => btn_south, dac_out => channel_out);
+        
 
     waveform <= sw(2 downto 0);
-
+    
     aud_l <= channel_out;
 	aud_r <= channel_out;
 	aux_aud_l <= channel_out;

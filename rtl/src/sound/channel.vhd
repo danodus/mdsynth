@@ -1,6 +1,6 @@
 -- MDSynth Sound Chip
 --
--- Copyright (c) 2012-2016, Meldora Inc.
+-- Copyright (c) 2012-2022, Daniel Cliche
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -26,7 +26,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: DAC-direct
+           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: FM (implemented as phase modulation), 5: Noise
            note_on:  in std_logic;
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);
@@ -98,6 +98,9 @@ signal ena_nco_message : std_logic;
 signal envelope_reset : std_logic := '1';
 signal envelope_gain : unsigned(5 downto 0);
 
+signal lfsr_counter : unsigned(11 downto 0);
+signal lfsr_data : std_logic_vector(31 downto 0);
+
 begin
 
     nco_carrier0 : nco port map (clk => clk, reset_phase => reset_phase, ena => ena_nco_carrier, phase_delta => phase_delta, octave => octave_carrier, phase => phase_carrier);
@@ -106,7 +109,19 @@ begin
     sinewave0 : sinewave port map (clk => clk, gain => sine_gain, phase => sine_phase, waveform => sine_waveform, data_out => sine_data);
 
     envelope0 : envelope port map (clk => clk, reset => envelope_reset, note_on => note_on, attack_rate => attack_rate, release_rate => release_rate, gain => envelope_gain, phase => envelope_phase);
-	
+    
+	lfsr0 : entity work.lfsr
+	    generic map (
+	    g_Num_Bits => 32
+	    )
+        port map (
+            i_Clk   => std_logic(lfsr_counter(11)),
+            i_Enable    => '1',
+            i_Seed_DV   => '0',
+            i_Seed_Data => (31 downto 0 => '0'),
+            o_LFSR_Data => lfsr_data            
+        );
+          
 	process (clk, reset)
 	begin
         if (reset = '1') then
@@ -116,7 +131,7 @@ begin
             sine_waveform <= "00";
             envelope_reset <= '1';
 	    elsif (rising_edge(clk)) then
-
+	        lfsr_counter <= lfsr_counter + 1;
             envelope_reset <= '0';	    
             phase_modulated <= to_unsigned(to_integer(phase_carrier) + sine_message, 9);
             output <= dac_in;
@@ -134,7 +149,12 @@ begin
 	                -- We calculate the modulated waveform
 	                ena_nco_message <= '0';
 	                ena_nco_carrier <= '1';
-   	                sine_phase <= phase_modulated(7 downto 0);
+	                if waveform = "101" then
+	                   -- noise
+	                    sine_phase <= unsigned(lfsr_data(7 downto 0));
+	                else
+                        sine_phase <= phase_modulated(7 downto 0);
+                    end if;
 	                --sine_gain <= gain_modulated;
 	                sine_gain <= envelope_gain;
 	                sine_waveform <= waveform_modulated;
@@ -161,7 +181,11 @@ begin
 	            when "100" =>
 	                -- PM
 	                dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
+	            when "101" =>
+                    -- Noise
+	                dac_in <= std_logic_vector(to_unsigned(128 + sine_modulated, 8));
 	            when others =>
+	                -- DAC direct
 	                dac_in <= dac_direct_value;
 	        end case;	                
 	        

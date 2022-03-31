@@ -2,7 +2,7 @@ MDSynth
 FPGA-based synthesizer system for the Xilinx Spartan-3A and Spartan-3E Starter Kits
 
 Author: Daniel Cliche
-Copyright (c) 2011-2017, Meldora Inc. All rights reserved.
+Copyright (c) 2011-2022, Daniel Cliche. All rights reserved.
 
 License: BSD for the sound synthesizer chip *only*, GPL for the complete 6809-based synthesizer system.
 Languages: VHDL, 6809 assembly, C
@@ -58,8 +58,8 @@ Four sound chip channels are available at the following base addresses:
 
 Write:
 
-Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
-	      bit 7: Note ON/OFF (0: OFF, 1: ON)
+Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation, 0x05: Noise)
+	      bit 7: Note ON/OFF for PM and Noise (0: OFF, 1: ON)
 Base + 1: Message Octave (4-bit) + Phase Delta MSB (4-bit)
 Base + 2: Phase Delta LSB (8-bit)
 Base + 3: Carrier Octave (4-bit)

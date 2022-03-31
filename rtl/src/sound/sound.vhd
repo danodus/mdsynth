@@ -1,6 +1,6 @@
 -- MDSynth Sound Chip
 --
--- Copyright (c) 2012, Meldora Inc.
+-- Copyright (c) 2012-2022, Daniel Cliche
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -21,7 +21,7 @@
 --
 -- Write:
 --
--- Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation)
+-- Base + 0: bits 2 downto 0: Waveform (0x00: DAC direct, 0x01: Square, 0x02: Sawtooth, 0x03: Sine, 0x04: Phase Modulation, 0x05: Noise)
 --           bit 7: Note ON/OFF (0: OFF, 1: ON)
 -- Base + 1: Pitch Hi (see below)
 -- Base + 2: Pitch Low (see below)
@@ -71,7 +71,7 @@ constant nb_voices : integer := 4;
 component channel is
     port ( clk:      in std_logic;
            reset:    in std_logic;
-           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: Phase Modulation
+           waveform: in std_logic_vector(2 downto 0);    -- 0: DAC direct, 1: Square (message only), 2: Sawtooth (message only), 3: Sine (message only), 4: Phase Modulation, 5: Noise
            note_on:  in std_logic;
            gain_message:          in unsigned(5 downto 0);
            gain_modulated:        in unsigned(5 downto 0);

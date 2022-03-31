@@ -1,7 +1,7 @@
 /*
 MDSynth
 
-Copyright (c) 2011-2016, Meldora Inc.
+Copyright (c) 2011-2022, Daniel Cliche
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
@@ -124,7 +124,7 @@ unsigned pitch;
 		note = pitch - 96;
 	} else {
 		/* Note OFF */
-		if (waveform == 4) {
+		if (waveform == 4 || waveform == 5) {
 			snd[0] = 0x7f & waveform;
 		} else {
 			snd[0] = 0;
@@ -247,7 +247,7 @@ char **argv;
 	prints("MDSynth Poly");
 
 	moveto(0, 1);
-	prints("Copyright (c) 2011-2017, Meldora Inc.");
+	prints("Copyright (c) 2011-2022, Daniel Cliche");
 	
 	moveto(10, 3);
 	prints(" W E   T Y U");
@@ -266,7 +266,7 @@ char **argv;
 	moveto(10, 10);
 	prints("n, N: Release Rate +/- (PM only)");
 	moveto(10, 11);
-	prints("1, 2, 3, 4: Square/Saw/Sine/PM, 5, 6: Message/modulated waveform");
+	prints("1, 2, 3, 4, 5: Square/Saw/Sine/PM/Noise, 6, 7: Message/modulated waveform");
 	
 	moveto(0, 12);
 	prints("Octave:");
@@ -504,6 +504,11 @@ char **argv;
 				newpitch = 1;
 				break;
 
+				case '5':
+				waveform = 5;
+				newpitch = 1;
+				break;
+
 				case 'X':
 				if (octcarr > -8)
 					octcarr--;
@@ -554,11 +559,11 @@ char **argv;
 					relrate++;
 				break;
 
-				case '5':
+				case '6':
 				wavmsg = (wavmsg + 1) % 4;
 				break;
 				
-				case '6':
+				case '7':
 				wavmod = (wavmod + 1) % 4;
 				break;
 
